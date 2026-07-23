@@ -6,7 +6,7 @@ export const SimulationConsole: React.FC = () => {
   const { logs, clearLogs } = useSimulationStore();
 
   return (
-    <div className="academic-panel p-4 rounded-xl space-y-2.5 font-mono text-xs">
+    <div className="card-panel p-4 rounded-xl space-y-2.5 font-mono text-xs">
       <div className="flex items-center justify-between border-b border-slate-200 pb-2">
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-slate-700" />

@@ -80,7 +80,7 @@ export const ComparePage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Title Header */}
-      <div className="academic-panel p-6 sm:p-8 rounded-2xl space-y-3">
+      <div className="card-panel p-6 sm:p-8 rounded-2xl space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-xs font-mono font-medium">
           <Layers className="w-3.5 h-3.5" />
           <span>Sampling Efficiency &amp; Variance Benchmarking</span>
@@ -128,7 +128,7 @@ export const ComparePage: React.FC = () => {
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Monte Carlo Stats Card */}
-            <div className="academic-panel p-6 rounded-xl space-y-4 font-mono text-xs">
+            <div className="card-panel p-6 rounded-xl space-y-4 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Cpu className="w-5 h-5 text-teal-700" />
@@ -164,7 +164,7 @@ export const ComparePage: React.FC = () => {
             </div>
 
             {/* Latin Hypercube Stats Card */}
-            <div className="academic-panel p-6 rounded-xl space-y-4 font-mono text-xs">
+            <div className="card-panel p-6 rounded-xl space-y-4 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
                   <Layers className="w-5 h-5 text-purple-700" />
@@ -201,7 +201,7 @@ export const ComparePage: React.FC = () => {
           </div>
 
           {/* Combined Convergence Overlay Chart */}
-          <div className="academic-panel p-6 rounded-2xl space-y-4">
+          <div className="card-panel p-6 rounded-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-heading">Mean Convergence Comparison</h3>

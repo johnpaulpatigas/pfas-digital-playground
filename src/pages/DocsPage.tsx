@@ -6,7 +6,7 @@ export const DocsPage: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* Page Header */}
-      <div className="academic-panel p-8 rounded-2xl space-y-3">
+      <div className="card-panel p-8 rounded-2xl space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-900 text-xs font-mono font-medium">
           <BookOpen className="w-3.5 h-3.5" />
           <span>Scientific Methodology &amp; Toxicokinetic Equations</span>
@@ -20,7 +20,7 @@ export const DocsPage: React.FC = () => {
       </div>
 
       {/* Section 1: Toxicokinetic 1-Compartment Model */}
-      <section className="academic-panel p-6 sm:p-8 rounded-2xl space-y-5">
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <Cpu className="w-5 h-5 text-blue-700" />
           <h2 className="text-xl font-bold text-slate-900 font-heading">1. One-Compartment Toxicokinetic Model</h2>
@@ -64,7 +64,7 @@ export const DocsPage: React.FC = () => {
       </section>
 
       {/* Section 2: Probability Distributions */}
-      <section className="academic-panel p-6 sm:p-8 rounded-2xl space-y-5">
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <ShieldAlert className="w-5 h-5 text-amber-700" />
           <h2 className="text-xl font-bold text-slate-900 font-heading">2. Supported Probability Distributions</h2>
@@ -109,7 +109,7 @@ export const DocsPage: React.FC = () => {
       </section>
 
       {/* Section 3: Sampling Methods */}
-      <section className="academic-panel p-6 sm:p-8 rounded-2xl space-y-5">
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <Layers className="w-5 h-5 text-purple-700" />
           <h2 className="text-xl font-bold text-slate-900 font-heading">3. Monte Carlo vs. Latin Hypercube Sampling</h2>

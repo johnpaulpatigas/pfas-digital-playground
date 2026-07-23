@@ -16,7 +16,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 }) => {
   if (!summaryStats) {
     return (
-      <div className="academic-panel p-6 rounded-xl text-center space-y-3 font-mono text-xs">
+      <div className="card-panel p-6 rounded-xl text-center space-y-3 font-mono text-xs">
         <Cpu className="w-8 h-8 text-slate-400 mx-auto animate-pulse" />
         <p className="text-slate-600 font-semibold">No simulation data generated yet.</p>
         <p className="text-slate-500 text-[11px]">
@@ -31,7 +31,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   return (
     <div className="w-full space-y-4 font-mono text-xs">
       {/* Primary KPI Card: Mean Concentration */}
-      <div className="academic-panel-teal p-4 rounded-xl space-y-1.5 relative overflow-hidden">
+      <div className="card-panel-teal p-4 rounded-xl space-y-1.5 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <span className="text-[11px] text-slate-600 uppercase tracking-wider font-bold">
             Expected Mean Serum (<MathView math="C_{ss}" />)
@@ -50,7 +50,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       </div>
 
       {/* Health Risk & Hazard Quotient Card */}
-      <div className={`p-4 rounded-xl ${isHighRisk ? 'academic-panel-rose' : 'academic-panel-accent'} space-y-2`}>
+      <div className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}>
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div className="flex items-center gap-1.5">
             {isHighRisk ? (
@@ -80,7 +80,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       </div>
 
       {/* Quantiles Risk Table */}
-      <div className="academic-panel p-4 rounded-xl space-y-3">
+      <div className="card-panel p-4 rounded-xl space-y-3">
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div className="flex items-center gap-1.5">
             <Activity className="w-4 h-4 text-teal-600" />
@@ -123,7 +123,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       </div>
 
       {/* Variance & Deviation Metrics */}
-      <div className="academic-panel p-4 rounded-xl space-y-2">
+      <div className="card-panel p-4 rounded-xl space-y-2">
         <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2">
           <TrendingUp className="w-4 h-4 text-purple-600" />
           <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
@@ -144,7 +144,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
       {/* Top Sensitivity Driver */}
       {sensitivityRanks.length > 0 && (
-        <div className="academic-panel-amber p-4 rounded-xl space-y-1.5">
+        <div className="card-panel-amber p-4 rounded-xl space-y-1.5">
           <div className="flex items-center gap-1.5">
             <Award className="w-4 h-4 text-amber-600" />
             <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">

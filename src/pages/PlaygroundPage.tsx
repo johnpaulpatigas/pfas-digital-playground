@@ -84,7 +84,7 @@ export const PlaygroundPage: React.FC = () => {
   return (
     <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Top Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 academic-panel p-5 rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 card-panel p-5 rounded-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 font-heading tracking-tight">
@@ -132,7 +132,7 @@ export const PlaygroundPage: React.FC = () => {
 
         {/* Center Column: Interactive Scientific Charts Suite */}
         <div className="lg:col-span-8 xl:col-span-6 space-y-6">
-          <div className="academic-panel p-5 rounded-xl space-y-4">
+          <div className="card-panel p-5 rounded-xl space-y-4">
             {/* Navigation Tabs */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
               <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">

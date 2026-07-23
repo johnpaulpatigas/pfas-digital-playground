@@ -57,7 +57,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
   return (
     <div className="w-full space-y-4 text-xs font-sans">
       {/* Target PFAS Compound Selection Card */}
-      <div className="academic-panel p-4 rounded-xl space-y-3">
+      <div className="card-panel p-4 rounded-xl space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-blue-600" />
@@ -89,7 +89,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
       </div>
 
       {/* Scenario Presets Bar */}
-      <div className="academic-panel p-4 rounded-xl space-y-3">
+      <div className="card-panel p-4 rounded-xl space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bookmark className="w-4 h-4 text-teal-600" />
@@ -120,7 +120,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
       </div>
 
       {/* Sampling Engine Setup */}
-      <div className="academic-panel p-4 rounded-xl space-y-4">
+      <div className="card-panel p-4 rounded-xl space-y-4">
         <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
           <Sliders className="w-4 h-4 text-purple-600" />
           <span className="font-bold text-slate-800 uppercase font-mono tracking-wider text-[11px]">
@@ -212,7 +212,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           return (
             <div
               key={key}
-              className="academic-panel p-3 rounded-xl space-y-2 hover:border-slate-300 transition-colors"
+              className="card-panel p-3 rounded-xl space-y-2 hover:border-slate-300 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

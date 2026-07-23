@@ -58,7 +58,7 @@ export const HomePage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-mono text-xs">
           {PFAS_COMPOUNDS.map((c) => (
-            <div key={c.id} className="academic-panel p-3.5 rounded-xl space-y-1.5">
+            <div key={c.id} className="card-panel p-3.5 rounded-xl space-y-1.5">
               <div className="text-slate-900 font-bold text-xs">{c.name.split(' ')[0]}</div>
               <div className="text-slate-500 text-[11px]">
                 <MathView math={c.chemicalFormula} />
@@ -110,7 +110,7 @@ export const HomePage: React.FC = () => {
           return (
             <div
               key={index}
-              className="p-5 rounded-xl academic-panel space-y-2.5"
+              className="p-5 rounded-xl card-panel space-y-2.5"
             >
               <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center">
                 <Icon className={`w-4 h-4 ${item.color}`} />
@@ -123,7 +123,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Demographic Context Section */}
-      <section className="academic-panel rounded-2xl p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+      <section className="card-panel rounded-2xl p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
         <div className="space-y-3">
           <span className="text-xs font-mono text-blue-700 uppercase tracking-widest font-semibold">
             Cohort Focus &amp; Vulnerability
