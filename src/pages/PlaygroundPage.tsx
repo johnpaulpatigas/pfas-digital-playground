@@ -84,10 +84,10 @@ export const PlaygroundPage: React.FC = () => {
   return (
     <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Top Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 card-panel p-5 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-panel p-4 sm:p-5 rounded-xl">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-900 font-heading tracking-tight">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900 font-heading tracking-tight">
               PFAS Toxicokinetic Simulation Playground
             </h1>
             <span className="px-2.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-mono font-bold">
@@ -95,12 +95,12 @@ export const PlaygroundPage: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-500 font-mono">
-            Probabilistic 1-Compartment Modeling • Target: Bioaccumulation Serum (<MathView math="C_{ss}" />) • Cohort: Filipino Women
+            Probabilistic 1-Compartment Modeling • Target: Bioaccumulation Serum (<MathView math="C_{ss}" />)
           </p>
         </div>
 
         {/* Quick Export Controls */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="secondary"
             size="sm"
@@ -132,10 +132,10 @@ export const PlaygroundPage: React.FC = () => {
 
         {/* Center Column: Interactive Scientific Charts Suite */}
         <div className="lg:col-span-8 xl:col-span-6 space-y-6">
-          <div className="card-panel p-5 rounded-xl space-y-4">
-            {/* Navigation Tabs */}
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-              <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+          <div className="card-panel p-4 sm:p-5 rounded-xl space-y-4">
+            {/* Scrollable Navigation Tabs on Mobile */}
+            <div className="border-b border-slate-200 pb-3">
+              <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap no-scrollbar py-1">
                 {[
                   { id: 'histogram', label: 'Frequency Histogram', icon: BarChart2 },
                   { id: 'cdf', label: 'CDF', icon: LineChartIcon },
@@ -151,7 +151,7 @@ export const PlaygroundPage: React.FC = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-all flex-shrink-0 ${
                         isActive
                           ? 'bg-slate-900 text-white font-semibold shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -189,7 +189,7 @@ export const PlaygroundPage: React.FC = () => {
 
                   {activeTab === 'table' && (
                     <div className="space-y-3 font-mono text-xs">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <input
                           type="text"
                           placeholder="Search iteration number..."
@@ -198,7 +198,7 @@ export const PlaygroundPage: React.FC = () => {
                             setTableSearch(e.target.value);
                             setTablePage(1);
                           }}
-                          className="bg-white border border-slate-300 text-slate-900 rounded-md px-3 py-1 text-xs focus:outline-none focus:border-blue-500"
+                          className="bg-white border border-slate-300 text-slate-900 rounded-md px-3 py-1 text-xs focus:outline-none focus:border-blue-500 w-full sm:w-auto"
                         />
                         <span className="text-slate-500 text-[11px]">
                           Showing {paginatedResults.length} of {filteredResults.length} samples
