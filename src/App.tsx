@@ -7,7 +7,7 @@ import { DocsPage } from './pages/DocsPage';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <MainLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
