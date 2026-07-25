@@ -44,8 +44,8 @@ export const TimeCourseChart: React.FC<TimeCourseChartProps> = ({ results }) => 
             label={{ value: 'Serum Concentration C(t) (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
           />
           <RechartsTooltip
-            formatter={(val: any, name: any) => [`${val} µg/L`, name === 'meanConcentration' ? 'Mean Serum' : name]}
-            labelFormatter={(label: any) => `Year ${label}`}
+            formatter={(val: unknown, name: unknown) => [`${String(val)} µg/L`, String(name) === 'meanConcentration' ? 'Mean Serum' : String(name ?? '')]}
+            labelFormatter={(label: unknown) => `Year ${String(label ?? '')}`}
           />
           <Area type="monotone" dataKey="p95Concentration" stroke="none" fill="url(#timeCourseBandLight)" name="P95 Upper Bound" />
           <Line type="monotone" dataKey="meanConcentration" stroke="#2563eb" strokeWidth={2.5} dot={false} name="Mean Trajectory" />

@@ -57,8 +57,8 @@ export const CDFChart: React.FC<CDFChartProps> = ({ results }) => {
             label={{ value: 'Cumulative Percentile (%)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
           />
           <RechartsTooltip
-            formatter={(val: any) => [`${val}%`, 'Cumulative Probability']}
-            labelFormatter={(label: any) => `Conc: ${label} µg/L`}
+            formatter={(val: unknown) => [`${String(val)}%`, 'Cumulative Probability']}
+            labelFormatter={(label: unknown) => `Conc: ${String(label ?? '')} µg/L`}
           />
           <Area type="monotone" dataKey="probability" stroke="#7c3aed" strokeWidth={2} fillOpacity={1} fill="url(#cdfGradientLight)" />
           <ReferenceLine y={50} stroke="#2563eb" strokeDasharray="3 3" label={{ value: 'P50 (Median)', fill: '#2563eb', fontSize: 10 }} />

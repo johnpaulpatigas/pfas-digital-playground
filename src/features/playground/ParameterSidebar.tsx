@@ -5,7 +5,7 @@ import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { DistributionSelector } from './DistributionSelector';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { Button } from '../../components/ui/Button';
-import type { DistributionType, SimulationParameters } from '../../types';
+import type { DistributionType, DistributionParams, SimulationParameters } from '../../types';
 import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
@@ -50,7 +50,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
     }
   };
 
-  const createDefaultDistribution = (type: DistributionType): any => {
+  const createDefaultDistribution = (type: DistributionType): DistributionParams => {
     switch (type) {
       case 'fixed':
         return { type: 'fixed', value: 1.0 };

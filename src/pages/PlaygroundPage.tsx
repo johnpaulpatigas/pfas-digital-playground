@@ -155,7 +155,7 @@ export const PlaygroundPage: React.FC = () => {
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as any)}
+                      onClick={() => setActiveTab(tab.id as typeof activeTab)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-all flex-shrink-0 ${
                         isActive
                           ? 'bg-slate-900 text-white font-semibold shadow-xs'

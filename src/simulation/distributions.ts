@@ -18,7 +18,7 @@ export function createPRNG(seed: number = 42) {
  */
 export function sampleStandardNormal(prng: () => number): number {
   let u1 = prng();
-  let u2 = prng();
+  const u2 = prng();
   while (u1 <= Number.EPSILON) u1 = prng();
   return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
 }

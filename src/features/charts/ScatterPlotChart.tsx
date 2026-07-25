@@ -56,7 +56,7 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
             label={{ value: 'Serum Concentration Css (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
           />
           <RechartsTooltip
-            formatter={(value: any, name: any) => [`${value}`, name]}
+            formatter={(value: unknown, name: unknown) => [`${String(value ?? '')}`, String(name ?? '')]}
             cursor={{ strokeDasharray: '3 3' }}
           />
           <Scatter name="Iteration Samples" data={scatterData} fill="#2563eb" opacity={0.6} r={3} />

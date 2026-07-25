@@ -54,8 +54,8 @@ export const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ results }) =
             label={{ value: 'Running Mean Css (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
           />
           <RechartsTooltip
-            formatter={(val: any) => [`${val} µg/L`, 'Running Mean']}
-            labelFormatter={(label: any) => `Iteration ${label}`}
+            formatter={(val: unknown) => [`${String(val)} µg/L`, 'Running Mean']}
+            labelFormatter={(label: unknown) => `Iteration ${String(label ?? '')}`}
           />
           <Line type="monotone" dataKey="runningMean" stroke="#2563eb" strokeWidth={2} dot={false} />
         </LineChart>

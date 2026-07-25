@@ -65,8 +65,8 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({ results, summary
             label={{ value: 'Frequency (%)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
           />
           <RechartsTooltip
-            formatter={(value: any) => [`${parseFloat(value).toFixed(2)}%`, 'Frequency']}
-            labelFormatter={(label: any) => `Conc: ${label} µg/L`}
+            formatter={(value: unknown) => [`${parseFloat(String(value ?? 0)).toFixed(2)}%`, 'Frequency']}
+            labelFormatter={(label: unknown) => `Conc: ${String(label ?? '')} µg/L`}
           />
           <Bar dataKey="frequencyPercent" fill="#2563eb" radius={[2, 2, 0, 0]} opacity={0.85} />
           <ReferenceLine x={summaryStats.mean.toFixed(3)} stroke="#0d9488" strokeWidth={2} strokeDasharray="4 4" label={{ value: 'Mean', fill: '#0d9488', fontSize: 10 }} />

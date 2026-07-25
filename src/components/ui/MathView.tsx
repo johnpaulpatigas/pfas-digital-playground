@@ -17,7 +17,7 @@ export const MathView: React.FC<MathViewProps> = ({ math, block = false, classNa
           displayMode: block,
           throwOnError: false,
         });
-      } catch (err) {
+      } catch {
         if (containerRef.current) {
           containerRef.current.textContent = math;
         }

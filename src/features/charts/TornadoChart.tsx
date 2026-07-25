@@ -37,8 +37,8 @@ export const TornadoChart: React.FC<TornadoChartProps> = ({ sensitivityRanks }) 
           />
           <YAxis type="category" dataKey="name" stroke="#64748b" tick={{ fill: '#475569', fontSize: 10 }} />
           <RechartsTooltip
-            formatter={(val: any) => [val, 'Spearman Correlation']}
-            labelFormatter={(label: any) => `Parameter: ${label}`}
+            formatter={(val: unknown) => [String(val ?? ''), 'Spearman Correlation']}
+            labelFormatter={(label: unknown) => `Parameter: ${String(label ?? '')}`}
           />
           <ReferenceLine x={0} stroke="#94a3b8" strokeWidth={1.5} />
           <Bar dataKey="correlation" radius={[2, 2, 2, 2]}>
