@@ -6,7 +6,7 @@ import { DistributionSelector } from './DistributionSelector';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { Button } from '../../components/ui/Button';
 import type { DistributionType, SimulationParameters } from '../../types';
-import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical } from 'lucide-react';
+import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
 interface ParameterSidebarProps {
@@ -38,6 +38,17 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
   ];
 
   const activeCompound = PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
+
+  const getMethodName = () => {
+    switch (samplingConfig.method) {
+      case 'monte-carlo':
+        return 'Monte Carlo';
+      case 'latin-hypercube':
+        return 'Latin Hypercube';
+      case 'monte-carlo-lhs':
+        return 'Monte Carlo + LHS';
+    }
+  };
 
   const createDefaultDistribution = (type: DistributionType): any => {
     switch (type) {
@@ -129,31 +140,47 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
         </div>
 
         {/* Method Toggle Buttons */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-1.5">
           <button
             type="button"
             onClick={() => setSamplingConfig({ method: 'monte-carlo' })}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md border transition-all font-semibold ${
+            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight ${
               samplingConfig.method === 'monte-carlo'
                 ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
+            title="Monte Carlo Sampling"
           >
-            <Cpu className="w-3.5 h-3.5" />
-            <span>Monte Carlo</span>
+            <Cpu className="w-3.5 h-3.5 mb-1" />
+            <span className="text-center">Monte Carlo</span>
           </button>
 
           <button
             type="button"
             onClick={() => setSamplingConfig({ method: 'latin-hypercube' })}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-md border transition-all font-semibold ${
+            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight ${
               samplingConfig.method === 'latin-hypercube'
                 ? 'bg-purple-900 text-white border-purple-900 shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
+            title="Latin Hypercube Sampling"
           >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Latin Hypercube</span>
+            <Layers className="w-3.5 h-3.5 mb-1" />
+            <span className="text-center">Latin Hypercube</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSamplingConfig({ method: 'monte-carlo-lhs' })}
+            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight ${
+              samplingConfig.method === 'monte-carlo-lhs'
+                ? 'bg-teal-900 text-white border-teal-900 shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            }`}
+            title="Combined Monte Carlo + Latin Hypercube Hybrid"
+          >
+            <GitMerge className="w-3.5 h-3.5 mb-1" />
+            <span className="text-center">MC + LHS</span>
           </button>
         </div>
 
@@ -194,7 +221,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           className="w-full mt-1 font-mono uppercase tracking-wider text-xs"
           icon={<Play className="w-4 h-4 fill-current" />}
         >
-          {isSimulating ? 'Simulating...' : `Execute ${samplingConfig.method === 'monte-carlo' ? 'Monte Carlo' : 'Latin Hypercube'}`}
+          {isSimulating ? 'Simulating...' : `Execute ${getMethodName()}`}
         </Button>
       </div>
 

@@ -28,6 +28,13 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   const isHighRisk = summaryStats.riskExceedancePercent > 5;
 
+  const getMethodBadge = () => {
+    if (samplingMethod === 'monte-carlo') return 'MONTE CARLO';
+    if (samplingMethod === 'latin-hypercube') return 'LATIN HYPERCUBE';
+    if (samplingMethod === 'monte-carlo-lhs') return 'MC + LATIN HYPERCUBE';
+    return samplingMethod.toUpperCase();
+  };
+
   return (
     <div className="w-full space-y-4 font-mono text-xs">
       {/* Primary KPI Card: Mean Concentration */}
@@ -37,7 +44,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             Expected Mean Serum (<MathView math="C_{ss}" />)
           </span>
           <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-bold">
-            {samplingMethod.toUpperCase()}
+            {getMethodBadge()}
           </span>
         </div>
         <div className="text-3xl font-extrabold text-slate-900 tracking-tight font-heading">

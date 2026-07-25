@@ -68,7 +68,7 @@ export interface SimulationParameters {
 }
 
 // Sampling Configuration
-export type SamplingMethod = 'monte-carlo' | 'latin-hypercube';
+export type SamplingMethod = 'monte-carlo' | 'latin-hypercube' | 'monte-carlo-lhs';
 
 export interface SamplingConfig {
   method: SamplingMethod;
@@ -136,10 +136,13 @@ export interface SensitivityRank {
 export interface ComparisonResult {
   mcStats: SummaryStatistics;
   lhsStats: SummaryStatistics;
+  mcLhsStats?: SummaryStatistics;
   mcRuntimeMs: number;
   lhsRuntimeMs: number;
+  mcLhsRuntimeMs?: number;
   mcConvergence: Array<{ iteration: number; runningMean: number }>;
   lhsConvergence: Array<{ iteration: number; runningMean: number }>;
+  mcLhsConvergence?: Array<{ iteration: number; runningMean: number }>;
 }
 
 // Preset Scenario Profile

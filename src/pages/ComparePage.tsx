@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useSimulationStore } from '../stores/useSimulationStore';
 import { runMonteCarloSimulation } from '../simulation/monteCarlo';
 import { runLatinHypercubeSimulation } from '../simulation/latinHypercube';
+import { runMonteCarloLhsSimulation } from '../simulation/monteCarloLhs';
 import { calculateSummaryStatistics } from '../simulation/statistics';
 import type { ComparisonResult } from '../types';
 import { Button } from '../components/ui/Button';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, Legend } from 'recharts';
-import { Layers, Cpu, Play } from 'lucide-react';
+import { Layers, Cpu, Play, GitMerge } from 'lucide-react';
 import { MathView } from '../components/ui/MathView';
 
 export const ComparePage: React.FC = () => {
@@ -31,16 +32,25 @@ export const ComparePage: React.FC = () => {
       const t1_lhs = performance.now();
       const lhsStats = calculateSummaryStatistics(lhsResults);
 
+      // Benchmark Monte Carlo + Latin Hypercube
+      const t0_mcLhs = performance.now();
+      const mcLhsResults = runMonteCarloLhsSimulation(parameters, iterations, 42);
+      const t1_mcLhs = performance.now();
+      const mcLhsStats = calculateSummaryStatistics(mcLhsResults);
+
       // Compute Convergence data over iterations
       const step = Math.max(1, Math.floor(iterations / 100));
       let mcSum = 0;
       let lhsSum = 0;
+      let mcLhsSum = 0;
       const mcConvergence = [];
       const lhsConvergence = [];
+      const mcLhsConvergence = [];
 
       for (let i = 0; i < iterations; i++) {
         mcSum += mcResults[i].steadyStateConcentration;
         lhsSum += lhsResults[i].steadyStateConcentration;
+        mcLhsSum += mcLhsResults[i].steadyStateConcentration;
 
         if (i % step === 0 || i === iterations - 1) {
           mcConvergence.push({
@@ -53,16 +63,24 @@ export const ComparePage: React.FC = () => {
             runningMean: parseFloat((lhsSum / (i + 1)).toFixed(4)),
             runningStd: 0,
           });
+          mcLhsConvergence.push({
+            iteration: i + 1,
+            runningMean: parseFloat((mcLhsSum / (i + 1)).toFixed(4)),
+            runningStd: 0,
+          });
         }
       }
 
       setComparison({
         mcStats,
         lhsStats,
+        mcLhsStats,
         mcRuntimeMs: parseFloat((t1_mc - t0_mc).toFixed(2)),
         lhsRuntimeMs: parseFloat((t1_lhs - t0_lhs).toFixed(2)),
+        mcLhsRuntimeMs: parseFloat((t1_mcLhs - t0_mcLhs).toFixed(2)),
         mcConvergence,
         lhsConvergence,
+        mcLhsConvergence,
       });
 
       setIsBenchmarking(false);
@@ -74,6 +92,7 @@ export const ComparePage: React.FC = () => {
         iteration: item.iteration,
         MonteCarlo: item.runningMean,
         LatinHypercube: comparison.lhsConvergence[idx]?.runningMean || item.runningMean,
+        MonteCarloLHS: comparison.mcLhsConvergence?.[idx]?.runningMean || item.runningMean,
       }))
     : [];
 
@@ -87,12 +106,13 @@ export const ComparePage: React.FC = () => {
         </div>
 
         <h1 className="text-2xl sm:text-4xl font-bold text-slate-900 font-heading">
-          Monte Carlo vs Latin Hypercube Sampling (LHS)
+          Monte Carlo vs Latin Hypercube vs Monte Carlo + LHS
         </h1>
 
         <p className="text-slate-600 text-sm max-w-3xl leading-relaxed">
-          Standard <strong>Monte Carlo (MC)</strong> sampling relies on unstratified pseudo-random draws, which can cause clustering and slower statistical convergence. 
-          In contrast, <strong>Latin Hypercube Sampling (LHS)</strong> partitions each parameter distribution into <MathView math="N" /> equal strata, guaranteeing uniform sampling coverage across the entire probability space with reduced variance (<MathView math="\sigma^2" />).
+          Standard <strong>Monte Carlo (MC)</strong> sampling relies on unstratified pseudo-random draws.
+          <strong> Latin Hypercube Sampling (LHS)</strong> partitions each parameter distribution into <MathView math="N" /> equal strata.
+          The <strong>Monte Carlo + Latin Hypercube (MC + LHS)</strong> hybrid combines pseudo-random stochastic draws with stratified quantile sampling for optimal variance reduction and tail risk precision.
         </p>
 
         {/* Controls */}
@@ -118,7 +138,7 @@ export const ComparePage: React.FC = () => {
             size="md"
             icon={<Play className="w-4 h-4 fill-current" />}
           >
-            Run Head-to-Head Benchmark
+            Run 3-Way Benchmark
           </Button>
         </div>
       </div>
@@ -126,15 +146,15 @@ export const ComparePage: React.FC = () => {
       {/* Head to Head Comparison Cards */}
       {comparison && (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Monte Carlo Stats Card */}
-            <div className="card-panel p-6 rounded-xl space-y-4 font-mono text-xs">
+            <div className="card-panel p-5 rounded-xl space-y-4 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-teal-700" />
-                  <h2 className="text-base font-bold text-slate-900 font-heading">Monte Carlo Sampling</h2>
+                  <Cpu className="w-4 h-4 text-teal-700" />
+                  <h2 className="text-sm font-bold text-slate-900 font-heading">Monte Carlo</h2>
                 </div>
-                <span className="px-2.5 py-1 rounded bg-teal-50 text-teal-800 text-[11px] font-semibold border border-teal-200">
+                <span className="px-2 py-0.5 rounded bg-teal-50 text-teal-800 text-[10px] font-semibold border border-teal-200">
                   {comparison.mcRuntimeMs} ms
                 </span>
               </div>
@@ -145,7 +165,7 @@ export const ComparePage: React.FC = () => {
                   <span className="text-teal-800 font-bold">{comparison.mcStats.mean.toFixed(4)} µg/L</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Standard Deviation (<MathView math="\sigma" />)</span>
+                  <span>Std Dev (<MathView math="\sigma" />)</span>
                   <span className="text-slate-900 font-bold">{comparison.mcStats.stdDev.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
@@ -153,7 +173,7 @@ export const ComparePage: React.FC = () => {
                   <span className="text-slate-900 font-bold">{comparison.mcStats.variance.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>95% Confidence Interval</span>
+                  <span>95% CI</span>
                   <span className="text-slate-900 font-bold">[{comparison.mcStats.ci95Lower.toFixed(3)}, {comparison.mcStats.ci95Upper.toFixed(3)}]</span>
                 </div>
                 <div className="flex justify-between py-1">
@@ -164,13 +184,13 @@ export const ComparePage: React.FC = () => {
             </div>
 
             {/* Latin Hypercube Stats Card */}
-            <div className="card-panel p-6 rounded-xl space-y-4 font-mono text-xs">
+            <div className="card-panel p-5 rounded-xl space-y-4 font-mono text-xs">
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <Layers className="w-5 h-5 text-purple-700" />
-                  <h2 className="text-base font-bold text-slate-900 font-heading">Latin Hypercube Sampling</h2>
+                  <Layers className="w-4 h-4 text-purple-700" />
+                  <h2 className="text-sm font-bold text-slate-900 font-heading">Latin Hypercube</h2>
                 </div>
-                <span className="px-2.5 py-1 rounded bg-purple-50 text-purple-800 text-[11px] font-semibold border border-purple-200">
+                <span className="px-2 py-0.5 rounded bg-purple-50 text-purple-800 text-[10px] font-semibold border border-purple-200">
                   {comparison.lhsRuntimeMs} ms
                 </span>
               </div>
@@ -181,7 +201,7 @@ export const ComparePage: React.FC = () => {
                   <span className="text-purple-800 font-bold">{comparison.lhsStats.mean.toFixed(4)} µg/L</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Standard Deviation (<MathView math="\sigma" />)</span>
+                  <span>Std Dev (<MathView math="\sigma" />)</span>
                   <span className="text-slate-900 font-bold">{comparison.lhsStats.stdDev.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
@@ -189,7 +209,7 @@ export const ComparePage: React.FC = () => {
                   <span className="text-slate-900 font-bold">{comparison.lhsStats.variance.toFixed(4)}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>95% Confidence Interval</span>
+                  <span>95% CI</span>
                   <span className="text-slate-900 font-bold">[{comparison.lhsStats.ci95Lower.toFixed(3)}, {comparison.lhsStats.ci95Upper.toFixed(3)}]</span>
                 </div>
                 <div className="flex justify-between py-1">
@@ -197,6 +217,44 @@ export const ComparePage: React.FC = () => {
                   <span className="text-red-700 font-bold">{comparison.lhsStats.p95.toFixed(4)} µg/L</span>
                 </div>
               </div>
+            </div>
+
+            {/* Monte Carlo + LHS Hybrid Card */}
+            <div className="card-panel p-5 rounded-xl space-y-4 font-mono text-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                <div className="flex items-center gap-2">
+                  <GitMerge className="w-4 h-4 text-blue-700" />
+                  <h2 className="text-sm font-bold text-slate-900 font-heading">Monte Carlo + LHS</h2>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 text-[10px] font-semibold border border-blue-200">
+                  {comparison.mcLhsRuntimeMs || 0} ms
+                </span>
+              </div>
+
+              {comparison.mcLhsStats && (
+                <div className="space-y-2 text-slate-700">
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span>Mean Serum <MathView math="C_{ss}" /></span>
+                    <span className="text-blue-800 font-bold">{comparison.mcLhsStats.mean.toFixed(4)} µg/L</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span>Std Dev (<MathView math="\sigma" />)</span>
+                    <span className="text-slate-900 font-bold">{comparison.mcLhsStats.stdDev.toFixed(4)}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span>Variance (<MathView math="\sigma^2" />)</span>
+                    <span className="text-slate-900 font-bold">{comparison.mcLhsStats.variance.toFixed(4)}</span>
+                  </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span>95% CI</span>
+                    <span className="text-slate-900 font-bold">[{comparison.mcLhsStats.ci95Lower.toFixed(3)}, {comparison.mcLhsStats.ci95Upper.toFixed(3)}]</span>
+                  </div>
+                  <div className="flex justify-between py-1">
+                    <span>High Risk (<MathView math="P_{95}" />)</span>
+                    <span className="text-red-700 font-bold">{comparison.mcLhsStats.p95.toFixed(4)} µg/L</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -206,7 +264,7 @@ export const ComparePage: React.FC = () => {
               <div>
                 <h3 className="text-base font-bold text-slate-900 font-heading">Mean Convergence Comparison</h3>
                 <p className="text-xs text-slate-500 font-mono">
-                  Comparing stability of running mean between Monte Carlo and Stratified Latin Hypercube
+                  Comparing stability of running mean across Monte Carlo, Stratified Latin Hypercube, and Monte Carlo + LHS Hybrid
                 </p>
               </div>
             </div>
@@ -230,6 +288,7 @@ export const ComparePage: React.FC = () => {
                   <Legend verticalAlign="top" height={36} />
                   <Line type="monotone" dataKey="MonteCarlo" stroke="#0d9488" strokeWidth={2} dot={false} name="Monte Carlo" />
                   <Line type="monotone" dataKey="LatinHypercube" stroke="#7c3aed" strokeWidth={2} dot={false} name="Latin Hypercube (LHS)" />
+                  <Line type="monotone" dataKey="MonteCarloLHS" stroke="#2563eb" strokeWidth={2} dot={false} name="Monte Carlo + LHS" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -239,3 +298,4 @@ export const ComparePage: React.FC = () => {
     </div>
   );
 };
+

@@ -115,7 +115,7 @@ export const DocsPage: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-900 font-heading">3. Monte Carlo vs. Latin Hypercube Sampling</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-mono">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs font-mono">
           <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
             <h3 className="text-teal-800 font-bold text-sm font-heading">Monte Carlo Sampling</h3>
             <ul className="space-y-2 text-slate-600 font-sans">
@@ -140,6 +140,20 @@ export const DocsPage: React.FC = () => {
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
                 <span>Achieves smooth distribution coverage and lower variance with 3x-5x fewer iterations using inverse CDF quantiles: <MathView math="P_k = F^{-1}\left(\frac{k - 1 + U_k}{N}\right)" />.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <h3 className="text-blue-800 font-bold text-sm font-heading">Monte Carlo + LHS Hybrid</h3>
+            <ul className="space-y-2 text-slate-600 font-sans">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Ensemble hybrid approach combining 50% Monte Carlo random draws with 50% stratified Latin Hypercube draws.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Captures unconstrained stochastic random variation while maintaining robust quantile stratification across tail risk boundaries (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</span>
               </li>
             </ul>
           </div>

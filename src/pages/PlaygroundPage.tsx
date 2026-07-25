@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useSimulationStore } from '../stores/useSimulationStore';
 import { runMonteCarloSimulation } from '../simulation/monteCarlo';
 import { runLatinHypercubeSimulation } from '../simulation/latinHypercube';
+import { runMonteCarloLhsSimulation } from '../simulation/monteCarloLhs';
 import { calculateSummaryStatistics, calculateSensitivityRanks } from '../simulation/statistics';
 import { ParameterSidebar } from '../features/playground/ParameterSidebar';
 import { SummaryPanel } from '../features/statistics/SummaryPanel';
@@ -53,10 +54,14 @@ export const PlaygroundPage: React.FC = () => {
     setIsSimulating(true);
 
     setTimeout(() => {
-      const isMC = samplingConfig.method === 'monte-carlo';
-      const simResults = isMC
-        ? runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed)
-        : runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+      let simResults;
+      if (samplingConfig.method === 'monte-carlo') {
+        simResults = runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+      } else if (samplingConfig.method === 'latin-hypercube') {
+        simResults = runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+      } else {
+        simResults = runMonteCarloLhsSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+      }
 
       const stats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
       const ranks = calculateSensitivityRanks(simResults, parameters, 'steadyStateConcentration');
