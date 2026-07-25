@@ -1,9 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { useSimulationStore } from '../stores/useSimulationStore';
-import { runMonteCarloSimulation } from '../simulation/monteCarlo';
-import { runLatinHypercubeSimulation } from '../simulation/latinHypercube';
-import { runMonteCarloLhsSimulation } from '../simulation/monteCarloLhs';
-import { calculateSummaryStatistics, calculateSensitivityRanks } from '../simulation/statistics';
+import { executeSimulationAsync } from '../simulation/runSimulationAsync';
 import { ParameterSidebar } from '../features/playground/ParameterSidebar';
 import { SummaryPanel } from '../features/statistics/SummaryPanel';
 import { SimulationConsole } from '../features/playground/SimulationConsole';
@@ -53,21 +50,14 @@ export const PlaygroundPage: React.FC = () => {
   const executeSimulation = useCallback(() => {
     setIsSimulating(true);
 
-    setTimeout(() => {
-      let simResults;
-      if (samplingConfig.method === 'monte-carlo') {
-        simResults = runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
-      } else if (samplingConfig.method === 'latin-hypercube') {
-        simResults = runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
-      } else {
-        simResults = runMonteCarloLhsSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
-      }
-
-      const stats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
-      const ranks = calculateSensitivityRanks(simResults, parameters, 'steadyStateConcentration');
-
-      setSimulationResults(simResults, stats, ranks);
-    }, 50);
+    executeSimulationAsync(parameters, samplingConfig)
+      .then(({ simResults, summaryStats, sensitivityRanks }) => {
+        setSimulationResults(simResults, summaryStats, sensitivityRanks);
+      })
+      .catch((err) => {
+        console.error('Simulation execution error:', err);
+        setIsSimulating(false);
+      });
   }, [parameters, samplingConfig, setIsSimulating, setSimulationResults]);
 
   useEffect(() => {

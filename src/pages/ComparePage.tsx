@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useSimulationStore } from '../stores/useSimulationStore';
-import { runMonteCarloSimulation } from '../simulation/monteCarlo';
-import { runLatinHypercubeSimulation } from '../simulation/latinHypercube';
-import { runMonteCarloLhsSimulation } from '../simulation/monteCarloLhs';
+import { executeComparisonAsync } from '../simulation/runSimulationAsync';
 import { calculateSummaryStatistics } from '../simulation/statistics';
 import type { ComparisonResult } from '../types';
 import { Button } from '../components/ui/Button';
@@ -19,72 +17,63 @@ export const ComparePage: React.FC = () => {
   const runBenchmark = () => {
     setIsBenchmarking(true);
 
-    setTimeout(() => {
-      // Benchmark Monte Carlo
-      const t0_mc = performance.now();
-      const mcResults = runMonteCarloSimulation(parameters, iterations, 42);
-      const t1_mc = performance.now();
-      const mcStats = calculateSummaryStatistics(mcResults);
+    executeComparisonAsync(parameters, iterations)
+      .then(({ mcResults, lhsResults, mcLhsResults, mcRuntimeMs, lhsRuntimeMs, mcLhsRuntimeMs }) => {
+        const mcStats = calculateSummaryStatistics(mcResults);
+        const lhsStats = calculateSummaryStatistics(lhsResults);
+        const mcLhsStats = calculateSummaryStatistics(mcLhsResults);
 
-      // Benchmark Latin Hypercube
-      const t0_lhs = performance.now();
-      const lhsResults = runLatinHypercubeSimulation(parameters, iterations, 42);
-      const t1_lhs = performance.now();
-      const lhsStats = calculateSummaryStatistics(lhsResults);
+        // Compute Convergence data over iterations
+        const step = Math.max(1, Math.floor(iterations / 100));
+        let mcSum = 0;
+        let lhsSum = 0;
+        let mcLhsSum = 0;
+        const mcConvergence = [];
+        const lhsConvergence = [];
+        const mcLhsConvergence = [];
 
-      // Benchmark Monte Carlo + Latin Hypercube
-      const t0_mcLhs = performance.now();
-      const mcLhsResults = runMonteCarloLhsSimulation(parameters, iterations, 42);
-      const t1_mcLhs = performance.now();
-      const mcLhsStats = calculateSummaryStatistics(mcLhsResults);
+        for (let i = 0; i < iterations; i++) {
+          mcSum += mcResults[i].steadyStateConcentration;
+          lhsSum += lhsResults[i].steadyStateConcentration;
+          mcLhsSum += mcLhsResults[i].steadyStateConcentration;
 
-      // Compute Convergence data over iterations
-      const step = Math.max(1, Math.floor(iterations / 100));
-      let mcSum = 0;
-      let lhsSum = 0;
-      let mcLhsSum = 0;
-      const mcConvergence = [];
-      const lhsConvergence = [];
-      const mcLhsConvergence = [];
-
-      for (let i = 0; i < iterations; i++) {
-        mcSum += mcResults[i].steadyStateConcentration;
-        lhsSum += lhsResults[i].steadyStateConcentration;
-        mcLhsSum += mcLhsResults[i].steadyStateConcentration;
-
-        if (i % step === 0 || i === iterations - 1) {
-          mcConvergence.push({
-            iteration: i + 1,
-            runningMean: parseFloat((mcSum / (i + 1)).toFixed(4)),
-            runningStd: 0,
-          });
-          lhsConvergence.push({
-            iteration: i + 1,
-            runningMean: parseFloat((lhsSum / (i + 1)).toFixed(4)),
-            runningStd: 0,
-          });
-          mcLhsConvergence.push({
-            iteration: i + 1,
-            runningMean: parseFloat((mcLhsSum / (i + 1)).toFixed(4)),
-            runningStd: 0,
-          });
+          if (i % step === 0 || i === iterations - 1) {
+            mcConvergence.push({
+              iteration: i + 1,
+              runningMean: parseFloat((mcSum / (i + 1)).toFixed(4)),
+              runningStd: 0,
+            });
+            lhsConvergence.push({
+              iteration: i + 1,
+              runningMean: parseFloat((lhsSum / (i + 1)).toFixed(4)),
+              runningStd: 0,
+            });
+            mcLhsConvergence.push({
+              iteration: i + 1,
+              runningMean: parseFloat((mcLhsSum / (i + 1)).toFixed(4)),
+              runningStd: 0,
+            });
+          }
         }
-      }
 
-      setComparison({
-        mcStats,
-        lhsStats,
-        mcLhsStats,
-        mcRuntimeMs: parseFloat((t1_mc - t0_mc).toFixed(2)),
-        lhsRuntimeMs: parseFloat((t1_lhs - t0_lhs).toFixed(2)),
-        mcLhsRuntimeMs: parseFloat((t1_mcLhs - t0_mcLhs).toFixed(2)),
-        mcConvergence,
-        lhsConvergence,
-        mcLhsConvergence,
+        setComparison({
+          mcStats,
+          lhsStats,
+          mcLhsStats,
+          mcRuntimeMs,
+          lhsRuntimeMs,
+          mcLhsRuntimeMs,
+          mcConvergence,
+          lhsConvergence,
+          mcLhsConvergence,
+        });
+
+        setIsBenchmarking(false);
+      })
+      .catch((err) => {
+        console.error('Benchmark execution error:', err);
+        setIsBenchmarking(false);
       });
-
-      setIsBenchmarking(false);
-    }, 50);
   };
 
   const combinedConvergenceData = comparison
