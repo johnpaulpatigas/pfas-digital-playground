@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { useSimulationStore } from '../stores/useSimulationStore';
 import { executeSimulationAsync } from '../simulation/runSimulationAsync';
 import { ParameterSidebar } from '../features/playground/ParameterSidebar';
