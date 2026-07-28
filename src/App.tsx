@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
+import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
+import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
 import { MainLayout } from './layouts/MainLayout';
 import { HomePage } from './pages/HomePage';
 import { PlaygroundPage } from './pages/PlaygroundPage';
@@ -29,6 +31,25 @@ function BackButtonHandler() {
 }
 
 function App() {
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      SystemBars.setStyle({ style: SystemBarsStyle.Light }).catch(console.error);
+
+      if (Capacitor.getPlatform() === 'android') {
+        EdgeToEdge.enable()
+          .then(() => {
+            return Promise.all([
+              EdgeToEdge.setStatusBarColor({ color: '#ffffff' }),
+              EdgeToEdge.setNavigationBarColor({ color: '#ffffff' }),
+            ]);
+          })
+          .catch((err) => {
+            console.error('EdgeToEdge initialization error:', err);
+          });
+      }
+    }
+  }, []);
+
   return (
     <HashRouter>
       <BackButtonHandler />
