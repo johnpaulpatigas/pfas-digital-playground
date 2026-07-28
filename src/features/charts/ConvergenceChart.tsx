@@ -38,20 +38,23 @@ export const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ results }) =
   }, [results]);
 
   return (
-    <div className="w-full h-72 sm:h-80 pt-2 font-mono">
+    <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={convergenceData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+        <LineChart data={convergenceData} margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
             dataKey="iteration"
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Simulation Iterations (N)', position: 'bottom', offset: 5, fill: '#0f172a', fontSize: 11 }}
+            interval="preserveStartEnd"
+            minTickGap={25}
+            label={{ value: 'Simulation Iterations (N)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <YAxis
+            width={45}
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Running Mean Css (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
+            label={{ value: 'Running Mean Css (µg/L)', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <RechartsTooltip
             formatter={(val: unknown) => [`${String(val)} µg/L`, 'Running Mean']}

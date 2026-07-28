@@ -91,14 +91,25 @@
   background: #94a3b8;
 }
 
-/* Recharts Publication Tooltip */
+/* Recharts Publication Tooltip & Touch Scroll Optimizations */
+.recharts-wrapper {
+  touch-action: pan-y !important;
+}
+
+.recharts-surface {
+  touch-action: pan-y !important;
+}
+
 .recharts-default-tooltip {
   background-color: #ffffff !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 8px !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
   color: #0f172a !important;
-  padding: 8px 12px !important;
+  padding: 6px 10px !important;
+  max-width: 85vw !important;
+  font-size: 11px !important;
+  z-index: 50 !important;
 }
 
 /* KaTeX Publication Math styling */

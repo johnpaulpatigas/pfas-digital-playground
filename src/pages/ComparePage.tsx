@@ -258,23 +258,26 @@ export const ComparePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="w-full h-80 pt-2 font-mono">
+            <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={combinedConvergenceData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+                <LineChart data={combinedConvergenceData} margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis
                     dataKey="iteration"
                     stroke="#64748b"
                     tick={{ fill: '#475569', fontSize: 10 }}
-                    label={{ value: 'Iterations (N)', position: 'bottom', offset: 5, fill: '#0f172a', fontSize: 11 }}
+                    interval="preserveStartEnd"
+                    minTickGap={25}
+                    label={{ value: 'Iterations (N)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
                   />
                   <YAxis
+                    width={45}
                     stroke="#64748b"
                     tick={{ fill: '#475569', fontSize: 10 }}
-                    label={{ value: 'Running Mean Css (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
+                    label={{ value: 'Running Mean Css (µg/L)', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
                   />
                   <RechartsTooltip />
-                  <Legend verticalAlign="top" height={36} />
+                  <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: '10px', fontSize: '11px' }} />
                   <Line type="monotone" dataKey="MonteCarlo" stroke="#0d9488" strokeWidth={2} dot={false} name="Monte Carlo" />
                   <Line type="monotone" dataKey="LatinHypercube" stroke="#7c3aed" strokeWidth={2} dot={false} name="Latin Hypercube (LHS)" />
                   <Line type="monotone" dataKey="MonteCarloLHS" stroke="#2563eb" strokeWidth={2} dot={false} name="Monte Carlo + LHS" />

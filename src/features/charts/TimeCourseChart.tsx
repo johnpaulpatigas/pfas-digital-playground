@@ -22,9 +22,9 @@ export const TimeCourseChart: React.FC<TimeCourseChartProps> = ({ results }) => 
   }, [results]);
 
   return (
-    <div className="w-full h-72 sm:h-80 pt-2 font-mono">
+    <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={trajectoryData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+        <AreaChart data={trajectoryData} margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
           <defs>
             <linearGradient id="timeCourseBandLight" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
@@ -36,12 +36,15 @@ export const TimeCourseChart: React.FC<TimeCourseChartProps> = ({ results }) => 
             dataKey="year"
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Chronic Exposure Duration (Years)', position: 'bottom', offset: 5, fill: '#0f172a', fontSize: 11 }}
+            interval="preserveStartEnd"
+            minTickGap={20}
+            label={{ value: 'Chronic Exposure Duration (Years)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <YAxis
+            width={45}
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Serum Concentration C(t) (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
+            label={{ value: 'Serum C(t) (µg/L)', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <RechartsTooltip
             formatter={(val: unknown, name: unknown) => [`${String(val)} µg/L`, String(name) === 'meanConcentration' ? 'Mean Serum' : String(name ?? '')]}

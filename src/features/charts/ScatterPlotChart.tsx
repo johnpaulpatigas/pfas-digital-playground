@@ -33,9 +33,9 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
   }, [results]);
 
   return (
-    <div className="w-full h-72 sm:h-80 pt-2 font-mono">
+    <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+        <RechartsScatterChart margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
             type="number"
@@ -44,16 +44,19 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
             unit=" µg/day"
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Daily PFAS Intake (µg/day)', position: 'bottom', offset: 5, fill: '#0f172a', fontSize: 11 }}
+            interval="preserveStartEnd"
+            minTickGap={25}
+            label={{ value: 'Daily PFAS Intake (µg/day)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <YAxis
             type="number"
             dataKey="y"
             name="Serum Concentration"
             unit=" µg/L"
+            width={45}
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Serum Concentration Css (µg/L)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
+            label={{ value: 'Serum Css (µg/L)', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <RechartsTooltip
             formatter={(value: unknown, name: unknown) => [`${String(value ?? '')}`, String(name ?? '')]}

@@ -34,9 +34,9 @@ export const CDFChart: React.FC<CDFChartProps> = ({ results }) => {
   }, [results]);
 
   return (
-    <div className="w-full h-72 sm:h-80 pt-2 font-mono">
+    <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={cdfData} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
+        <AreaChart data={cdfData} margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
           <defs>
             <linearGradient id="cdfGradientLight" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
@@ -48,21 +48,24 @@ export const CDFChart: React.FC<CDFChartProps> = ({ results }) => {
             dataKey="concentration"
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Blood Concentration Css (µg/L)', position: 'bottom', offset: 5, fill: '#0f172a', fontSize: 11 }}
+            interval="preserveStartEnd"
+            minTickGap={20}
+            label={{ value: 'Blood Concentration Css (µg/L)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <YAxis
             domain={[0, 100]}
+            width={45}
             stroke="#64748b"
             tick={{ fill: '#475569', fontSize: 10 }}
-            label={{ value: 'Cumulative Percentile (%)', angle: -90, position: 'insideLeft', fill: '#0f172a', fontSize: 11 }}
+            label={{ value: 'Cumulative %', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
           />
           <RechartsTooltip
             formatter={(val: unknown) => [`${String(val)}%`, 'Cumulative Probability']}
             labelFormatter={(label: unknown) => `Conc: ${String(label ?? '')} µg/L`}
           />
           <Area type="monotone" dataKey="probability" stroke="#7c3aed" strokeWidth={2} fillOpacity={1} fill="url(#cdfGradientLight)" />
-          <ReferenceLine y={50} stroke="#2563eb" strokeDasharray="3 3" label={{ value: 'P50 (Median)', fill: '#2563eb', fontSize: 10 }} />
-          <ReferenceLine y={95} stroke="#dc2626" strokeDasharray="3 3" label={{ value: 'P95 Limit', fill: '#dc2626', fontSize: 10 }} />
+          <ReferenceLine y={50} stroke="#2563eb" strokeDasharray="3 3" label={{ value: 'P50 (Median)', fill: '#2563eb', fontSize: 9, position: 'insideTopLeft' }} />
+          <ReferenceLine y={95} stroke="#dc2626" strokeDasharray="3 3" label={{ value: 'P95 Limit', fill: '#dc2626', fontSize: 9, position: 'insideTopLeft' }} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
