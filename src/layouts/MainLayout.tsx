@@ -11,11 +11,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Close menu on route change
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
   // Close menu on Escape key press
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
