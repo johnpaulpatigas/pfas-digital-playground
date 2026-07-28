@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Compass, BookOpen, Layers, Dna, Menu, X } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -41,14 +42,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-medium transition-all ${
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-md text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                    ? 'text-white font-semibold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-400'}`} />
-                <span>{item.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavPill"
+                    className="absolute inset-0 bg-slate-900 rounded-md shadow-xs"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <Icon className={`relative z-10 w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-400'}`} />
+                <span className="relative z-10">{item.label}</span>
               </Link>
             );
           })}
@@ -65,29 +73,37 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </header>
 
       {/* Mobile Menu Dropdown Drawer */}
-      {mobileMenuOpen && (
-        <nav className="md:hidden sticky top-[61px] z-40 bg-white border-b border-slate-200 px-4 py-3 space-y-1 shadow-md animate-in slide-in-from-top-2 duration-150">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-slate-900 text-white font-semibold'
-                    : 'text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      )}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.nav
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.18, ease: 'easeInOut' }}
+            className="md:hidden sticky top-[61px] z-40 bg-white border-b border-slate-200 px-4 py-3 space-y-1 shadow-md overflow-hidden"
+          >
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-slate-900 text-white font-semibold'
+                      : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </motion.nav>
+        )}
+      </AnimatePresence>
 
       {/* Main View Area */}
       <main className="flex-1 flex flex-col">

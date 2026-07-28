@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSimulationStore } from '../stores/useSimulationStore';
 import { executeSimulationAsync } from '../simulation/runSimulationAsync';
 import { ParameterSidebar } from '../features/playground/ParameterSidebar';
@@ -146,14 +147,21 @@ export const PlaygroundPage: React.FC = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-all flex-shrink-0 ${
+                      className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-colors flex-shrink-0 cursor-pointer ${
                         isActive
-                          ? 'bg-slate-900 text-white font-semibold shadow-xs'
+                          ? 'text-white font-semibold'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                       }`}
                     >
-                      <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
-                      <span>{tab.label}</span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeChartTabPill"
+                          className="absolute inset-0 bg-slate-900 rounded-md shadow-xs"
+                          transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                        />
+                      )}
+                      <Icon className={`relative z-10 w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                      <span className="relative z-10">{tab.label}</span>
                     </button>
                   );
                 })}
@@ -170,17 +178,24 @@ export const PlaygroundPage: React.FC = () => {
               )}
 
               {results && summaryStats ? (
-                <>
-                  {activeTab === 'histogram' && (
-                    <HistogramChart results={results} summaryStats={summaryStats} />
-                  )}
-                  {activeTab === 'cdf' && <CDFChart results={results} />}
-                  {activeTab === 'timecourse' && <TimeCourseChart results={results} />}
-                  {activeTab === 'scatter' && <ScatterPlotChart results={results} />}
-                  {activeTab === 'tornado' && (
-                    <TornadoChart sensitivityRanks={sensitivityRanks} />
-                  )}
-                  {activeTab === 'convergence' && <ConvergenceChart results={results} />}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                  >
+                    {activeTab === 'histogram' && (
+                      <HistogramChart results={results} summaryStats={summaryStats} />
+                    )}
+                    {activeTab === 'cdf' && <CDFChart results={results} />}
+                    {activeTab === 'timecourse' && <TimeCourseChart results={results} />}
+                    {activeTab === 'scatter' && <ScatterPlotChart results={results} />}
+                    {activeTab === 'tornado' && (
+                      <TornadoChart sensitivityRanks={sensitivityRanks} />
+                    )}
+                    {activeTab === 'convergence' && <ConvergenceChart results={results} />}
 
                   {activeTab === 'table' && (
                     <div className="space-y-3 font-mono text-xs">
@@ -249,7 +264,8 @@ export const PlaygroundPage: React.FC = () => {
                       </div>
                     </div>
                   )}
-                </>
+                </motion.div>
+              </AnimatePresence>
               ) : (
                 <div className="h-72 flex items-center justify-center text-slate-400 text-xs font-mono">
                   Loading simulation data...
