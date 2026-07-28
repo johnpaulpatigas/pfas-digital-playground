@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/pfas-digital-playground/",
+  base: "./",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

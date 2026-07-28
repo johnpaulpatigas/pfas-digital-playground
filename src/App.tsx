@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
 import { HomePage } from './pages/HomePage';
 import { PlaygroundPage } from './pages/PlaygroundPage';
@@ -7,7 +7,7 @@ import { DocsPage } from './pages/DocsPage';
 
 function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <HashRouter>
       <MainLayout>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -16,7 +16,7 @@ function App() {
           <Route path="/docs" element={<DocsPage />} />
         </Routes>
       </MainLayout>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
