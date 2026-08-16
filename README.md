@@ -9,7 +9,7 @@ This platform provides researchers, toxicologists, environmental health scientis
 - **1-Compartment Toxicokinetic Modeling**: Model 1-compartment pharmacokinetic clearance and body accumulation of PFAS compounds (PFOA, PFOS, PFHxS, PFNA, GenX/HFPO-DA).
 - **Probabilistic Risk Assessment**: Incorporate statistical variability and parameter uncertainty across physiological and exposure parameters.
 - **Sampling Efficiency Comparison**: Benchmark statistical efficiency, convergence rates, and precision between standard Monte Carlo (MC) and Stratified Latin Hypercube Sampling (LHS).
-- **Demographic Focus**: Presets and physiological profiles tailored for Filipino female cohorts (Average Adult Female, Urban Manila Resident, High Coastal Seafood Diet, Pregnant Female Profile).
+- **Demographic Focus**: Presets and physiological profiles tailored for Filipino female cohorts (Average Adult Female, Pregnant Female Profile).
 
 ---
 
