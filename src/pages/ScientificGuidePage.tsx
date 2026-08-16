@@ -113,10 +113,10 @@ export const ScientificGuidePage: React.FC = () => {
         {activeTab === 'risk' && (
           <motion.div
             key="risk-tab"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
             className="space-y-8"
           >
             {/* Core Section: Hazard Quotient */}
@@ -258,10 +258,10 @@ export const ScientificGuidePage: React.FC = () => {
         {activeTab === 'sensitivity' && (
           <motion.div
             key="sensitivity-tab"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
             className="space-y-8"
           >
             <section className="card-panel p-6 sm:p-8 rounded-3xl space-y-6 border border-slate-200 bg-white">
@@ -371,10 +371,10 @@ export const ScientificGuidePage: React.FC = () => {
         {activeTab === 'scenario' && (
           <motion.div
             key="scenario-tab"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
             className="space-y-8"
           >
             <section className="card-panel p-6 sm:p-8 rounded-3xl space-y-6 border border-slate-200 bg-white">
