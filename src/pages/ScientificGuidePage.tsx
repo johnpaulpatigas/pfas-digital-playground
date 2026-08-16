@@ -523,34 +523,30 @@ export const ScientificGuidePage: React.FC = () => {
       </AnimatePresence>
 
       {/* Bottom CTA Card */}
-      <div className="card-panel p-6 sm:p-8 rounded-3xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-5">
-        <div className="space-y-1 text-center sm:text-left">
-          <h3 className="text-lg font-bold text-white font-heading">
+      <div className="rounded-3xl bg-slate-900 border border-slate-800 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
+        <div className="space-y-1.5 text-center sm:text-left">
+          <h3 className="text-lg sm:text-xl font-bold text-white font-heading tracking-tight">
             Ready to test these scientific models in real-time?
           </h3>
-          <p className="text-xs text-slate-300 font-sans">
+          <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed max-w-xl">
             Configure exposure distributions, run Monte Carlo &amp; LHS sampling, and visualize your results.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Link to="/playground">
-            <Button
-              variant="primary"
-              size="md"
-              icon={<ArrowRight className="w-4 h-4" />}
-            >
-              Open Simulation Playground
-            </Button>
+          <Link
+            to="/playground"
+            className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-semibold text-xs font-sans transition-all shadow-xs"
+          >
+            <span>Open Simulation Playground</span>
+            <ArrowRight className="w-4 h-4 text-slate-900" />
           </Link>
-          <Link to="/compare">
-            <Button
-              variant="secondary"
-              size="md"
-              icon={<Layers className="w-4 h-4" />}
-            >
-              Compare MC vs LHS
-            </Button>
+          <Link
+            to="/compare"
+            className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs font-sans border border-slate-700 transition-all"
+          >
+            <Layers className="w-4 h-4 text-slate-300" />
+            <span>Compare MC vs LHS</span>
           </Link>
         </div>
       </div>
