@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ShieldAlert, Cpu, Network, ArrowRight, Layers, CheckCircle2, FlaskConical } from 'lucide-react';
+import { Activity, ShieldAlert, Cpu, Network, ArrowRight, Layers, CheckCircle2, FlaskConical, GraduationCap } from 'lucide-react';
 import { MathView } from '../components/ui/MathView';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 
@@ -41,6 +41,14 @@ export const HomePage: React.FC = () => {
             >
               <Layers className="w-4 h-4 text-blue-600" />
               <span>Compare MC vs LHS</span>
+            </Link>
+
+            <Link
+              to="/guide"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs border border-slate-200 transition-all"
+            >
+              <GraduationCap className="w-4 h-4 text-teal-600" />
+              <span>Scientific Guide</span>
             </Link>
           </div>
         </div>

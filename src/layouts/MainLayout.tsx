@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Compass, BookOpen, Layers, Dna, Menu, X } from 'lucide-react';
+import { Activity, Compass, BookOpen, Layers, Dna, Menu, X, GraduationCap } from 'lucide-react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -24,6 +24,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { path: '/', label: 'Overview', icon: Compass },
     { path: '/playground', label: 'Playground', icon: Activity },
     { path: '/compare', label: 'MC vs LHS Compare', icon: Layers },
+    { path: '/guide', label: 'Scientific Guide', icon: GraduationCap },
     { path: '/docs', label: 'Methodology & Math', icon: BookOpen },
   ];
 

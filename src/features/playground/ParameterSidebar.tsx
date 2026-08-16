@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
@@ -6,7 +7,7 @@ import { DistributionSelector } from './DistributionSelector';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { Button } from '../../components/ui/Button';
 import type { DistributionType, DistributionParams, SimulationParameters } from '../../types';
-import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge } from 'lucide-react';
+import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge, Info } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
 interface ParameterSidebarProps {
@@ -102,11 +103,18 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
       {/* Scenario Presets Bar */}
       <div className="card-panel p-4 rounded-xl space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Bookmark className="w-4 h-4 text-teal-600" />
             <span className="font-bold text-slate-800 uppercase font-mono tracking-wider text-[11px]">
               Demographic Presets
             </span>
+            <Link
+              to="/guide"
+              title="Read scientific guide on Scenario & Demographic Cohort Modeling"
+              className="text-slate-400 hover:text-teal-600 transition-colors p-0.5"
+            >
+              <Info className="w-3.5 h-3.5" />
+            </Link>
           </div>
           <button
             onClick={resetToDefault}

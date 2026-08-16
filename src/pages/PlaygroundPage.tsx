@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSimulationStore } from '../stores/useSimulationStore';
 import { executeSimulationAsync } from '../simulation/runSimulationAsync';
@@ -24,6 +25,7 @@ import {
   Clock,
   ScatterChart as ScatterIcon,
   Table as TableIcon,
+  GraduationCap,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -95,8 +97,18 @@ export const PlaygroundPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Quick Export Controls */}
-        <div className="flex items-center gap-2">
+        {/* Quick Actions & Export Controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to="/guide">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<GraduationCap className="w-3.5 h-3.5 text-blue-600" />}
+            >
+              Scientific Guide
+            </Button>
+          </Link>
+
           <Button
             variant="secondary"
             size="sm"

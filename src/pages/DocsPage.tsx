@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Cpu, ShieldAlert, Layers, CheckCircle } from 'lucide-react';
+import { BookOpen, Cpu, ShieldAlert, Layers, CheckCircle, Flame, Users } from 'lucide-react';
 import { MathView } from '../components/ui/MathView';
 
 export const DocsPage: React.FC = () => {
@@ -156,6 +156,98 @@ export const DocsPage: React.FC = () => {
                 <span>Captures unconstrained stochastic random variation while maintaining robust quantile stratification across tail risk boundaries (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</span>
               </li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 4: Health Risk Assessment & Hazard Quotient */}
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+          <ShieldAlert className="w-5 h-5 text-red-600" />
+          <h2 className="text-xl font-bold text-slate-900 font-heading">4. Probabilistic Human Health Risk Assessment</h2>
+        </div>
+
+        <p className="text-slate-600 text-sm leading-relaxed font-sans">
+          To evaluate toxicological risk, predicted steady-state blood serum concentrations (<MathView math="C_{ss}" />) are compared against health-protective drinking water Maximum Contaminant Levels (MCL) and reference doses (RfD).
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-mono text-xs">
+          <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5">
+            <h3 className="text-red-900 font-bold text-sm font-heading">Hazard Quotient (HQ) Formula</h3>
+            <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
+              <MathView math="HQ = \frac{C_{ss}}{\text{Guideline MCL}}" block />
+            </div>
+            <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
+              An <MathView math="HQ \le 1.0" /> indicates exposures within established toxicological safety thresholds. An <MathView math="HQ > 1.0" /> denotes potential adverse health exceedance.
+            </p>
+          </div>
+
+          <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5">
+            <h3 className="text-rose-900 font-bold text-sm font-heading">Population Exceedance Probability</h3>
+            <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
+              <MathView math="P(HQ > 1.0) = \frac{1}{N} \sum_{i=1}^N \mathbb{I}(HQ_i > 1.0) \times 100\%" block />
+            </div>
+            <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
+              Quantifies the percentage of the simulated cohort exceeding safe exposure levels, highlighting upper-tail vulnerabilities (<MathView math="P_{95}" />, <MathView math="P_{99}" />).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5: Sensitivity Analysis */}
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+          <Flame className="w-5 h-5 text-amber-600" />
+          <h2 className="text-xl font-bold text-slate-900 font-heading">5. Global Sensitivity &amp; Parameter Uncertainty</h2>
+        </div>
+
+        <p className="text-slate-600 text-sm leading-relaxed font-sans">
+          Sensitivity analysis quantifies the relative influence of each uncertain input parameter on output serum concentrations. Non-linear monotonic dependencies are modeled using non-parametric <strong>Spearman Rank Correlation</strong>.
+        </p>
+
+        <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3 font-mono text-xs">
+          <h3 className="text-amber-900 font-bold text-sm font-heading">Spearman Rank Correlation Coefficient (<MathView math="\rho" />)</h3>
+          <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
+            <MathView math="\rho = 1 - \frac{6 \sum_{i=1}^N d_i^2}{N(N^2 - 1)}" block />
+          </div>
+          <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
+            Where <MathView math="d_i" /> represents the rank difference between parameter input <MathView math="X_i" /> and output serum concentration <MathView math="Y_i" /> for iteration <MathView math="i" />.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-slate-700 font-sans text-xs">
+            <div className="p-3 bg-white rounded-lg border border-slate-200">
+              <strong className="text-amber-900 font-mono">Positive Drivers (<MathView math="\rho > 0" />):</strong> Daily intake, elimination half-life, and GI absorption increase bioaccumulation.
+            </div>
+            <div className="p-3 bg-white rounded-lg border border-slate-200">
+              <strong className="text-blue-900 font-mono">Protective Drivers (<MathView math="\rho < 0" />):</strong> Body weight dilutes internal serum concentration via increased volume of distribution.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 6: Scenario Analysis */}
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+          <Users className="w-5 h-5 text-teal-600" />
+          <h2 className="text-xl font-bold text-slate-900 font-heading">6. Scenario Analysis &amp; Demographic Profiling</h2>
+        </div>
+
+        <p className="text-slate-600 text-sm leading-relaxed font-sans">
+          The platform evaluates differential risk across demographic and physiological cohorts through validated demographic presets:
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-mono">
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <h3 className="text-teal-900 font-bold text-sm font-heading">Average Filipino Woman</h3>
+            <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
+              Calibrated from Philippine National Nutrition Council (NNC) health surveys: baseline adult body weight of <strong>55.4 kg</strong>, baseline tropical drinking water intake of <strong>2.0 L/day</strong>, and lifetime environmental exposure kinetics.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+            <h3 className="text-purple-900 font-bold text-sm font-heading">Pregnant Female Profile</h3>
+            <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
+              Models gestational hemodilution (+40-50% blood plasma volume expansion), increased hydration demands (<strong>2.8 L/day</strong>), gestational mass (<strong>65.2 kg</strong>), and transplacental clearance dynamics shortening maternal serum half-life (<strong>2.4 yrs</strong>).
+            </p>
           </div>
         </div>
       </section>

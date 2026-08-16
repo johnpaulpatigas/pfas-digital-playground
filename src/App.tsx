@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage';
 import { PlaygroundPage } from './pages/PlaygroundPage';
 import { ComparePage } from './pages/ComparePage';
 import { DocsPage } from './pages/DocsPage';
+import { ScientificGuidePage } from './pages/ScientificGuidePage';
 
 function BackButtonHandler() {
   const location = useLocation();
@@ -84,6 +85,14 @@ function AnimatedRoutes() {
           element={
             <PageWrapper>
               <DocsPage />
+            </PageWrapper>
+          }
+        />
+        <Route
+          path="/guide"
+          element={
+            <PageWrapper>
+              <ScientificGuidePage />
             </PageWrapper>
           }
         />

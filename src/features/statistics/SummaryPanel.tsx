@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import type { SummaryStatistics, SensitivityRank } from '../../types';
-import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
 interface SummaryPanelProps {
@@ -14,6 +15,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   sensitivityRanks,
   samplingMethod,
 }) => {
+
   if (!summaryStats) {
     return (
       <div className="card-panel p-6 rounded-xl text-center space-y-3 font-mono text-xs">
@@ -68,6 +70,13 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
               Health Risk Quotient (HQ)
             </span>
+            <Link
+              to="/guide"
+              title="Read scientific guide on Health Risk Assessment & HQ"
+              className="text-slate-400 hover:text-blue-600 transition-colors p-0.5"
+            >
+              <Info className="w-3.5 h-3.5" />
+            </Link>
           </div>
           <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
             isHighRisk
@@ -152,11 +161,20 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       {/* Top Sensitivity Driver */}
       {sensitivityRanks.length > 0 && (
         <div className="card-panel-amber p-4 rounded-xl space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <Award className="w-4 h-4 text-amber-600" />
-            <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">
-              Top Exposure Driver
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-amber-600" />
+              <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">
+                Top Exposure Driver
+              </span>
+            </div>
+            <Link
+              to="/guide"
+              title="Read scientific guide on Sensitivity Analysis & Spearman Rank"
+              className="text-amber-700 hover:text-amber-950 transition-colors p-0.5"
+            >
+              <Info className="w-3.5 h-3.5" />
+            </Link>
           </div>
           <div className="text-slate-900 font-bold text-xs font-sans">
             {sensitivityRanks[0].parameterName}
