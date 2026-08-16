@@ -18,6 +18,13 @@
     --accent-rose: #dc2626;
   }
 
+  html {
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+
   body {
     background-color: #f8fafc;
     color: #0f172a;
