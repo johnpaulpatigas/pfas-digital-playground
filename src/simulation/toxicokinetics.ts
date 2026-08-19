@@ -1,5 +1,6 @@
-import type { IterationResult } from '../types';
-import { PFAS_COMPOUNDS } from './pfasCompounds';
+import type { IterationResult, CriticalThresholds, ExceedanceRangeStats } from '../types';
+import { PFAS_COMPOUNDS, type PFASCompound } from './pfasCompounds';
+
 
 export interface ToxicokineticInput {
   dailyIntake: number;        // µg/day
@@ -117,3 +118,137 @@ export function calculateTimeCourseTrajectory(
 
   return timeSeries;
 }
+
+/**
+ * Closed-Form Analytical Critical Threshold Calculator (O(1) Instant Computation)
+ * Solves the critical parameter values at which Hazard Quotient HQ = 1.0
+ */
+export function calculateCriticalThresholds(
+  compound: PFASCompound,
+  bodyWeight: number = 55,
+  bioavailability: number = 0.9,
+  halfLifeYears?: number
+): CriticalThresholds {
+  const halfLife = halfLifeYears && halfLifeYears > 0 ? halfLifeYears : compound.halfLifeYears;
+  const halfLifeDays = halfLife * 365.25;
+  const eliminationRate = Math.LN2 / Math.max(1, halfLifeDays);
+
+  // Critical daily intake (ug/day) where Dose/BW = RfD => Intake = BW * RfD
+  const criticalDailyIntake = bodyWeight * compound.rfdDose;
+
+  // Critical daily absorbed dose (ug/day)
+  const criticalAbsorbedDose = criticalDailyIntake * bioavailability;
+
+  // Total volume of distribution (L)
+  const volumeOfDistributionTotal = Math.max(1, bodyWeight * compound.volumeOfDistribution);
+
+  // Steady-state serum concentration at critical intake (ug/L)
+  const criticalSerumConcentration = criticalAbsorbedDose / (volumeOfDistributionTotal * eliminationRate);
+
+  // Critical steady-state body burden (ug)
+  const criticalBodyBurden = criticalAbsorbedDose / eliminationRate;
+
+  // US EPA Maximum Contaminant Level converted to ug/L (ng/L / 1000)
+  const epaMCLConcentration = compound.epaMCL / 1000;
+
+  return {
+    criticalDailyIntake,
+    criticalDailyDosePerKg: compound.rfdDose,
+    criticalSerumConcentration,
+    criticalBodyBurden,
+    epaMCLConcentration,
+  };
+}
+
+function quantileSorted(sortedValues: number[], q: number): number {
+  if (sortedValues.length === 0) return 0;
+  const pos = (sortedValues.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  if (sortedValues[base + 1] !== undefined) {
+    return sortedValues[base] + rest * (sortedValues[base + 1] - sortedValues[base]);
+  }
+  return sortedValues[base];
+}
+
+/**
+ * Empirical Exceedance Range Breakdown
+ * Calculates statistical ranges (min, median, max, P95) for iterations exceeding HQ > 1.0 vs safe
+ */
+export function calculateExceedanceRangeStats(
+  results: IterationResult[],
+  compound: PFASCompound,
+  meanBodyWeight: number = 55,
+  meanBioavailability: number = 0.9,
+  meanHalfLife?: number
+): ExceedanceRangeStats {
+  const totalCount = results.length;
+  const thresholds = calculateCriticalThresholds(compound, meanBodyWeight, meanBioavailability, meanHalfLife);
+
+  if (totalCount === 0) {
+    return {
+      totalCount: 0,
+      exceedanceCount: 0,
+      exceedancePercent: 0,
+      safeCount: 0,
+      safePercent: 0,
+      exceedingDailyIntake: { min: 0, median: 0, max: 0, p5: 0, p95: 0 },
+      exceedingSerumCss: { min: 0, median: 0, max: 0, p5: 0, p95: 0 },
+      exceedingPeakBodyBurden: { min: 0, median: 0, max: 0, p5: 0, p95: 0 },
+      exceedingBodyWeight: { min: 0, median: 0, max: 0 },
+      exceedingHalfLife: { min: 0, median: 0, max: 0 },
+      safeDailyIntake: { min: 0, median: 0, max: 0 },
+      safeSerumCss: { min: 0, median: 0, max: 0 },
+      safePeakBodyBurden: { min: 0, median: 0, max: 0 },
+      safeBodyWeight: { min: 0, median: 0, max: 0 },
+      safeHalfLife: { min: 0, median: 0, max: 0 },
+      thresholds,
+    };
+  }
+
+  const exceeding = results.filter((r) => r.hazardQuotient > 1.0);
+  const safe = results.filter((r) => r.hazardQuotient <= 1.0);
+
+  const getStats = (arr: IterationResult[], key: keyof IterationResult) => {
+    if (arr.length === 0) return { min: 0, median: 0, max: 0, p5: 0, p95: 0 };
+    const vals = arr.map((r) => r[key] as number).sort((a, b) => a - b);
+    return {
+      min: vals[0],
+      median: quantileSorted(vals, 0.5),
+      max: vals[vals.length - 1],
+      p5: quantileSorted(vals, 0.05),
+      p95: quantileSorted(vals, 0.95),
+    };
+  };
+
+  const getBasicStats = (arr: IterationResult[], key: keyof IterationResult) => {
+    if (arr.length === 0) return { min: 0, median: 0, max: 0 };
+    const vals = arr.map((r) => r[key] as number).sort((a, b) => a - b);
+    return {
+      min: vals[0],
+      median: quantileSorted(vals, 0.5),
+      max: vals[vals.length - 1],
+    };
+  };
+
+  return {
+    totalCount,
+    exceedanceCount: exceeding.length,
+    exceedancePercent: (exceeding.length / totalCount) * 100,
+    safeCount: safe.length,
+    safePercent: (safe.length / totalCount) * 100,
+    exceedingDailyIntake: getStats(exceeding, 'dailyIntake'),
+    exceedingSerumCss: getStats(exceeding, 'steadyStateConcentration'),
+    exceedingPeakBodyBurden: getStats(exceeding, 'peakBodyBurden'),
+    exceedingBodyWeight: getBasicStats(exceeding, 'bodyWeight'),
+    exceedingHalfLife: getBasicStats(exceeding, 'eliminationHalfLife'),
+    safeDailyIntake: getBasicStats(safe, 'dailyIntake'),
+    safeSerumCss: getBasicStats(safe, 'steadyStateConcentration'),
+    safePeakBodyBurden: getBasicStats(safe, 'peakBodyBurden'),
+    safeBodyWeight: getBasicStats(safe, 'bodyWeight'),
+    safeHalfLife: getBasicStats(safe, 'eliminationHalfLife'),
+    thresholds,
+  };
+}
+
+

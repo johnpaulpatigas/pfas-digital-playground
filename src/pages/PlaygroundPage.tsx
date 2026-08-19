@@ -6,6 +6,7 @@ import { executeSimulationAsync } from '../simulation/runSimulationAsync';
 import { ParameterSidebar } from '../features/playground/ParameterSidebar';
 import { SummaryPanel } from '../features/statistics/SummaryPanel';
 import { SimulationConsole } from '../features/playground/SimulationConsole';
+import { ExceedanceAnalyzer } from '../features/playground/ExceedanceAnalyzer';
 import { HistogramChart } from '../features/charts/HistogramChart';
 import { CDFChart } from '../features/charts/CDFChart';
 import { TimeCourseChart } from '../features/charts/TimeCourseChart';
@@ -26,6 +27,7 @@ import {
   ScatterChart as ScatterIcon,
   Table as TableIcon,
   GraduationCap,
+  Zap,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -42,11 +44,13 @@ export const PlaygroundPage: React.FC = () => {
   } = useSimulationStore();
 
   const [activeTab, setActiveTab] = useState<
-    'histogram' | 'cdf' | 'timecourse' | 'scatter' | 'tornado' | 'convergence' | 'table'
-  >('histogram');
+    'thresholds' | 'histogram' | 'cdf' | 'timecourse' | 'scatter' | 'tornado' | 'convergence' | 'table'
+  >('thresholds');
 
   const [tableSearch, setTableSearch] = useState('');
+  const [tableFilter, setTableFilter] = useState<'all' | 'exceeding' | 'safe'>('all');
   const [tablePage, setTablePage] = useState(1);
+
 
   const activeCompound = PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
 
@@ -71,9 +75,15 @@ export const PlaygroundPage: React.FC = () => {
 
   const filteredResults = React.useMemo(() => {
     if (!results) return [];
-    if (!tableSearch) return results;
-    return results.filter((r) => r.iteration.toString().includes(tableSearch));
-  }, [results, tableSearch]);
+    let list = results;
+    if (tableFilter === 'exceeding') {
+      list = list.filter((r) => r.hazardQuotient > 1.0);
+    } else if (tableFilter === 'safe') {
+      list = list.filter((r) => r.hazardQuotient <= 1.0);
+    }
+    if (!tableSearch) return list;
+    return list.filter((r) => r.iteration.toString().includes(tableSearch));
+  }, [results, tableFilter, tableSearch]);
 
   const pageSize = 15;
   const totalPages = Math.ceil(filteredResults.length / pageSize) || 1;
@@ -145,6 +155,7 @@ export const PlaygroundPage: React.FC = () => {
             <div className="border-b border-slate-200 pb-3">
               <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap no-scrollbar py-1">
                 {[
+                  { id: 'thresholds', label: 'Exceedance Analyzer', icon: Zap },
                   { id: 'histogram', label: 'Frequency Histogram', icon: BarChart2 },
                   { id: 'cdf', label: 'CDF', icon: LineChartIcon },
                   { id: 'timecourse', label: 'Bioaccumulation C(t)', icon: Clock },
@@ -153,6 +164,7 @@ export const PlaygroundPage: React.FC = () => {
                   { id: 'convergence', label: 'Convergence', icon: Activity },
                   { id: 'table', label: 'Data Matrix', icon: TableIcon },
                 ].map((tab) => {
+
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
                   return (
@@ -198,6 +210,14 @@ export const PlaygroundPage: React.FC = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.12, ease: 'easeOut' }}
                   >
+                    {activeTab === 'thresholds' && (
+                      <ExceedanceAnalyzer
+                        results={results}
+                        parameters={parameters}
+                        compoundId={samplingConfig.compoundId}
+                        samplingMethod={samplingConfig.method}
+                      />
+                    )}
                     {activeTab === 'histogram' && (
                       <HistogramChart results={results} summaryStats={summaryStats} />
                     )}
@@ -212,16 +232,44 @@ export const PlaygroundPage: React.FC = () => {
                   {activeTab === 'table' && (
                     <div className="space-y-3 font-mono text-xs">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <input
-                          type="text"
-                          placeholder="Search iteration number..."
-                          value={tableSearch}
-                          onChange={(e) => {
-                            setTableSearch(e.target.value);
-                            setTablePage(1);
-                          }}
-                          className="bg-white border border-slate-300 text-slate-900 rounded-md px-3 py-1 text-xs focus:outline-none focus:border-blue-500 w-full sm:w-auto"
-                        />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Search iteration #..."
+                            value={tableSearch}
+                            onChange={(e) => {
+                              setTableSearch(e.target.value);
+                              setTablePage(1);
+                            }}
+                            className="bg-white border border-slate-300 text-slate-900 rounded-md px-3 py-1 text-xs focus:outline-none focus:border-blue-500 w-full sm:w-auto"
+                          />
+                          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-md border border-slate-200 text-[10px]">
+                            <button
+                              onClick={() => { setTableFilter('all'); setTablePage(1); }}
+                              className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                                tableFilter === 'all' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                              }`}
+                            >
+                              All ({results.length})
+                            </button>
+                            <button
+                              onClick={() => { setTableFilter('exceeding'); setTablePage(1); }}
+                              className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                                tableFilter === 'exceeding' ? 'bg-red-600 text-white' : 'text-red-700 hover:text-red-900'
+                              }`}
+                            >
+                              Exceeding HQ &gt; 1.0 ({results.filter((r) => r.hazardQuotient > 1.0).length})
+                            </button>
+                            <button
+                              onClick={() => { setTableFilter('safe'); setTablePage(1); }}
+                              className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-colors ${
+                                tableFilter === 'safe' ? 'bg-emerald-600 text-white' : 'text-emerald-700 hover:text-emerald-900'
+                              }`}
+                            >
+                              Safe ({results.filter((r) => r.hazardQuotient <= 1.0).length})
+                            </button>
+                          </div>
+                        </div>
                         <span className="text-slate-500 text-[11px]">
                           Showing {paginatedResults.length} of {filteredResults.length} samples
                         </span>
@@ -235,19 +283,24 @@ export const PlaygroundPage: React.FC = () => {
                               <th className="p-2">Intake (µg/d)</th>
                               <th className="p-2">BW (kg)</th>
                               <th className="p-2">Half-Life (yr)</th>
+                              <th className="p-2 text-amber-800">Body Burden (µg)</th>
                               <th className="p-2 text-blue-700">Serum Css (µg/L)</th>
-                              <th className="p-2 text-amber-700">HQ</th>
+                              <th className="p-2 text-red-700">HQ</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 text-slate-800">
                             {paginatedResults.map((row) => (
-                              <tr key={row.iteration} className="hover:bg-slate-50">
+                              <tr
+                                key={row.iteration}
+                                className={`hover:bg-slate-50 ${row.hazardQuotient > 1.0 ? 'bg-red-50/25' : ''}`}
+                              >
                                 <td className="p-2 text-slate-400">{row.iteration}</td>
-                                <td className="p-2">{row.dailyIntake.toFixed(4)}</td>
+                                <td className="p-2 font-mono">{row.dailyIntake.toFixed(4)}</td>
                                 <td className="p-2">{row.bodyWeight.toFixed(1)}</td>
                                 <td className="p-2">{row.eliminationHalfLife.toFixed(2)}</td>
-                                <td className="p-2 text-blue-700 font-bold">{row.steadyStateConcentration.toFixed(4)}</td>
-                                <td className={`p-2 font-bold ${row.hazardQuotient > 1.0 ? 'text-red-600' : 'text-slate-800'}`}>
+                                <td className="p-2 font-mono text-amber-900 font-semibold">{row.peakBodyBurden.toFixed(3)}</td>
+                                <td className="p-2 font-mono text-blue-700 font-bold">{row.steadyStateConcentration.toFixed(4)}</td>
+                                <td className={`p-2 font-mono font-bold ${row.hazardQuotient > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}>
                                   {row.hazardQuotient.toFixed(2)}
                                 </td>
                               </tr>
@@ -296,9 +349,14 @@ export const PlaygroundPage: React.FC = () => {
             summaryStats={summaryStats}
             sensitivityRanks={sensitivityRanks}
             samplingMethod={samplingConfig.method}
+            compoundId={samplingConfig.compoundId}
+            results={results}
+            parameters={parameters}
+            onOpenExceedanceAnalyzer={() => setActiveTab('thresholds')}
           />
         </div>
       </div>
     </div>
   );
 };
+

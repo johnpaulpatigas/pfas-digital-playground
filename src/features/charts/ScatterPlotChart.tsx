@@ -7,6 +7,7 @@ import {
   YAxis,
   Tooltip as RechartsTooltip,
   CartesianGrid,
+  Legend,
 } from 'recharts';
 import type { IterationResult } from '../../types';
 
@@ -15,21 +16,30 @@ interface ScatterPlotChartProps {
 }
 
 export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) => {
-  const scatterData = useMemo(() => {
-    if (!results || results.length === 0) return [];
+  const { safePoints, exceedingPoints } = useMemo(() => {
+    if (!results || results.length === 0) return { safePoints: [], exceedingPoints: [] };
 
     const step = Math.max(1, Math.floor(results.length / 500));
-    const points = [];
+    const safe: Array<{ x: number; y: number; bw: number; hq: number; bb: number }> = [];
+    const exceeding: Array<{ x: number; y: number; bw: number; hq: number; bb: number }> = [];
 
     for (let i = 0; i < results.length; i += step) {
-      points.push({
+      const pt = {
         x: parseFloat(results[i].dailyIntake.toFixed(4)),
         y: parseFloat(results[i].steadyStateConcentration.toFixed(4)),
         bw: parseFloat(results[i].bodyWeight.toFixed(1)),
-      });
+        hq: parseFloat(results[i].hazardQuotient.toFixed(2)),
+        bb: parseFloat(results[i].peakBodyBurden.toFixed(3)),
+      };
+
+      if (results[i].hazardQuotient > 1.0) {
+        exceeding.push(pt);
+      } else {
+        safe.push(pt);
+      }
     }
 
-    return points;
+    return { safePoints: safe, exceedingPoints: exceeding };
   }, [results]);
 
   return (
@@ -60,11 +70,32 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
           />
           <RechartsTooltip
             formatter={(value: unknown, name: unknown) => [`${String(value ?? '')}`, String(name ?? '')]}
-            cursor={{ strokeDasharray: '3 3' }}
+            content={({ active, payload }) => {
+              if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                const isExceeding = data.hq > 1.0;
+                return (
+                  <div className="bg-slate-900 text-white p-2.5 rounded-lg text-[11px] font-mono space-y-1 shadow-lg border border-slate-700">
+                    <div className={`font-bold flex items-center justify-between gap-2 border-b pb-1 ${isExceeding ? 'text-red-400 border-red-800' : 'text-teal-400 border-teal-800'}`}>
+                      <span>{isExceeding ? 'Exceeding (HQ > 1.0)' : 'Safe (HQ ≤ 1.0)'}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 bg-white/10 rounded">HQ = {data.hq}</span>
+                    </div>
+                    <div>Intake: <span className="font-semibold text-blue-300">{data.x} µg/day</span></div>
+                    <div>Serum <span className="text-slate-400">Css</span>: <span className="font-semibold text-purple-300">{data.y} µg/L</span></div>
+                    <div>Body Burden: <span className="font-semibold text-amber-300">{data.bb} µg</span></div>
+                    <div>Body Weight: <span className="text-slate-300">{data.bw} kg</span></div>
+                  </div>
+                );
+              }
+              return null;
+            }}
           />
-          <Scatter name="Iteration Samples" data={scatterData} fill="#2563eb" opacity={0.6} r={3} />
+          <Legend verticalAlign="top" height={24} wrapperStyle={{ fontSize: '10px', paddingTop: '-6px' }} />
+          <Scatter name="Safe Cohort (HQ ≤ 1.0)" data={safePoints} fill="#0d9488" opacity={0.65} r={3} />
+          <Scatter name="Exceedance Cohort (HQ > 1.0)" data={exceedingPoints} fill="#dc2626" opacity={0.75} r={3.5} />
         </RechartsScatterChart>
       </ResponsiveContainer>
     </div>
   );
 };
+

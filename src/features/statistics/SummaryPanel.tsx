@@ -1,20 +1,44 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import type { SummaryStatistics, SensitivityRank } from '../../types';
-import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info } from 'lucide-react';
+import type { SummaryStatistics, SensitivityRank, IterationResult, SimulationParameters } from '../../types';
+import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import { calculateExceedanceRangeStats } from '../../simulation/toxicokinetics';
+import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info, Scale, ChevronRight } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
+
 
 interface SummaryPanelProps {
   summaryStats: SummaryStatistics | null;
   sensitivityRanks: SensitivityRank[];
   samplingMethod: string;
+  compoundId?: string;
+  results?: IterationResult[] | null;
+  parameters?: SimulationParameters;
+  onOpenExceedanceAnalyzer?: () => void;
 }
+
 
 export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   summaryStats,
   sensitivityRanks,
   samplingMethod,
+  compoundId = 'pfoa',
+  results,
+  parameters,
+  onOpenExceedanceAnalyzer,
 }) => {
+  const activeCompound = useMemo(() => {
+    return PFAS_COMPOUNDS.find((c) => c.id === compoundId) || PFAS_COMPOUNDS[0];
+  }, [compoundId]);
+
+  const exceedanceStats = useMemo(() => {
+    if (!results || results.length === 0 || !parameters) return null;
+    const pBw = parameters.bodyWeight.distribution;
+    const meanBW = pBw.type === 'fixed' ? pBw.value : (pBw.type === 'normal' || pBw.type === 'lognormal') ? pBw.mean : 55;
+    const pBio = parameters.bioavailability.distribution;
+    const meanBio = pBio.type === 'fixed' ? pBio.value : (pBio.type === 'normal' || pBio.type === 'lognormal') ? pBio.mean : 0.9;
+    return calculateExceedanceRangeStats(results, activeCompound, meanBW, meanBio);
+  }, [results, activeCompound, parameters]);
 
   if (!summaryStats) {
     return (
@@ -94,6 +118,67 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           </span>
         </div>
       </div>
+
+      {/* Critical Exceedance Range Card */}
+      {exceedanceStats && (
+        <div className="card-panel p-4 rounded-xl space-y-2.5">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div className="flex items-center gap-1.5">
+              <Scale className="w-4 h-4 text-slate-700" />
+              <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                Exceedance Range (HQ &gt; 1.0)
+              </span>
+            </div>
+            {onOpenExceedanceAnalyzer && (
+              <button
+                onClick={onOpenExceedanceAnalyzer}
+                className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
+              >
+                <span>Analyzer</span>
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          <div className="space-y-1.5 text-[11px]">
+            <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+              <span className="text-slate-600">Critical Intake Cutoff:</span>
+              <span className="text-red-700 font-bold font-mono">
+                &gt; {exceedanceStats.thresholds.criticalDailyIntake.toFixed(5)} µg/d
+              </span>
+            </div>
+
+            {exceedanceStats.exceedanceCount > 0 ? (
+              <>
+                <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+                  <span className="text-slate-600">Exceeding Intake Span:</span>
+                  <span className="text-slate-900 font-bold font-mono">
+                    [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} – {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
+                  </span>
+                </div>
+                <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+                  <span className="text-slate-600">Exceeding Body Burden:</span>
+                  <span className="text-slate-900 font-bold font-mono">
+                    [{exceedanceStats.exceedingPeakBodyBurden.min.toFixed(2)} – {exceedanceStats.exceedingPeakBodyBurden.max.toFixed(2)}] µg
+                  </span>
+                </div>
+                <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+                  <span className="text-slate-600">Exceeding Serum <MathView math="C_{ss}" />:</span>
+                  <span className="text-slate-900 font-bold font-mono">
+                    [{exceedanceStats.exceedingSerumCss.min.toFixed(4)} – {exceedanceStats.exceedingSerumCss.max.toFixed(4)}] µg/L
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="text-emerald-700 text-[10px] p-1.5 bg-emerald-50 rounded text-center font-sans">
+                No simulated iterations exceeded the safety benchmark.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+
 
       {/* Quantiles Risk Table */}
       <div className="card-panel p-4 rounded-xl space-y-3">

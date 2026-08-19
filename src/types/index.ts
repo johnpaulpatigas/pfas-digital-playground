@@ -145,6 +145,42 @@ export interface ComparisonResult {
   mcLhsConvergence?: Array<{ iteration: number; runningMean: number }>;
 }
 
+// Analytical Critical Exceedance Thresholds
+export interface CriticalThresholds {
+  criticalDailyIntake: number;        // ug/day (intake where HQ = 1.0 for given body weight)
+  criticalDailyDosePerKg: number;     // ug/kg/day (= compound RfD)
+  criticalSerumConcentration: number; // ug/L (Css where HQ = 1.0)
+  criticalBodyBurden: number;         // ug (Steady-state peak body burden where HQ = 1.0)
+  epaMCLConcentration: number;        // ug/L (MCL in ug/L)
+}
+
+// Empirical Cohort Exceedance Range Breakdown
+export interface ExceedanceRangeStats {
+  totalCount: number;
+  exceedanceCount: number;
+  exceedancePercent: number;
+  safeCount: number;
+  safePercent: number;
+
+  // Exceedance Cohort (HQ > 1.0) Ranges
+  exceedingDailyIntake: { min: number; median: number; max: number; p5: number; p95: number };
+  exceedingSerumCss: { min: number; median: number; max: number; p5: number; p95: number };
+  exceedingPeakBodyBurden: { min: number; median: number; max: number; p5: number; p95: number };
+  exceedingBodyWeight: { min: number; median: number; max: number };
+  exceedingHalfLife: { min: number; median: number; max: number };
+
+  // Safe Cohort (HQ <= 1.0) Ranges
+  safeDailyIntake: { min: number; median: number; max: number };
+  safeSerumCss: { min: number; median: number; max: number };
+  safePeakBodyBurden: { min: number; median: number; max: number };
+  safeBodyWeight: { min: number; median: number; max: number };
+  safeHalfLife: { min: number; median: number; max: number };
+
+  // Instant Analytical Thresholds
+  thresholds: CriticalThresholds;
+}
+
+
 // Preset Scenario Profile
 export interface DemographicScenario {
   id: string;
@@ -153,3 +189,4 @@ export interface DemographicScenario {
   targetGroup: string;
   parameters: SimulationParameters;
 }
+
