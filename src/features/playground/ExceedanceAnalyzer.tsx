@@ -112,16 +112,27 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
       return { chartData: [], domainMin: 0, domainMax: 1 };
     }
 
-    const values = results.map((r) =>
+    const rawValues = results.map((r) =>
       metricView === 'bodyBurden' ? r.peakBodyBurden : r.steadyStateConcentration
     );
 
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const binCount = 40;
-    const binWidth = (max - min) / binCount || 0.001;
+    const values = rawValues.filter((v) => typeof v === 'number' && Number.isFinite(v));
+    if (values.length === 0) {
+      return { chartData: [], domainMin: 0, domainMax: 1 };
+    }
 
-    const bins = new Array(binCount).fill(0).map((_, i) => {
+    let min = values[0];
+    let max = values[0];
+    for (let i = 1; i < values.length; i++) {
+      if (values[i] < min) min = values[i];
+      if (values[i] > max) max = values[i];
+    }
+
+    const binCount = 40;
+    const span = max - min;
+    const binWidth = span > 1e-9 ? span / binCount : (min > 0 ? min * 0.05 : 0.01);
+
+    const bins = Array.from({ length: binCount }, (_, i) => {
       const mid = min + (i + 0.5) * binWidth;
       return {
         binMid: parseFloat(mid.toFixed(4)),
@@ -132,24 +143,26 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
 
     values.forEach((v) => {
       let idx = Math.floor((v - min) / binWidth);
+      if (Number.isNaN(idx) || idx < 0) idx = 0;
       if (idx >= binCount) idx = binCount - 1;
-      if (idx < 0) idx = 0;
-      if (v >= activeThreshold) {
-        bins[idx].exceedCount++;
-      } else {
-        bins[idx].safeCount++;
+      if (bins[idx]) {
+        if (v >= activeThreshold) {
+          bins[idx].exceedCount++;
+        } else {
+          bins[idx].safeCount++;
+        }
       }
     });
 
     const total = values.length;
     const data = bins.map((b) => ({
       value: b.binMid,
-      safeFrequency: parseFloat(((b.safeCount / total) * 100).toFixed(2)),
-      exceedFrequency: parseFloat(((b.exceedCount / total) * 100).toFixed(2)),
+      safeFrequency: total > 0 ? parseFloat(((b.safeCount / total) * 100).toFixed(2)) : 0,
+      exceedFrequency: total > 0 ? parseFloat(((b.exceedCount / total) * 100).toFixed(2)) : 0,
     }));
 
-    const dMin = Math.max(0, Math.min(min, activeThreshold * 0.9));
-    const dMax = Math.max(max, activeThreshold * 1.1);
+    const dMin = Math.max(0, Math.min(min, Number.isFinite(activeThreshold) ? activeThreshold * 0.9 : min));
+    const dMax = Math.max(max, Number.isFinite(activeThreshold) ? activeThreshold * 1.1 : max);
 
     return { chartData: data, domainMin: dMin, domainMax: dMax };
   }, [results, metricView, activeThreshold]);
