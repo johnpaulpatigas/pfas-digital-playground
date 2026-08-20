@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MathView } from '../../components/ui/MathView';
 import { Button } from '../../components/ui/Button';
 import { useSimulationStore } from '../../stores/useSimulationStore';
@@ -10,6 +11,7 @@ import {
   Sliders,
   Table as TableIcon,
   Sparkles,
+  ArrowRight,
 } from 'lucide-react';
 
 interface ParameterGuideModalProps {
@@ -429,9 +431,24 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-600">
-          <span>Need deeper toxicological background? Check out the full guide.</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-600">
+          <div className="flex items-center gap-1.5">
+            <span>Need deeper toxicological background?</span>
+            <Link
+              to="/guide"
+              onClick={onClose}
+              className="text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-2 flex items-center gap-0.5"
+            >
+              <span>Explore the full Scientific Guide</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
           <div className="flex items-center gap-2">
+            <Link to="/docs" onClick={onClose}>
+              <Button variant="secondary" size="sm">
+                Mathematical Docs
+              </Button>
+            </Link>
             <Button variant="primary" size="sm" onClick={onClose}>
               Close Guide
             </Button>
