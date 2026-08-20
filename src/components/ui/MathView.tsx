@@ -16,6 +16,7 @@ export const MathView: React.FC<MathViewProps> = ({ math, block = false, classNa
         katex.render(math, containerRef.current, {
           displayMode: block,
           throwOnError: false,
+          output: 'html',
         });
       } catch {
         if (containerRef.current) {
