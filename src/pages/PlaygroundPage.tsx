@@ -7,6 +7,7 @@ import { ParameterSidebar } from '../features/playground/ParameterSidebar';
 import { SummaryPanel } from '../features/statistics/SummaryPanel';
 import { SimulationConsole } from '../features/playground/SimulationConsole';
 import { ExceedanceAnalyzer } from '../features/playground/ExceedanceAnalyzer';
+import { ParameterGuideModal } from '../features/playground/ParameterGuideModal';
 import { HistogramChart } from '../features/charts/HistogramChart';
 import { CDFChart } from '../features/charts/CDFChart';
 import { TimeCourseChart } from '../features/charts/TimeCourseChart';
@@ -28,6 +29,7 @@ import {
   Table as TableIcon,
   GraduationCap,
   Zap,
+  BookOpen,
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
@@ -47,6 +49,7 @@ export const PlaygroundPage: React.FC = () => {
     'thresholds' | 'histogram' | 'cdf' | 'timecourse' | 'scatter' | 'tornado' | 'convergence' | 'table'
   >('thresholds');
 
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [tableSearch, setTableSearch] = useState('');
   const [tableFilter, setTableFilter] = useState<'all' | 'exceeding' | 'safe'>('all');
   const [tablePage, setTablePage] = useState(1);
@@ -109,6 +112,15 @@ export const PlaygroundPage: React.FC = () => {
 
         {/* Quick Actions & Export Controls */}
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsGuideModalOpen(true)}
+            icon={<BookOpen className="w-3.5 h-3.5 text-indigo-600" />}
+          >
+            Parameter &amp; Input Guide
+          </Button>
+
           <Link to="/guide">
             <Button
               variant="secondary"
@@ -145,7 +157,10 @@ export const PlaygroundPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Parameter Sidebar */}
         <div className="lg:col-span-4 xl:col-span-3">
-          <ParameterSidebar onRunSimulation={executeSimulation} />
+          <ParameterSidebar
+            onRunSimulation={executeSimulation}
+            onOpenGuide={() => setIsGuideModalOpen(true)}
+          />
         </div>
 
         {/* Center Column: Interactive Scientific Charts Suite */}
@@ -356,6 +371,12 @@ export const PlaygroundPage: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Parameter Input & Usage Reference Guide Modal */}
+      <ParameterGuideModal
+        isOpen={isGuideModalOpen}
+        onClose={() => setIsGuideModalOpen(false)}
+      />
     </div>
   );
 };

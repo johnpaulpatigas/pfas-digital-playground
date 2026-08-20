@@ -8,14 +8,15 @@ import { DistributionSelector } from './DistributionSelector';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { Button } from '../../components/ui/Button';
 import type { DistributionType, DistributionParams, SimulationParameters, ParameterCriticalThreshold } from '../../types';
-import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge, Info } from 'lucide-react';
+import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge, Info, BookOpen } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
 interface ParameterSidebarProps {
   onRunSimulation: () => void;
+  onOpenGuide?: () => void;
 }
 
-export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulation }) => {
+export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulation, onOpenGuide }) => {
   const {
     parameters,
     samplingConfig,
@@ -244,7 +245,19 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           <span className="font-bold text-slate-700 uppercase font-mono tracking-wider text-[11px]">
             Physiological &amp; Exposure Inputs
           </span>
-          <span className="text-slate-500 font-mono text-[10px]">7 Parameters</span>
+          {onOpenGuide ? (
+            <button
+              type="button"
+              onClick={onOpenGuide}
+              className="text-[11px] font-sans font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer"
+              title="Open Parameter & Range Guide"
+            >
+              <span>Range Guide</span>
+              <BookOpen className="w-3 h-3" />
+            </button>
+          ) : (
+            <span className="text-slate-500 font-mono text-[10px]">7 Parameters</span>
+          )}
         </div>
 
         {parameterKeys.map((key) => {

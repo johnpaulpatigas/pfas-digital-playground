@@ -17,9 +17,11 @@ import {
 } from 'lucide-react';
 import { MathView } from '../components/ui/MathView';
 import { Button } from '../components/ui/Button';
+import { PARAMETER_REFERENCES } from '../features/playground/ParameterGuideModal';
+import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 
 export const ScientificGuidePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'risk' | 'sensitivity' | 'scenario'>('risk');
+  const [activeTab, setActiveTab] = useState<'risk' | 'sensitivity' | 'scenario' | 'parameters'>('risk');
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
@@ -47,12 +49,12 @@ export const ScientificGuidePage: React.FC = () => {
             Scientific Guide: Risk, Sensitivity &amp; Scenario Analysis
           </h1>
           <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl font-sans">
-            A comprehensive reference on the toxicological theory, mathematical formulation, and epidemiological applications of probabilistic PFAS exposure modeling in Filipino female cohorts.
+            A comprehensive reference on the toxicological theory, mathematical formulation, physiological parameter ranges, and epidemiological applications of probabilistic PFAS exposure modeling.
           </p>
         </div>
 
         {/* Quick Topics Pills */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
           <button
             onClick={() => setActiveTab('risk')}
             className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
@@ -101,6 +103,23 @@ export const ScientificGuidePage: React.FC = () => {
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
               Baseline female cohorts vs. gestational hemodilution &amp; transplacental kinetics.
+            </p>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('parameters')}
+            className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+              activeTab === 'parameters'
+                ? 'bg-indigo-50/80 border-indigo-300 ring-2 ring-indigo-500/20'
+                : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <div className="flex items-center gap-2 text-indigo-700 font-bold font-heading text-sm">
+              <Scale className="w-4 h-4" />
+              <span>Parameter Ranges</span>
+            </div>
+            <p className="text-slate-600 text-xs mt-1 font-sans">
+              Min, average, max physiological bounds, distributions &amp; literature sources.
             </p>
           </button>
         </div>
@@ -565,6 +584,106 @@ export const ScientificGuidePage: React.FC = () => {
                       Use the <em>MC vs LHS Compare</em> page to benchmark how Latin Hypercube Sampling achieves lower variance with fewer iterations across these cohorts.
                     </p>
                   </div>
+                </div>
+              </div>
+            </section>
+          </motion.div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: PARAMETER RANGES & PLAYGROUND USAGE GUIDE */}
+        {/* ========================================================================= */}
+        {activeTab === 'parameters' && (
+          <motion.div
+            key="parameters-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <section className="card-panel p-6 sm:p-8 rounded-3xl space-y-6 bg-white border border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Scale className="w-5 h-5 text-indigo-600" />
+                    <h2 className="text-xl font-bold text-slate-900 font-heading">
+                      4. Physiological Parameter Reference &amp; Empirical Ranges
+                    </h2>
+                  </div>
+                  <p className="text-slate-600 text-xs sm:text-sm font-sans">
+                    Recommended baseline values, biological bounds, and literature sources for all 7 simulation inputs.
+                  </p>
+                </div>
+              </div>
+
+              {/* Parameter Range Table */}
+              <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-xs">
+                <table className="w-full text-left border-collapse text-[11px]">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-mono">
+                      <th className="p-3 font-semibold">Parameter / Symbol</th>
+                      <th className="p-3 font-semibold">Unit</th>
+                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">Minimum Bound</th>
+                      <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">Baseline / Average</th>
+                      <th className="p-3 font-semibold text-rose-800 bg-rose-50/40">Upper / Max Bound</th>
+                      <th className="p-3 font-semibold">Recommended Distribution</th>
+                      <th className="p-3 font-semibold">Literature Source</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-800 font-sans">
+                    {PARAMETER_REFERENCES.map((row) => (
+                      <tr key={row.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="p-3">
+                          <div className="font-bold text-slate-900">{row.name}</div>
+                          <div className="text-[10px] text-slate-500 font-mono">Symbol: <MathView math={row.symbol} /></div>
+                          <p className="text-[10px] text-slate-600 mt-1 max-w-xs leading-relaxed">{row.description}</p>
+                        </td>
+                        <td className="p-3 font-mono font-medium text-slate-600">{row.unit}</td>
+                        <td className="p-3 font-mono text-emerald-700 font-medium bg-emerald-50/20">{row.min}</td>
+                        <td className="p-3 font-mono text-blue-900 font-bold bg-blue-50/30">{row.average}</td>
+                        <td className="p-3 font-mono text-red-700 font-medium bg-rose-50/20">{row.max}</td>
+                        <td className="p-3 font-mono text-slate-700 text-[10px]">{row.recommendedDist}</td>
+                        <td className="p-3 text-slate-500 text-[10px] leading-relaxed max-w-xs">{row.source}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Chemical Benchmarks */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 font-sans text-xs">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-slate-900 font-heading text-sm">
+                    Target PFAS Compounds &amp; Regulatory Benchmark Table
+                  </h3>
+                  <span className="text-[10px] font-mono text-slate-500">US EPA NPDWR (2024) Standards</span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-slate-600 bg-white font-mono">
+                        <th className="p-2.5 font-semibold">Compound</th>
+                        <th className="p-2.5 font-semibold">Biological Half-Life (<MathView math="T_{1/2}" />)</th>
+                        <th className="p-2.5 font-semibold">Volume of Distribution (<MathView math="V_d" />)</th>
+                        <th className="p-2.5 font-semibold">EPA MCL (ng/L)</th>
+                        <th className="p-2.5 font-semibold">Reference Dose (<MathView math="\text{RfD}" />)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {PFAS_COMPOUNDS.map((c) => (
+                        <tr key={c.id} className="hover:bg-slate-100/50">
+                          <td className="p-2.5 font-medium text-slate-900">
+                            {c.name} <span className="text-slate-500 font-mono text-[10px]">(CAS {c.casNumber})</span>
+                          </td>
+                          <td className="p-2.5 font-mono">{c.halfLifeYears} years</td>
+                          <td className="p-2.5 font-mono">{c.volumeOfDistribution} L/kg</td>
+                          <td className="p-2.5 font-mono font-bold text-blue-700">{c.epaMCL} ng/L</td>
+                          <td className="p-2.5 font-mono text-slate-700">{c.rfdDose} µg/kg/day</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </section>
