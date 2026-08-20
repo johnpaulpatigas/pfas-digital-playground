@@ -3,6 +3,7 @@ import {
   calculateToxicokinetics,
   calculateTimeCourseTrajectory,
   calculateCriticalThresholds,
+  calculateDetailedCriticalAnalysis,
   calculateExceedanceRangeStats,
 } from '../toxicokinetics';
 import { PFAS_COMPOUNDS } from '../pfasCompounds';
@@ -137,5 +138,41 @@ describe('Toxicokinetics Engine', () => {
     expect(stats.exceedingSerumCss.min).toBe(0.5);
     expect(stats.exceedingSerumCss.max).toBe(1.2);
   });
+
+  it('calculateDetailedCriticalAnalysis accurately evaluates all 6 critical parameters and detects body burden exceedance', () => {
+    const pfoa = PFAS_COMPOUNDS.find((c) => c.id === 'pfoa')!;
+    
+    // Scenario 1: Safe baseline below critical thresholds
+    const safeParams = {
+      dailyIntake: { id: 'dailyIntake', name: 'Daily Intake', unit: 'µg/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.00005 } },
+      bodyWeight: { id: 'bodyWeight', name: 'Body Weight', unit: 'kg', description: '', scientificContext: '', distribution: { type: 'fixed', value: 55.4 } },
+      age: { id: 'age', name: 'Age', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 30 } },
+      waterConsumption: { id: 'waterConsumption', name: 'Water', unit: 'L/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 2.0 } },
+      bioavailability: { id: 'bioavailability', name: 'Bioavailability', unit: 'fraction', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.95 } },
+      eliminationHalfLife: { id: 'eliminationHalfLife', name: 'Half-Life', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 3.8 } },
+      exposureDuration: { id: 'exposureDuration', name: 'Duration', unit: 'years', description: '', scientificContext: '', distribution: { type: 'uniform', min: 25, max: 30 } },
+    } as any;
+
+    const safeAnalysis = calculateDetailedCriticalAnalysis(pfoa, safeParams);
+
+    expect(safeAnalysis.parameterThresholds.length).toBe(6);
+    expect(safeAnalysis.isBurdenExceeded).toBe(false);
+    expect(safeAnalysis.hazardQuotient).toBeLessThan(1.0);
+    expect(safeAnalysis.steadyStateFractionAtExposureDuration).toBeGreaterThan(99.0); // 25-30 yrs achieves >99%
+    expect(safeAnalysis.baselineBodyBurden).toBeLessThanOrEqual(safeAnalysis.criticalBodyBurden);
+
+    // Scenario 2: Exceeding critical threshold (e.g. Daily intake = 0.09 ug/d > RfD limit for 55.4kg = 0.0831 ug/d)
+    const exceedParams = {
+      ...safeParams,
+      dailyIntake: { ...safeParams.dailyIntake, distribution: { type: 'fixed', value: 0.09 } },
+    };
+
+    const exceedAnalysis = calculateDetailedCriticalAnalysis(pfoa, exceedParams);
+    expect(exceedAnalysis.isBurdenExceeded).toBe(true);
+    expect(exceedAnalysis.hazardQuotient).toBeGreaterThan(1.0);
+    expect(exceedAnalysis.burdenExceedanceRatio).toBeGreaterThan(1.0);
+    expect(exceedAnalysis.parameterThresholds.find((p: any) => p.id === 'dailyIntake')?.isExceeded).toBe(true);
+  });
 });
+
 

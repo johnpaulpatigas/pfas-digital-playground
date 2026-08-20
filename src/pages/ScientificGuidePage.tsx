@@ -13,6 +13,7 @@ import {
   Sparkles,
   Activity,
   Layers,
+  Scale,
 } from 'lucide-react';
 import { MathView } from '../components/ui/MathView';
 import { Button } from '../components/ui/Button';
@@ -202,6 +203,55 @@ export const ScientificGuidePage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Section on 6 Critical Parameter Thresholds & 25-30 yr Chronic Body Burden */}
+              <div className="p-6 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-4 font-sans text-xs">
+                <div className="flex items-center gap-2 text-purple-950 font-bold text-sm font-heading">
+                  <Scale className="w-4 h-4 text-purple-700" />
+                  <span>Analytical Critical Parameter Thresholds &amp; Chronic 25–30 Year Equilibrium</span>
+                </div>
+                <p className="text-slate-700 leading-relaxed">
+                  When evaluating toxicological safety, each parameter in the 1-compartment model possesses a critical boundary beyond which the predicted cumulative internal body burden (<MathView math="B(t)" />) automatically exceeds the Reference Dose (<MathView math="\text{RfD}" />) baseline:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-[11px]">
+                  <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
+                    <strong className="text-purple-950 block">1. Estimated PFAS Intake (<MathView math="I" />)</strong>
+                    <div className="text-purple-900 font-bold"><MathView math="I_{\text{crit}} = BW \times \text{RfD}" /></div>
+                    <p className="text-slate-600 text-[10px] font-sans">Intake threshold where daily dose per kg exhausts safe toxicological tolerance.</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
+                    <strong className="text-purple-950 block">2. Body Weight (<MathView math="BW" />)</strong>
+                    <div className="text-purple-900 font-bold"><MathView math="BW_{\text{crit}} = \frac{I}{\text{RfD}}" /></div>
+                    <p className="text-slate-600 text-[10px] font-sans">Lower body mass concentrates analyte per kg, causing exceedance below this cutoff.</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
+                    <strong className="text-purple-950 block">3. Drinking Water (<MathView math="W" />)</strong>
+                    <div className="text-purple-900 font-bold"><MathView math="W_{\text{crit}} = \frac{BW \times \text{RfD}}{\text{EPA MCL}}" /></div>
+                    <p className="text-slate-600 text-[10px] font-sans">Hydration volume where water at EPA MCL (4 ng/L) alone reaches 100% of RfD allowance.</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
+                    <strong className="text-purple-950 block">4. Bioavailability (<MathView math="f_{abs}" />)</strong>
+                    <div className="text-purple-900 font-bold"><MathView math="f_{\text{abs, crit}} = \frac{BW \times \text{RfD}}{I}" /></div>
+                    <p className="text-slate-600 text-[10px] font-sans">GI absorption fraction required for absorbed mass to cross safe threshold.</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
+                    <strong className="text-purple-950 block">5. Half-Life (<MathView math="T_{1/2}" />)</strong>
+                    <div className="text-purple-900 font-bold"><MathView math="T_{1/2, \text{crit}} = \frac{BW \times \text{RfD}}{I} \times T_{1/2}" /></div>
+                    <p className="text-slate-600 text-[10px] font-sans">Prolonged retention slows excretion, elevating steady-state accumulation.</p>
+                  </div>
+
+                  <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
+                    <strong className="text-purple-950 block">6. Exposure Duration (<MathView math="t" />)</strong>
+                    <div className="text-purple-900 font-bold">25 – 30 Years (Equilibrium)</div>
+                    <p className="text-slate-600 text-[10px] font-sans">Corresponds to 6.5–8.0 half-lives, achieving &gt;99% of theoretical steady-state body burden.</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Regulatory Benchmarks & Health Effects */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
                 <div className="space-y-3">
@@ -230,13 +280,13 @@ export const ScientificGuidePage: React.FC = () => {
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
-                        <strong>Examine the CDF Tab:</strong> The Cumulative Distribution Function (CDF) chart displays a vertical reference line indicating where the population exceeds <MathView math="HQ = 1.0" />.
+                        <strong>Examine the Exceedance Analyzer Tab:</strong> Displays live threshold comparison cards for all 6 parameters and flags whether body burden exceeds the critical baseline.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
-                        <strong>Monitor the 95th Percentile (<MathView math="P_{95}" />):</strong> In many scenarios, the median (<MathView math="P_{50}" />) may show safe levels while the upper 5% of the population faces severe exceedances.
+                        <strong>Test 25–30 Year Exposure:</strong> Loading the <em>Critical Baseline Threshold</em> scenario preset configures the 25–30 year exposure range to evaluate steady-state equilibrium capacity.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">

@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import { calculateDetailedCriticalAnalysis } from '../../simulation/toxicokinetics';
 import { DistributionSelector } from './DistributionSelector';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { Button } from '../../components/ui/Button';
-import type { DistributionType, DistributionParams, SimulationParameters } from '../../types';
+import type { DistributionType, DistributionParams, SimulationParameters, ParameterCriticalThreshold } from '../../types';
 import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge, Info } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
@@ -39,6 +40,10 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
   ];
 
   const activeCompound = PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
+
+  const criticalAnalysis = useMemo(() => {
+    return calculateDetailedCriticalAnalysis(activeCompound, parameters);
+  }, [activeCompound, parameters]);
 
   const getMethodName = () => {
     switch (samplingConfig.method) {
@@ -244,10 +249,14 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
         {parameterKeys.map((key) => {
           const param = parameters[key];
+          const thresholdInfo = criticalAnalysis.parameterThresholds.find((p: ParameterCriticalThreshold) => p.id === key);
+
           return (
             <div
               key={key}
-              className="card-panel p-3 rounded-xl space-y-2 hover:border-slate-300 transition-colors"
+              className={`card-panel p-3 rounded-xl space-y-2 hover:border-slate-300 transition-colors ${
+                thresholdInfo && thresholdInfo.isExceeded ? 'border-red-200/80' : ''
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -258,6 +267,26 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
                 </div>
                 <Tooltip content={param.scientificContext} />
               </div>
+
+              {/* Critical Threshold Reference Indicator */}
+              {thresholdInfo && (
+                <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
+                  <span className="text-slate-500">
+                    Critical cutoff: <span className="font-semibold text-slate-700">{thresholdInfo.criticalRangeDisplay}</span>
+                  </span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded text-[9px] font-semibold border ${
+                      thresholdInfo.isExceeded
+                        ? 'bg-red-50 text-red-700 border-red-200'
+                        : thresholdInfo.status === 'borderline'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}
+                  >
+                    {thresholdInfo.isExceeded ? 'Exceeds cutoff' : thresholdInfo.status === 'borderline' ? 'Elevated' : 'Within cutoff'}
+                  </span>
+                </div>
+              )}
 
               <p className="text-[11px] text-slate-500 leading-relaxed">{param.description}</p>
 
@@ -274,3 +303,4 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
     </div>
   );
 };
+

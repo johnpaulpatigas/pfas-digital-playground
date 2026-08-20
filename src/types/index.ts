@@ -151,7 +151,46 @@ export interface CriticalThresholds {
   criticalDailyDosePerKg: number;     // ug/kg/day (= compound RfD)
   criticalSerumConcentration: number; // ug/L (Css where HQ = 1.0)
   criticalBodyBurden: number;         // ug (Steady-state peak body burden where HQ = 1.0)
+  criticalWaterConsumption: number;   // L/day (Water consumption to reach RfD at EPA MCL)
+  criticalBioavailability: number;    // fraction (0 - 1)
+  criticalHalfLife: number;           // years
+  criticalExposureDurationMin: number; // 25 years (chronic steady-state plateau)
+  criticalExposureDurationMax: number; // 30 years (chronic steady-state plateau)
   epaMCLConcentration: number;        // ug/L (MCL in ug/L)
+}
+
+// Parameter-Level Critical Threshold Breakdown
+export interface ParameterCriticalThreshold {
+  id: keyof SimulationParameters;
+  name: string;
+  unit: string;
+  criticalValue: number;
+  criticalRangeDisplay: string;
+  currentValue: number;
+  currentRangeDisplay: string;
+  isExceeded: boolean;
+  status: 'safe' | 'borderline' | 'exceeded';
+  direction: 'greater_than' | 'less_than' | 'range';
+  explanation: string;
+  formula: string;
+}
+
+// Detailed Critical Analysis across all 6 key parameters
+export interface DetailedCriticalAnalysis {
+  thresholds: CriticalThresholds;
+  parameterThresholds: ParameterCriticalThreshold[];
+  baselineBodyBurden: number;            // ug (at current duration)
+  steadyStateBodyBurden: number;         // ug (at steady-state)
+  criticalBodyBurden: number;            // ug (critical threshold body burden at current duration)
+  criticalSteadyStateBodyBurden: number; // ug (critical threshold body burden at steady-state)
+  currentSerumCss: number;               // ug/L
+  criticalSerumCss: number;              // ug/L
+  hazardQuotient: number;                // HQ = Dose / RfD
+  burdenExceedanceRatio: number;         // currentBodyBurden / criticalBodyBurden
+  isBurdenExceeded: boolean;
+  steadyStateFractionAtExposureDuration: number; // % (e.g. 99.2% for 25-30 years)
+  timeToExceedanceYears: number | null; // years required to cross critical threshold
+  overallStatus: 'safe' | 'borderline' | 'exceeded';
 }
 
 // Empirical Cohort Exceedance Range Breakdown
@@ -178,6 +217,7 @@ export interface ExceedanceRangeStats {
 
   // Instant Analytical Thresholds
   thresholds: CriticalThresholds;
+  detailedAnalysis?: DetailedCriticalAnalysis;
 }
 
 

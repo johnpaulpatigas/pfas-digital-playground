@@ -37,7 +37,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
     const meanBW = pBw.type === 'fixed' ? pBw.value : (pBw.type === 'normal' || pBw.type === 'lognormal') ? pBw.mean : 55;
     const pBio = parameters.bioavailability.distribution;
     const meanBio = pBio.type === 'fixed' ? pBio.value : (pBio.type === 'normal' || pBio.type === 'lognormal') ? pBio.mean : 0.9;
-    return calculateExceedanceRangeStats(results, activeCompound, meanBW, meanBio);
+    const pHalfLife = parameters.eliminationHalfLife.distribution;
+    const meanHalfLife = pHalfLife.type === 'fixed' ? pHalfLife.value : (pHalfLife.type === 'normal' || pHalfLife.type === 'lognormal') ? pHalfLife.mean : activeCompound.halfLifeYears;
+    return calculateExceedanceRangeStats(results, activeCompound, meanBW, meanBio, meanHalfLife, parameters);
   }, [results, activeCompound, parameters]);
 
   if (!summaryStats) {
@@ -126,7 +128,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <div className="flex items-center gap-1.5">
               <Scale className="w-4 h-4 text-slate-700" />
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                Exceedance Range (HQ &gt; 1.0)
+                Critical Burden &amp; Exceedance
               </span>
             </div>
             {onOpenExceedanceAnalyzer && (
@@ -141,6 +143,22 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           </div>
 
           <div className="space-y-1.5 text-[11px]">
+            {exceedanceStats.detailedAnalysis && (
+              <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+                <span className="text-slate-600">Avg Body Burden (<MathView math="B(t)" />):</span>
+                <span className={`font-bold font-mono ${exceedanceStats.detailedAnalysis.isBurdenExceeded ? 'text-red-700' : 'text-slate-900'}`}>
+                  {exceedanceStats.detailedAnalysis.baselineBodyBurden.toFixed(3)} µg
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+              <span className="text-slate-600">Critical Body Burden Limit:</span>
+              <span className="text-slate-900 font-bold font-mono">
+                {exceedanceStats.thresholds.criticalBodyBurden.toFixed(3)} µg
+              </span>
+            </div>
+
             <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
               <span className="text-slate-600">Critical Intake Cutoff:</span>
               <span className="text-red-700 font-bold font-mono">
@@ -154,12 +172,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                   <span className="text-slate-600">Exceeding Intake Span:</span>
                   <span className="text-slate-900 font-bold font-mono">
                     [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} – {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
-                  </span>
-                </div>
-                <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
-                  <span className="text-slate-600">Exceeding Body Burden:</span>
-                  <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingPeakBodyBurden.min.toFixed(2)} – {exceedanceStats.exceedingPeakBodyBurden.max.toFixed(2)}] µg
                   </span>
                 </div>
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">

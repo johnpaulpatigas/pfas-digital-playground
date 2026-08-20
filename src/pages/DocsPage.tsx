@@ -164,18 +164,18 @@ export const DocsPage: React.FC = () => {
       <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-5">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <ShieldAlert className="w-5 h-5 text-red-600" />
-          <h2 className="text-xl font-bold text-slate-900 font-heading">4. Probabilistic Human Health Risk Assessment</h2>
+          <h2 className="text-xl font-bold text-slate-900 font-heading">4. Probabilistic Human Health Risk Assessment &amp; Critical Thresholds</h2>
         </div>
 
         <p className="text-slate-600 text-sm leading-relaxed font-sans">
-          To evaluate toxicological risk, predicted steady-state blood serum concentrations (<MathView math="C_{ss}" />) are compared against health-protective drinking water Maximum Contaminant Levels (MCL) and reference doses (RfD).
+          To evaluate toxicological risk, predicted steady-state blood serum concentrations (<MathView math="C_{ss}" />) and dynamic body burdens (<MathView math="B(t)" />) are compared against health-protective drinking water Maximum Contaminant Levels (MCL) and Reference Doses (RfD).
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-mono text-xs">
           <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5">
             <h3 className="text-red-900 font-bold text-sm font-heading">Hazard Quotient (HQ) Formula</h3>
             <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
-              <MathView math="HQ = \frac{C_{ss}}{\text{Guideline MCL}}" block />
+              <MathView math="HQ = \frac{I / BW}{\text{RfD}}" block />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               An <MathView math="HQ \le 1.0" /> indicates exposures within established toxicological safety thresholds. An <MathView math="HQ > 1.0" /> denotes potential adverse health exceedance.
@@ -183,12 +183,12 @@ export const DocsPage: React.FC = () => {
           </div>
 
           <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5">
-            <h3 className="text-rose-900 font-bold text-sm font-heading">Population Exceedance Probability</h3>
+            <h3 className="text-purple-900 font-bold text-sm font-heading">Critical Baseline Body Burden (<MathView math="B_{\text{crit}}" />)</h3>
             <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
-              <MathView math="P(HQ > 1.0) = \frac{1}{N} \sum_{i=1}^N \mathbb{I}(HQ_i > 1.0) \times 100\%" block />
+              <MathView math="B_{\text{crit}}(t) = \frac{BW \cdot \text{RfD} \cdot f_{\text{abs}}}{k_e} \left(1 - e^{-k_e \cdot t}\right)" block />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-              Quantifies the percentage of the simulated cohort exceeding safe exposure levels, highlighting upper-tail vulnerabilities (<MathView math="P_{95}" />, <MathView math="P_{99}" />).
+              At chronic exposure durations (<MathView math="t = 25 - 30\text{ years}" />), internal retention reaches &gt;99% of steady-state capacity (<MathView math="B_{\text{crit, ss}} = \frac{BW \cdot \text{RfD} \cdot f_{\text{abs}}}{k_e}" />).
             </p>
           </div>
         </div>
