@@ -95,7 +95,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             N = {summaryStats.count.toLocaleString()} iterations
           </span>
           <span className="text-slate-500">
-            95% CI: [{summaryStats.ci95Lower.toFixed(3)} – {summaryStats.ci95Upper.toFixed(3)}]
+            95% CI: [{summaryStats.ci95Lower.toFixed(3)} to {summaryStats.ci95Upper.toFixed(3)}]
           </span>
         </div>
       </div>
@@ -110,11 +110,11 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
               <ShieldCheck className="w-4 h-4 text-blue-600" />
             )}
             <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-              Health Risk Quotient (HQ)
+              Health risk quotient (HQ)
             </span>
             <Link
               to="/guide"
-              title="Read scientific guide on Health Risk Assessment & HQ"
+              title="Read scientific guide on health risk assessment and HQ"
               className="text-slate-400 hover:text-blue-600 transition-colors p-0.5"
             >
               <Info className="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-slate-700">
-          <span>Population Exceeding HQ &gt; 1.0:</span>
+          <span>Population exceeding HQ &gt; 1.0:</span>
           <span className={`font-bold ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
             {summaryStats.riskExceedancePercent.toFixed(1)}%
           </span>
@@ -146,7 +146,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <div className="flex items-center gap-1.5">
               <Scale className="w-4 h-4 text-slate-700" />
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                Critical Burden &amp; Exceedance per PFAS
+                Critical burden and exceedance per PFAS
               </span>
             </div>
             {onOpenExceedanceAnalyzer && (
@@ -189,7 +189,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                         : 'bg-emerald-100 text-emerald-800 border-emerald-200'
                     }`}
                   >
-                    {summary.status === 'exceeded' ? 'Exceeds Limit' : summary.status === 'borderline' ? 'Elevated' : 'Safe'}
+                    {summary.status === 'exceeded' ? 'Exceeds limit' : summary.status === 'borderline' ? 'Elevated' : 'Safe'}
                   </span>
                 </div>
 
@@ -205,7 +205,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                       <span className="text-slate-500 block">Exceeding Serum <MathView math="C_{ss}" />:</span>
                       <span className={`font-semibold font-mono ${summary.exceedingSerumMax > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
                         {summary.exceedingSerumMax > 0
-                          ? `[${summary.exceedingSerumMin.toFixed(4)} – ${summary.exceedingSerumMax.toFixed(4)}] µg/L`
+                          ? `[${summary.exceedingSerumMin.toFixed(4)} to ${summary.exceedingSerumMax.toFixed(4)}] µg/L`
                           : 'None'}
                       </span>
                     </div>
@@ -238,7 +238,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <div className="flex items-center gap-1.5">
               <Scale className="w-4 h-4 text-slate-700" />
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                Critical Burden &amp; Exceedance ({activeCompound.name.split(' ')[0]})
+                Critical burden and exceedance ({activeCompound.name.split(' ')[0]})
               </span>
             </div>
             {onOpenExceedanceAnalyzer && (
@@ -281,13 +281,13 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
                   <span className="text-slate-600">Exceeding Intake Span:</span>
                   <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} – {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
+                    [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} to {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
                   </span>
                 </div>
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
                   <span className="text-slate-600">Exceeding Serum <MathView math="C_{ss}" />:</span>
                   <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingSerumCss.min.toFixed(4)} – {exceedanceStats.exceedingSerumCss.max.toFixed(4)}] µg/L
+                    [{exceedanceStats.exceedingSerumCss.min.toFixed(4)} to {exceedanceStats.exceedingSerumCss.max.toFixed(4)}] µg/L
                   </span>
                 </div>
               </>
@@ -307,7 +307,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <div className="flex items-center gap-1.5">
               <Activity className="w-4 h-4 text-teal-600" />
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                Population Quantiles
+                Population quantiles
               </span>
             </div>
             <span className="text-[10px] text-slate-500">N = {summaryStats.count.toLocaleString()}</span>
@@ -351,7 +351,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2">
             <TrendingUp className="w-4 h-4 text-purple-600" />
             <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-              Variance Metrics
+              Variance metrics
             </span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
@@ -374,12 +374,12 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <div className="flex items-center gap-1.5">
               <Award className="w-4 h-4 text-amber-600" />
               <span className="font-bold text-amber-900 uppercase tracking-wider text-[11px]">
-                Top Exposure Driver
+                Top exposure driver
               </span>
             </div>
             <Link
               to="/guide"
-              title="Read scientific guide on Sensitivity Analysis & Spearman Rank"
+              title="Read scientific guide on sensitivity analysis and Spearman rank"
               className="text-amber-700 hover:text-amber-950 transition-colors p-0.5"
             >
               <Info className="w-3.5 h-3.5" />

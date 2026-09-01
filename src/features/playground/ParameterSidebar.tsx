@@ -179,7 +179,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           >
             {PFAS_COMPOUNDS.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.name} ({c.id.toUpperCase()}) — T½: {c.halfLifeYears}y
+                {c.name} ({c.id.toUpperCase()}), T½: {c.halfLifeYears}y
               </option>
             ))}
           </select>
@@ -193,10 +193,10 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              <span className="font-bold text-slate-800 text-xs">Simulating All 5 PFAS Types</span>
+              <span className="font-bold text-slate-800 text-xs">Simulating all 5 PFAS types</span>
             </div>
             <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-              5k–50k MC+LHS
+              5k to 50k MC+LHS
             </span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
@@ -567,7 +567,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
               <div className="bg-white p-2 rounded-lg border border-slate-200 space-y-0.5">
                 <span className="text-slate-500 text-[10px]">Compound T1/2</span>
                 <p className="font-bold text-slate-900 text-xs">
-                  0.2y &ndash; 8.5y
+                  0.2y to 8.5y
                 </p>
                 <p className="text-[9px] text-slate-400">
                   5 PFAS types evaluated

@@ -101,16 +101,16 @@ export const PlaygroundPage: React.FC = () => {
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-lg sm:text-xl font-bold text-slate-900 font-heading tracking-tight">
-              PFAS Toxicokinetic Simulation Playground
+              PFAS toxicokinetic simulation playground
             </h1>
             <span className="px-2.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-mono font-bold">
-              {isSimpleMode ? '5 PFAS Types Parallel Evaluation' : activeCompound.name}
+              {isSimpleMode ? '5 PFAS types parallel evaluation' : activeCompound.name}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-mono">
             {isSimpleMode
-              ? 'Multi-PFAS MC+LHS Hybrid Simulation • Evaluating PFOA, PFOS, PFHxS, PFNA & GenX'
-              : <>Probabilistic 1-Compartment Modeling • Target: Bioaccumulation Serum (<MathView math="C_{ss}" />)</>}
+              ? 'Multi-PFAS hybrid simulation: evaluating PFOA, PFOS, PFHxS, PFNA, and GenX'
+              : <>Probabilistic 1-compartment modeling: bioaccumulation serum concentration (<MathView math="C_{ss}" />)</>}
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export const PlaygroundPage: React.FC = () => {
             onClick={() => setIsGuideModalOpen(true)}
             icon={<BookOpen className="w-3.5 h-3.5 text-indigo-600" />}
           >
-            Parameter &amp; Input Guide
+            Parameter guide
           </Button>
 
           <Link to="/guide">
@@ -131,7 +131,7 @@ export const PlaygroundPage: React.FC = () => {
               size="sm"
               icon={<GraduationCap className="w-3.5 h-3.5 text-blue-600" />}
             >
-              Scientific Guide
+              Scientific guide
             </Button>
           </Link>
 
@@ -174,14 +174,14 @@ export const PlaygroundPage: React.FC = () => {
             <div className="border-b border-slate-200 pb-3">
               <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap no-scrollbar py-1">
                 {[
-                  { id: 'thresholds', label: 'Exceedance Analyzer', icon: Zap },
-                  { id: 'histogram', label: 'Frequency Histogram', icon: BarChart2 },
+                  { id: 'thresholds', label: 'Exceedance analyzer', icon: Zap },
+                  { id: 'histogram', label: 'Histogram', icon: BarChart2 },
                   { id: 'cdf', label: 'CDF', icon: LineChartIcon },
-                  { id: 'timecourse', label: 'Bioaccumulation C(t)', icon: Clock },
-                  { id: 'scatter', label: 'Scatter', icon: ScatterIcon },
-                  { id: 'tornado', label: 'Sensitivity Tornado', icon: Flame },
+                  { id: 'timecourse', label: 'Time course C(t)', icon: Clock },
+                  { id: 'scatter', label: 'Scatter plot', icon: ScatterIcon },
+                  { id: 'tornado', label: 'Sensitivity rankings', icon: Flame },
                   { id: 'convergence', label: 'Convergence', icon: Activity },
-                  { id: 'table', label: 'Data Matrix', icon: TableIcon },
+                  { id: 'table', label: 'Data table', icon: TableIcon },
                 ].map((tab) => {
 
                   const Icon = tab.icon;
@@ -216,7 +216,7 @@ export const PlaygroundPage: React.FC = () => {
               {isSimulating && (
                 <div className="absolute inset-0 bg-white/90 backdrop-blur-xs z-20 rounded-lg flex items-center justify-center font-mono text-slate-800 gap-2">
                   <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
-                  <span>Computing Toxicokinetic Iterations...</span>
+                  <span>Computing iterations...</span>
                 </div>
               )}
 

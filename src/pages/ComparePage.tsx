@@ -91,17 +91,17 @@ export const ComparePage: React.FC = () => {
       <div className="card-panel p-6 sm:p-8 rounded-2xl space-y-3">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-xs font-mono font-medium">
           <Layers className="w-3.5 h-3.5" />
-          <span>Sampling Efficiency &amp; Variance Benchmarking</span>
+          <span>Sampling efficiency and variance comparison</span>
         </div>
 
         <h1 className="text-2xl sm:text-4xl font-bold text-slate-900 font-heading">
-          Monte Carlo vs Latin Hypercube vs Monte Carlo + LHS
+          Monte Carlo, Latin hypercube, and hybrid sampling comparison
         </h1>
 
         <p className="text-slate-600 text-sm max-w-3xl leading-relaxed">
-          Standard <strong>Monte Carlo (MC)</strong> sampling relies on unstratified pseudo-random draws.
-          <strong> Latin Hypercube Sampling (LHS)</strong> partitions each parameter distribution into <MathView math="N" /> equal strata.
-          The <strong>Monte Carlo + Latin Hypercube (MC + LHS)</strong> hybrid combines pseudo-random stochastic draws with stratified quantile sampling for optimal variance reduction and tail risk precision.
+          <strong>Monte Carlo (MC)</strong> sampling draws random samples directly from parameter distributions.
+          <strong> Latin hypercube sampling (LHS)</strong> divides each distribution into <MathView math="N" /> equal-probability intervals to guarantee even coverage.
+          The <strong>hybrid (MC + LHS)</strong> combines random and stratified draws to evaluate tail percentiles while preserving random spread.
         </p>
 
         {/* Controls */}
@@ -127,7 +127,7 @@ export const ComparePage: React.FC = () => {
             size="md"
             icon={<Play className="w-4 h-4 fill-current" />}
           >
-            Run 3-Way Benchmark
+            Run benchmark comparison
           </Button>
         </div>
       </div>
@@ -251,9 +251,9 @@ export const ComparePage: React.FC = () => {
           <div className="card-panel p-6 rounded-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">Mean Convergence Comparison</h3>
+                <h3 className="text-base font-bold text-slate-900 font-heading">Mean convergence comparison</h3>
                 <p className="text-xs text-slate-500 font-mono">
-                  Comparing stability of running mean across Monte Carlo, Stratified Latin Hypercube, and Monte Carlo + LHS Hybrid
+                  Stability of running mean across Monte Carlo, Latin hypercube, and hybrid sampling
                 </p>
               </div>
             </div>

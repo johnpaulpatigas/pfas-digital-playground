@@ -195,14 +195,14 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-bold text-slate-900 font-heading">
-                Toxicokinetic Exceedance &amp; Critical Threshold Analysis
+                Toxicokinetic exceedance and critical thresholds
               </h2>
               <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-mono font-semibold">
                 {compound.name}
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-sans">
-              Evaluates whether baseline physiological inputs exceed toxicological reference thresholds (<MathView math="\text{RfD}" />, <MathView math="\text{EPA MCL}" />).
+              Evaluates whether physiological inputs lead to internal exposures above reference limits (<MathView math="\text{RfD}" />, <MathView math="\text{EPA MCL}" />).
             </p>
           </div>
         </div>
@@ -233,10 +233,10 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
               <div className="flex items-center gap-2">
                 <span className="font-bold text-xs uppercase tracking-wide font-mono">
                   {isExceeded
-                    ? 'Exceeds Toxicological Reference Threshold'
+                    ? 'Exceeds toxicological reference threshold'
                     : criticalAnalysis.overallStatus === 'borderline'
-                    ? 'Elevated Exposure Level'
-                    : 'Within Toxicological Safety Limit'}
+                    ? 'Elevated exposure level'
+                    : 'Within toxicological safety limit'}
                 </span>
                 <span
                   className={`px-1.5 py-0.2 rounded text-[10px] font-mono font-bold border ${
@@ -257,7 +257,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
           </div>
 
           <div className="text-right sm:border-l sm:border-slate-200 sm:pl-4 self-end sm:self-center font-mono text-[11px] shrink-0">
-            <div className="text-slate-500 text-[10px]">Equilibrium Progress</div>
+            <div className="text-slate-500 text-[10px]">Equilibrium progress</div>
             <div className="font-bold text-slate-900">
               {criticalAnalysis.steadyStateFractionAtExposureDuration}% at {paramMeanDuration.toFixed(1)} yr
             </div>
@@ -305,7 +305,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                 exceedanceStats && exceedanceStats.exceedancePercent > 5 ? 'text-red-700' : 'text-emerald-700'
               }`}
             >
-              {exceedanceStats ? `${exceedanceStats.exceedancePercent.toFixed(1)}%` : '—'}
+              {exceedanceStats ? `${exceedanceStats.exceedancePercent.toFixed(1)}%` : '-'}
             </div>
             <div className="text-[10px] text-slate-500 font-sans">
               {exceedanceStats ? `${exceedanceStats.exceedanceCount} / ${exceedanceStats.totalCount} samples` : 'Run simulation'}
@@ -320,11 +320,11 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
           <div className="flex items-center gap-2">
             <Scale className="w-4 h-4 text-slate-700" />
             <h3 className="font-bold text-slate-900 text-xs font-heading">
-              Analytical Parameter Threshold Matrix
+              Analytical parameter thresholds
             </h3>
           </div>
           <span className="text-[11px] text-slate-500 font-sans">
-            Individual parameter limits calculated using closed-form 1-compartment toxicokinetics
+            Individual parameter limits calculated from 1-compartment toxicokinetics
           </span>
         </div>
 
@@ -366,7 +366,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                             : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }`}
                       >
-                        {param.isExceeded ? 'Exceeds Limit' : param.status === 'borderline' ? 'Elevated' : 'Within Limit'}
+                        {param.isExceeded ? 'Exceeds limit' : param.status === 'borderline' ? 'Elevated' : 'Within limit'}
                       </span>
                     </td>
                   </tr>
@@ -382,10 +382,10 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
           <div>
             <h3 className="font-bold text-slate-900 text-xs font-heading">
-              Population Distribution vs Critical Safety Benchmark
+              Population distribution and critical safety benchmark
             </h3>
             <p className="text-[11px] text-slate-500 font-sans">
-              Area to the right of the reference threshold illustrates the proportion of simulated individuals with <MathView math="HQ > 1.0" />.
+              The shaded area to the right of the threshold marks the proportion of iterations with <MathView math="HQ > 1.0" />.
             </p>
           </div>
 
@@ -500,7 +500,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-slate-700" />
               <h3 className="font-bold text-slate-900 text-xs font-heading">
-                Toxicokinetic Population Stratification
+                Population exposure stratification
               </h3>
             </div>
             <span className="text-[10px] text-slate-500 font-mono">
@@ -527,13 +527,13 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   <td className="p-2.5 font-medium text-slate-600">Daily Intake (µg/day)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
-                      ? `${exceedanceStats.safeDailyIntake.median.toFixed(4)} [${exceedanceStats.safeDailyIntake.min.toFixed(4)} – ${exceedanceStats.safeDailyIntake.max.toFixed(4)}]`
-                      : '—'}
+                      ? `${exceedanceStats.safeDailyIntake.median.toFixed(4)} [${exceedanceStats.safeDailyIntake.min.toFixed(4)} to ${exceedanceStats.safeDailyIntake.max.toFixed(4)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-red-700 font-bold">
                     {exceedanceStats.exceedanceCount > 0
-                      ? `${exceedanceStats.exceedingDailyIntake.median.toFixed(4)} [${exceedanceStats.exceedingDailyIntake.min.toFixed(4)} – ${exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]`
-                      : '—'}
+                      ? `${exceedanceStats.exceedingDailyIntake.median.toFixed(4)} [${exceedanceStats.exceedingDailyIntake.min.toFixed(4)} to ${exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">
                     &gt; {analyticalThresholds.criticalDailyIntake.toFixed(5)} µg/day
@@ -543,13 +543,13 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   <td className="p-2.5 font-medium text-slate-600">Peak Body Burden (µg)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
-                      ? `${exceedanceStats.safePeakBodyBurden.median.toFixed(3)} [${exceedanceStats.safePeakBodyBurden.min.toFixed(3)} – ${exceedanceStats.safePeakBodyBurden.max.toFixed(3)}]`
-                      : '—'}
+                      ? `${exceedanceStats.safePeakBodyBurden.median.toFixed(3)} [${exceedanceStats.safePeakBodyBurden.min.toFixed(3)} to ${exceedanceStats.safePeakBodyBurden.max.toFixed(3)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-red-700 font-bold">
                     {exceedanceStats.exceedanceCount > 0
-                      ? `${exceedanceStats.exceedingPeakBodyBurden.median.toFixed(3)} [${exceedanceStats.exceedingPeakBodyBurden.min.toFixed(3)} – ${exceedanceStats.exceedingPeakBodyBurden.max.toFixed(3)}]`
-                      : '—'}
+                      ? `${exceedanceStats.exceedingPeakBodyBurden.median.toFixed(3)} [${exceedanceStats.exceedingPeakBodyBurden.min.toFixed(3)} to ${exceedanceStats.exceedingPeakBodyBurden.max.toFixed(3)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">
                     &gt; {analyticalThresholds.criticalBodyBurden.toFixed(3)} µg
@@ -559,13 +559,13 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   <td className="p-2.5 font-medium text-slate-600">Steady-State Serum <MathView math="C_{ss}" /> (µg/L)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
-                      ? `${exceedanceStats.safeSerumCss.median.toFixed(4)} [${exceedanceStats.safeSerumCss.min.toFixed(4)} – ${exceedanceStats.safeSerumCss.max.toFixed(4)}]`
-                      : '—'}
+                      ? `${exceedanceStats.safeSerumCss.median.toFixed(4)} [${exceedanceStats.safeSerumCss.min.toFixed(4)} to ${exceedanceStats.safeSerumCss.max.toFixed(4)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-red-700 font-bold">
                     {exceedanceStats.exceedanceCount > 0
-                      ? `${exceedanceStats.exceedingSerumCss.median.toFixed(4)} [${exceedanceStats.exceedingSerumCss.min.toFixed(4)} – ${exceedanceStats.exceedingSerumCss.max.toFixed(4)}]`
-                      : '—'}
+                      ? `${exceedanceStats.exceedingSerumCss.median.toFixed(4)} [${exceedanceStats.exceedingSerumCss.min.toFixed(4)} to ${exceedanceStats.exceedingSerumCss.max.toFixed(4)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">
                     &gt; {analyticalThresholds.criticalSerumConcentration.toFixed(4)} µg/L
@@ -575,13 +575,13 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   <td className="p-2.5 font-medium text-slate-600">Body Weight (kg)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
-                      ? `${exceedanceStats.safeBodyWeight.median.toFixed(1)} [${exceedanceStats.safeBodyWeight.min.toFixed(1)} – ${exceedanceStats.safeBodyWeight.max.toFixed(1)}]`
-                      : '—'}
+                      ? `${exceedanceStats.safeBodyWeight.median.toFixed(1)} [${exceedanceStats.safeBodyWeight.min.toFixed(1)} to ${exceedanceStats.safeBodyWeight.max.toFixed(1)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-red-700 font-bold">
                     {exceedanceStats.exceedanceCount > 0
-                      ? `${exceedanceStats.exceedingBodyWeight.median.toFixed(1)} [${exceedanceStats.exceedingBodyWeight.min.toFixed(1)} – ${exceedanceStats.exceedingBodyWeight.max.toFixed(1)}]`
-                      : '—'}
+                      ? `${exceedanceStats.exceedingBodyWeight.median.toFixed(1)} [${exceedanceStats.exceedingBodyWeight.min.toFixed(1)} to ${exceedanceStats.exceedingBodyWeight.max.toFixed(1)}]`
+                      : '-'}
                   </td>
                   <td className="p-2.5 text-[10px] text-slate-500 font-sans">
                     Dose scales inversely with body mass

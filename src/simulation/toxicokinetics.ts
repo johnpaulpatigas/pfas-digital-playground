@@ -237,7 +237,7 @@ export function extractDistributionCentralValue(distribution: DistributionParams
         mean: (distribution.min + distribution.max) / 2,
         min: distribution.min,
         max: distribution.max,
-        displayRange: `[${distribution.min} – ${distribution.max}]`,
+        displayRange: `[${distribution.min} to ${distribution.max}]`,
       };
     case 'normal':
       return {
@@ -258,7 +258,7 @@ export function extractDistributionCentralValue(distribution: DistributionParams
         mean: (distribution.min + distribution.mode + distribution.max) / 3,
         min: distribution.min,
         max: distribution.max,
-        displayRange: `Mode ${distribution.mode} [${distribution.min} – ${distribution.max}]`,
+        displayRange: `Mode ${distribution.mode} [${distribution.min} to ${distribution.max}]`,
       };
     default:
       return {
@@ -529,14 +529,14 @@ export function calculateDetailedCriticalAnalysis(
       unit: 'years',
       criticalValue: timeToExceedanceYears !== null ? timeToExceedanceYears : 25,
       criticalRangeDisplay: timeToExceedanceYears !== null
-        ? `≥ ${timeToExceedanceYears.toFixed(1)} yrs (25–30 yr Chronic Range)`
-        : '25 – 30 years (Equilibrium Plateau)',
+        ? `≥ ${timeToExceedanceYears.toFixed(1)} yrs (25 to 30 yr Chronic Range)`
+        : '25 to 30 years (Equilibrium Plateau)',
       currentValue: meanDuration,
       currentRangeDisplay: durationStats.displayRange,
       isExceeded: durationExceeded,
       status: durationStatus,
       direction: 'range',
-      explanation: 'Chronic exposure duration (25–30 years) achieving 99%+ of steady-state equilibrium capacity (5 to 7 biological half-lives), reaching the baseline average body burden.',
+      explanation: 'Chronic exposure duration (25 to 30 years) achieving 99%+ of steady-state equilibrium capacity (5 to 7 biological half-lives), reaching the baseline average body burden.',
       formula: 't_{\\text{crit}} = -\\frac{T_{1/2}}{\\ln(2)} \\ln\\left(1 - \\frac{BW \\times \\text{RfD}}{I}\\right)',
     },
   ];

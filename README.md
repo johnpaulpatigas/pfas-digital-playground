@@ -1,71 +1,69 @@
-# PFAS Toxicokinetic Modeling Playground
+# PFAS toxicokinetic modeling playground
 
-An interactive simulation platform for **Probabilistic Toxicokinetic Modeling of Per- and Polyfluoroalkyl Substances (PFAS) Exposure among Filipino Women Utilizing Monte Carlo Simulation and Latin Hypercube Sampling**.
+An interactive simulation tool for probabilistic toxicokinetic modeling of per- and polyfluoroalkyl substances (PFAS) exposure among Filipino women, using Monte Carlo simulation and Latin hypercube sampling.
 
 ## Overview
-This platform provides researchers, toxicologists, environmental health scientists, and educators with computational tools to simulate chemical exposure, compare probabilistic sampling methods (Monte Carlo vs. Latin Hypercube Sampling), model body burden and blood concentration over time, and evaluate population-level risk uncertainties.
+This application lets users simulate chemical exposure, compare Monte Carlo and Latin hypercube sampling, model body burden and serum concentration over time, and evaluate population-level risk distributions.
 
-### Key Objectives
-- **1-Compartment Toxicokinetic Modeling**: Model 1-compartment pharmacokinetic clearance and body accumulation of PFAS compounds (PFOA, PFOS, PFHxS, PFNA, GenX/HFPO-DA).
-- **Probabilistic Risk Assessment**: Incorporate statistical variability and parameter uncertainty across physiological and exposure parameters.
-- **Sampling Efficiency Comparison**: Benchmark statistical efficiency, convergence rates, and precision between standard Monte Carlo (MC) and Stratified Latin Hypercube Sampling (LHS).
-- **Demographic Focus**: Presets and physiological profiles tailored for Filipino female cohorts (Average Adult Female, Pregnant Female Profile).
+### Key objectives
+- **1-compartment toxicokinetic modeling**: Model clearance and accumulation for target PFAS compounds (PFOA, PFOS, PFHxS, PFNA, and GenX/HFPO-DA).
+- **Probabilistic risk assessment**: Account for parameter uncertainty across physiological and exposure variables.
+- **Sampling comparison**: Compare variance, runtime, and convergence rates between standard Monte Carlo (MC) and stratified Latin hypercube sampling (LHS).
+- **Demographic focus**: Use physiological baseline profiles calibrated for Filipino female cohorts, including non-pregnant and pregnant profiles.
 
 ---
 
 ## Features
-- [x] **Project Build Pipeline**: React 19 + TypeScript + Vite modern build pipeline setup.
-- [x] **Clean Design System**: High-contrast, clean layout designed for scientific competitions and presentation.
-- [x] **Interactive Parameter & Distribution Controls**: Configure exposure parameters (Daily Intake, Body Weight, Age, Water Consumption, Bioavailability, Half-Life, Exposure Duration) with Fixed, Uniform, Normal, Lognormal, and Triangular distributions.
-- [x] **PFAS Chemical Database**: Reference profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, chemical formulas, and US EPA Maximum Contaminant Levels (MCL).
-- [x] **Probabilistic Sampling Engines**: Seedable PRNG (Mulberry32), standard Normal Box-Muller transform, Inverse CDF Quantile functions, and Stratified Latin Hypercube Sampling modules.
-- [x] **Toxicokinetic & Risk Engine**: Compute body burden ($B(t)$), blood concentration ($C_{ss}$), clearance rate ($CL$), and Hazard Quotient ($HQ$) risk exceedance ($HQ > 1.0$).
-- [x] **Interactive Visualizations**: Recharts-powered frequency histogram, cumulative distribution (CDF), dynamic time-course trajectory ($C(t)$ over 40 years), intake vs. serum scatter plot, Spearman rank tornado plot, and convergence curves.
-- [x] **Statistical Analysis & Sensitivity Engine**: Calculate mean, median, standard deviation, variance, percentiles ($P_5, P_{25}, P_{75}, P_{95}, P_{99}$), 95% confidence intervals, and Spearman rank parameter sensitivity.
-- [x] **Methodology Comparison Mode**: Head-to-head performance analysis (runtime in ms, variance, convergence rate, CI bounds).
-- [x] **Data Matrix & Export**: Paginated iteration data matrix and export to CSV or JSON.
+- **Interactive parameter controls**: Configure distributions (fixed, uniform, normal, lognormal, triangular) for daily intake, body weight, water intake, bioavailability, elimination half-life, and exposure duration.
+- **PFAS compound database**: Chemical profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, formulas, half-lives, and EPA Maximum Contaminant Levels (MCL).
+- **Sampling engines**: Seedable pseudo-random generation (Mulberry32), Box-Muller transform, inverse CDF quantiles, and stratified Latin hypercube sampling.
+- **Toxicokinetics and risk metrics**: Calculate body burden ($B(t)$), steady-state serum concentration ($C_{ss}$), clearance rate ($CL$), and Hazard Quotient ($HQ$) exceedance fractions ($HQ > 1.0$).
+- **Visualizations**: Frequency histogram, cumulative distribution (CDF), time-course trajectory ($C(t)$ over 40 years), intake vs. serum scatter plot, Spearman rank tornado plot, and running mean convergence lines.
+- **Sensitivity analysis**: Summary statistics (mean, median, standard deviation, variance, confidence intervals, 5th to 99th percentiles) and Spearman rank correlation coefficients.
+- **Method comparison view**: Head-to-head analysis of runtime, variance, and convergence between MC, LHS, and hybrid MC+LHS.
+- **Data export**: Paginated iteration table with CSV and JSON export.
 
 ---
 
-## Tech Stack
-| Technology | Description / Purpose |
+## Tech stack
+| Technology | Purpose |
 | :--- | :--- |
-| **React 19** | UI components & concurrent rendering engine |
-| **TypeScript** | Strict static typing and mathematical domain safety |
-| **Vite** | Next-generation frontend build tooling and HMR |
-| **TailwindCSS** | Utility-first styling with clean design system |
-| **KaTeX** | Publication-grade LaTeX mathematical formula rendering |
-| **Zustand** | Lightweight, reactive state management store |
-| **React Router** | Single-page application routing |
-| **Recharts** | Declarative data visualization charts for scientific metrics |
-| **Framer Motion** | Micro-interactions and fluid layout transitions |
-| **Lucide React** | Modern scientific icon set |
+| **React 19** | Component UI and state rendering |
+| **TypeScript** | Static typing and domain schemas |
+| **Vite** | Build tool and local development server |
+| **TailwindCSS** | Layout styling |
+| **KaTeX** | Formula rendering |
+| **Zustand** | Client-side state store |
+| **React Router** | Client-side routing |
+| **Recharts** | Chart visualizations |
+| **Framer Motion** | UI transitions |
+| **Lucide React** | Icons |
 
 ---
 
-## Folder Structure
+## Folder structure
 ```
 src/
-├── components/   # Generic reusable UI primitives (Card, Button, Tooltip, MathView)
-├── features/     # Domain feature modules
-│   ├── charts/       # Interactive charts (Histogram, CDF, TimeCourse, Scatter, Tornado, Convergence)
-│   ├── playground/   # Parameter controls, distribution selector, console log
+├── components/   # Reusable UI primitives (Card, Button, Tooltip, MathView)
+├── features/     # Feature modules
+│   ├── charts/       # Charts (Histogram, CDF, TimeCourse, Scatter, Tornado, Convergence)
+│   ├── playground/   # Parameter inputs, distribution selector, execution console
 │   ├── scenarios/    # Preset demographic profiles for Filipino cohorts
-│   └── statistics/   # Summary statistics & hazard quantile tables
-├── layouts/      # Application layout frame (Header, Nav, Footer)
-├── pages/        # Route views (HomePage, PlaygroundPage, ComparePage, DocsPage)
-├── simulation/   # Core scientific algorithms (distributions, MC, LHS, toxicokinetics, pfasCompounds, statistics)
+│   └── statistics/   # Summary statistics and quantile tables
+├── layouts/      # App layout (Header, Nav, Mobile Drawer)
+├── pages/        # Route pages (HomePage, PlaygroundPage, ComparePage, DocsPage, ScientificGuidePage)
+├── simulation/   # Core algorithms (distributions, MC, LHS, toxicokinetics, compounds, statistics)
 ├── stores/       # Zustand store declarations (useSimulationStore)
-├── types/        # TypeScript models, parameter schemas & domain types
-└── utils/        # Export utilities (CSV, JSON)
+├── types/        # TypeScript interfaces and parameter schemas
+└── utils/        # Export helpers (CSV, JSON)
 ```
 
 ---
 
-## Installation & Setup
+## Installation and setup
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
@@ -73,21 +71,21 @@ src/
 npm install
 ```
 
-### Running Locally
+### Running locally
 ```bash
 npm run dev
 ```
 
-### Building for Production
+### Building for production
 ```bash
 npm run build
 ```
 
 ---
 
-## Mathematical & Sampling Models
+## Mathematical and sampling models
 
-### 1-Compartment Toxicokinetic Model
+### 1-compartment toxicokinetic model
 The steady-state blood concentration ($C_{ss}$), time-dependent serum concentration ($C(t)$), and body burden ($B(t)$) are modeled as:
 
 $$k_e = \frac{\ln(2)}{T_{1/2} \times 365.25}$$
@@ -98,8 +96,9 @@ $$C(t) = C_{ss} \left(1 - e^{-k_e \cdot t}\right)$$
 
 where:
 - $I$: Daily PFAS intake ($\mu g/\text{day}$)
-- $f_{\text{abs}}$: Bioavailability / Gastrointestinal absorption fraction
+- $f_{\text{abs}}$: Bioavailability / gastrointestinal absorption fraction
 - $BW$: Body weight ($\text{kg}$)
 - $V_d$: Volume of distribution ($\text{L/kg}$)
 - $k_e$: First-order elimination rate constant ($\text{day}^{-1}$)
 - $T_{1/2}$: Biological elimination half-life ($\text{years}$)
+

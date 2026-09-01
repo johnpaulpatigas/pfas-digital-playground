@@ -41,11 +41,11 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 'I',
     unit: 'µg/day',
     min: '0.001 µg/day',
-    average: '0.050 – 0.080 µg/day',
-    max: '0.250 – 0.500 µg/day',
+    average: '0.050 to 0.080 µg/day',
+    max: '0.250 to 0.500 µg/day',
     recommendedDist: 'Lognormal (µ: 0.05, σ: 0.40) or Triangular',
     source: 'US EPA Exposure Factors Handbook (2019), EFSA Contam Panel (2020)',
-    description: 'Total daily aggregate ingested mass of target PFAS from contaminated drinking water, dietary food (seafood/meat/dairy), consumer products, and dust.',
+    description: 'Total daily ingested mass of target PFAS from drinking water, food (such as seafood and dairy), consumer products, and dust.',
     criticalCutoff: 'I_{crit} = BW × RfD (e.g. 0.0831 µg/day for 55.4 kg with PFOA)',
   },
   {
@@ -55,10 +55,10 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     unit: 'kg',
     min: '40.0 kg',
     average: '55.4 kg (Filipino Adult Female)',
-    max: '85.0 – 100.0 kg',
+    max: '85.0 to 100.0 kg',
     recommendedDist: 'Normal (µ: 55.4, σ: 8.5) or Triangular (45, 55, 75)',
     source: 'DOST-FNRI Philippine Dietary Reference Intakes (PDRI), CDC NHANES',
-    description: 'Total body mass in kilograms. Lower body weight concentrates analyte mass per kg, shrinking the apparent volume of distribution and accelerating toxicological exceedance.',
+    description: 'Body mass in kilograms. Lower body weight results in a higher dose per kilogram for a given intake rate.',
     criticalCutoff: 'BW_{crit} = I / RfD (Exceedance occurs when body mass falls below critical cutoff)',
   },
   {
@@ -67,12 +67,12 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 'Age',
     unit: 'years',
     min: '18 years',
-    average: '30 – 35 years',
-    max: '65 – 75 years',
-    recommendedDist: 'Uniform (18 – 50) or Normal (µ: 32, σ: 7)',
-    source: 'Philippine Statistics Authority (PSA) Reproductive Demographic Cohorts',
-    description: 'Subject chronological age, used for cohort stratification and life-stage exposure modeling.',
-    criticalCutoff: 'Demographic baseline marker; informs cumulative lifetime exposure duration',
+    average: '30 to 35 years',
+    max: '65 to 75 years',
+    recommendedDist: 'Uniform (18 to 50) or Normal (µ: 32, σ: 7)',
+    source: 'Philippine Statistics Authority (PSA) Demographic Surveys',
+    description: 'Age used for demographic cohort stratification and exposure duration modeling.',
+    criticalCutoff: 'Demographic baseline marker informing cumulative exposure duration',
   },
   {
     id: 'waterConsumption',
@@ -80,25 +80,25 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 'W',
     unit: 'L/day',
     min: '0.8 L/day',
-    average: '1.8 – 2.2 L/day',
-    max: '3.5 – 5.0 L/day',
+    average: '1.8 to 2.2 L/day',
+    max: '3.5 to 5.0 L/day',
     recommendedDist: 'Normal (µ: 2.0, σ: 0.4) or Lognormal (µ: 1.9, σ: 0.3)',
     source: 'WHO Guidelines for Drinking-Water Quality, EPA Exposure Factors Handbook',
-    description: 'Direct ingestion volume of tap and municipal drinking water per day. High hydration rates elevate intake when water contains PFAS at or above the EPA Maximum Contaminant Level.',
+    description: 'Direct drinking water intake per day. Higher water intake increases total chemical ingestion when water contains detectable PFAS.',
     criticalCutoff: 'W_{crit} = (BW × RfD) / EPA_MCL (e.g. 20.8 L/day at 4 ng/L for PFOA)',
   },
   {
     id: 'bioavailability',
     name: 'Gastrointestinal Bioavailability',
     symbol: 'f_{abs}',
-    unit: 'fraction (0–1)',
+    unit: 'fraction (0 to 1)',
     min: '0.75 (75%)',
-    average: '0.90 – 0.95 (90–95%)',
+    average: '0.90 to 0.95 (90% to 95%)',
     max: '0.99 (99%)',
-    recommendedDist: 'Uniform (0.85 – 0.98) or Triangular (0.80, 0.95, 0.99)',
+    recommendedDist: 'Uniform (0.85 to 0.98) or Triangular (0.80, 0.95, 0.99)',
     source: 'ATSDR Toxicological Profile for Perfluoroalkyls (2021)',
-    description: 'Fraction of ingested PFAS that is absorbed through the gastrointestinal tract directly into systemic blood circulation. PFAS carboxylic and sulfonic acids exhibit near-complete GI absorption.',
-    criticalCutoff: 'f_{abs, crit} = (BW × RfD) / I (Fraction required to breach safe absorbed daily dose)',
+    description: 'Fraction of ingested PFAS absorbed through the gastrointestinal tract into systemic circulation. Perfluoroalkyl carboxylic and sulfonic acids exhibit high oral bioavailability (>90%).',
+    criticalCutoff: 'f_{abs, crit} = (BW × RfD) / I (Fraction required to reach reference dose)',
   },
   {
     id: 'eliminationHalfLife',
@@ -107,11 +107,11 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     unit: 'years',
     min: '0.1 yr (GenX)',
     average: '3.8 yr (PFOA), 5.4 yr (PFOS), 8.5 yr (PFHxS)',
-    max: '12.0 yr (PFHxS upper bound)',
-    recommendedDist: 'Fixed or Normal around target compound human empirical mean',
+    max: '12.0 yr (PFHxS)',
+    recommendedDist: 'Fixed or Normal around target compound empirical mean',
     source: 'Olsen et al. (2007), Li et al. (2018), US EPA Health Advisory Reviews',
-    description: 'Biological half-life for renal and biliary clearance in human blood serum. Long-chain PFAS undergo extensive renal tubular reabsorption via organic anion transporters (OAT4, URAT1).',
-    criticalCutoff: 'T_{1/2, crit} = (BW × RfD / I) × T_{1/2} (Prolonged half-life elevates steady-state mass)',
+    description: 'Biological half-life for elimination from human blood serum. Long-chain PFAS undergo renal tubular reabsorption via organic anion transporters (such as OAT4 and URAT1).',
+    criticalCutoff: 'T_{1/2, crit} = (BW × RfD / I) × T_{1/2} (Slower clearance elevates steady-state mass)',
   },
   {
     id: 'exposureDuration',
@@ -119,12 +119,12 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 't',
     unit: 'years',
     min: '1.0 year',
-    average: '25 – 30 years (Chronic Steady-State Plateau)',
-    max: '40 – 50 years (Lifetime)',
-    recommendedDist: 'Uniform (25 – 30) for baseline average, or Fixed (30)',
+    average: '25 to 30 years (steady-state capacity)',
+    max: '40 to 50 years',
+    recommendedDist: 'Uniform (25 to 30) for baseline average, or Fixed (30)',
     source: 'US EPA Superfund Standard Default Exposure Factors (30-yr residential)',
-    description: 'Continuous exposure timespan. Because PFAS half-lives span 3 to 8 years, 25 to 30 years corresponds to 5 to 8 half-lives, achieving >99% of theoretical steady-state equilibrium capacity.',
-    criticalCutoff: 't \\ge 25\\text{–}30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
+    description: 'Duration of chronic exposure. Because target PFAS half-lives range from 2.7 to 8.5 years, 25 to 30 years represents 5 to 8 half-lives, reaching over 99% of steady-state accumulation.',
+    criticalCutoff: 't \\ge 25\\text{ to }30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
   },
 ];
 
@@ -157,10 +157,10 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 font-heading">
-                PFAS Simulation Playground: Parameter &amp; Usage Guide
+                PFAS simulation: parameter and usage guide
               </h2>
               <p className="text-xs text-slate-500 font-sans">
-                Physiological ranges, recommended probability distributions, and step-by-step modeling guide.
+                Physiological ranges, recommended distributions, and simulation steps.
               </p>
             </div>
           </div>
@@ -185,7 +185,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             }`}
           >
             <TableIcon className="w-3.5 h-3.5" />
-            <span>Parameter Ranges (Min / Avg / Max)</span>
+            <span>Parameter ranges (min, avg, max)</span>
           </button>
 
           <button
@@ -197,7 +197,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span>How to Use the Playground</span>
+            <span>How to use the playground</span>
           </button>
 
           <button
@@ -209,7 +209,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Demographic Cohort Presets</span>
+            <span>Demographic cohort presets</span>
           </button>
         </div>
 
@@ -239,11 +239,11 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                     <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-mono">
                       <th className="p-3 font-semibold">Parameter / Symbol</th>
                       <th className="p-3 font-semibold">Unit</th>
-                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">Minimum Bound</th>
+                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">Minimum bound</th>
                       <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">Baseline / Average</th>
-                      <th className="p-3 font-semibold text-rose-800 bg-rose-50/40">Upper / Max Bound</th>
-                      <th className="p-3 font-semibold">Recommended Distribution</th>
-                      <th className="p-3 font-semibold">Literature Source</th>
+                      <th className="p-3 font-semibold text-rose-800 bg-rose-50/40">Upper bound</th>
+                      <th className="p-3 font-semibold">Recommended distribution</th>
+                      <th className="p-3 font-semibold">Literature source</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-800">
@@ -270,7 +270,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-900 text-xs font-heading">
-                    Target PFAS Compounds &amp; Regulatory Benchmark Table
+                    Target PFAS compounds and regulatory benchmarks
                   </h3>
                   <span className="text-[10px] font-mono text-slate-500">US EPA NPDWR (2024) Benchmarks</span>
                 </div>
@@ -309,10 +309,10 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             <div className="space-y-4">
               <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200 space-y-1.5">
                 <div className="font-bold text-blue-950 text-xs font-heading">
-                  Quick-Start 4-Step Simulation Workflow
+                  4-step simulation workflow
                 </div>
                 <p className="text-slate-600 text-[11px] leading-relaxed">
-                  The PFAS Digital Playground executes high-throughput probabilistic 1-compartment toxicokinetic simulations. Follow these four steps to run custom demographic cohort analyses:
+                  Follow these four steps to configure parameters and run toxicokinetic simulations:
                 </p>
               </div>
 
@@ -321,10 +321,10 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">1</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Select Compound &amp; Physiological Cohort</span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">Select chemical and cohort</span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Choose a target chemical from the top sidebar dropdown (e.g. <strong>PFOA</strong>, <strong>PFOS</strong>, <strong>PFHxS</strong>, <strong>PFNA</strong>, or <strong>GenX</strong>). Each compound automatically loads its peer-reviewed biological half-life, volume of distribution, and US EPA Maximum Contaminant Level (MCL).
+                    Choose a target chemical from the top sidebar dropdown (such as <strong>PFOA</strong>, <strong>PFOS</strong>, <strong>PFHxS</strong>, <strong>PFNA</strong>, or <strong>GenX</strong>). Each compound loads its biological half-life, volume of distribution, and US EPA Maximum Contaminant Level (MCL).
                   </p>
                 </div>
 
@@ -332,17 +332,17 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">2</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Configure Parameter Distributions</span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">Configure parameter distributions</span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Choose from 5 statistical distribution types for each physiological variable:
+                    Choose from five statistical distribution types for each physiological variable:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside font-mono">
                     <li><strong>Fixed:</strong> Deterministic single-value point estimate.</li>
                     <li><strong>Uniform [min, max]:</strong> Equal probability across a bounded range.</li>
                     <li><strong>Normal (µ, σ):</strong> Symmetric bell-curve distribution.</li>
-                    <li><strong>Lognormal (µ, σ):</strong> Right-skewed environmental distribution (best for daily intake).</li>
-                    <li><strong>Triangular (min, mode, max):</strong> Expert-estimated three-point distribution.</li>
+                    <li><strong>Lognormal (µ, σ):</strong> Right-skewed distribution (standard for daily intake).</li>
+                    <li><strong>Triangular (min, mode, max):</strong> Three-point distribution based on expert bounds.</li>
                   </ul>
                 </div>
 
@@ -350,31 +350,31 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">3</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Select Sampling Engine &amp; Iteration Size</span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">Select sampling method and sample size</span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Select your preferred probabilistic sampling engine:
+                    Select a sampling engine:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
-                    <li><strong>Monte Carlo:</strong> Pure pseudo-random sampling across multi-dimensional parameter space.</li>
-                    <li><strong>Latin Hypercube (LHS):</strong> Stratified orthogonal sampling guaranteeing stratified coverage of tail vulnerabilities.</li>
-                    <li><strong>MC + LHS Hybrid:</strong> Blended execution for optimal variance reduction and convergence speed.</li>
+                    <li><strong>Monte Carlo:</strong> Pseudo-random sampling across parameter ranges.</li>
+                    <li><strong>Latin Hypercube (LHS):</strong> Stratified sampling with uniform distribution coverage.</li>
+                    <li><strong>MC + LHS Hybrid:</strong> Blended execution for variance reduction and sample stability.</li>
                   </ul>
-                  <p className="text-[10px] text-slate-500">Recommended Sample Size: <strong>N = 2,000 to 10,000 iterations</strong>.</p>
+                  <p className="text-[10px] text-slate-500">Recommended sample size: <strong>N = 2,000 to 10,000 iterations</strong>.</p>
                 </div>
 
                 {/* Step 4 */}
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">4</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Execute &amp; Interpret Output Tabs</span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">Execute and inspect output tabs</span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Click <strong>&quot;Execute Simulation&quot;</strong> and inspect the 8 analytical playground tabs:
+                    Click <strong>&quot;Execute Simulation&quot;</strong> and view the analytical tabs:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
                     <li><strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient <MathView math="HQ = 1.0" />.</li>
-                    <li><strong>Histogram &amp; CDF:</strong> Population serum concentration density and tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</li>
+                    <li><strong>Histogram and CDF:</strong> Population serum concentration density and tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</li>
                     <li><strong>Time-Course Kinetics:</strong> Dynamic multi-year bioaccumulation curves up to 40 years.</li>
                     <li><strong>Tornado Sensitivity:</strong> Spearman rank correlation (<MathView math="\rho" />) identifying primary exposure drivers.</li>
                   </ul>

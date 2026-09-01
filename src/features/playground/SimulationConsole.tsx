@@ -11,7 +11,7 @@ export const SimulationConsole: React.FC = () => {
         <div className="flex items-center gap-2">
           <Terminal className="w-4 h-4 text-slate-700" />
           <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-            Simulation Execution Log
+            Simulation execution log
           </span>
         </div>
         <button
@@ -19,7 +19,7 @@ export const SimulationConsole: React.FC = () => {
           className="text-[11px] text-slate-400 hover:text-red-600 flex items-center gap-1 transition-colors"
         >
           <Trash2 className="w-3 h-3" />
-          <span>Clear Console</span>
+          <span>Clear log</span>
         </button>
       </div>
 

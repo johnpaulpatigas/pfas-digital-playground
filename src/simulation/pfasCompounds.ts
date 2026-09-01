@@ -38,7 +38,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFHxS (Perfluorohexane Sulfonic Acid)',
     chemicalFormula: 'C_6F_{13}SO_3^-',
     casNumber: '355-46-4',
-    description: 'Extremely persistent long-chain sulfonic acid with one of the longest human elimination half-lives.',
+    description: 'Persistent long-chain sulfonic acid with a long human elimination half-life.',
     halfLifeYears: 8.5,
     volumeOfDistribution: 0.28,
     epaMCL: 10.0, // 10 ng/L
@@ -49,7 +49,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFNA (Perfluorononanoic Acid)',
     chemicalFormula: 'C_9HF_{17}O_2',
     casNumber: '375-95-1',
-    description: '9-carbon perfluorinated carboxylic acid found in industrial plasticizers and contaminated seafood.',
+    description: '9-carbon perfluorinated carboxylic acid found in industrial applications and dietary sources.',
     halfLifeYears: 3.2,
     volumeOfDistribution: 0.20,
     epaMCL: 10.0, // 10 ng/L
@@ -60,7 +60,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'GenX (HFPO-DA)',
     chemicalFormula: 'C_6HF_{11}O_3',
     casNumber: '62037-80-3',
-    description: 'Short-chain synthetic replacement compound with shorter serum half-life but high mobility in groundwater.',
+    description: 'Short-chain replacement compound with shorter serum half-life and high mobility in groundwater.',
     halfLifeYears: 0.2,
     volumeOfDistribution: 0.40,
     epaMCL: 10.0, // 10 ng/L
