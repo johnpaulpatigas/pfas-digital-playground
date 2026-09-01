@@ -6,6 +6,8 @@ import type {
   SimulationParameters,
   DetailedCriticalAnalysis,
   ParameterCriticalThreshold,
+  CompoundSummary,
+  CompoundIterationOutput,
 } from '../types';
 import { PFAS_COMPOUNDS, type PFASCompound } from './pfasCompounds';
 
@@ -21,8 +23,19 @@ export interface ToxicokineticInput {
   compoundId?: string;
 }
 
+export interface MultiCompoundTimeCoursePoint {
+  year: number;
+  pfoa: number;
+  pfos: number;
+  pfhxs: number;
+  pfna: number;
+  genx: number;
+  [key: string]: number;
+}
+
 /**
  * 1-Compartment Pharmacokinetic Model for PFAS (Research Grade)
+ * Computes outputs for the active compound and populates compoundOutputs for all 5 PFAS types.
  */
 export function calculateToxicokinetics(
   input: ToxicokineticInput,
@@ -69,6 +82,29 @@ export function calculateToxicokinetics(
   // Hazard Quotient HQ = Dose / Reference Dose (RfD)
   const hazardQuotient = compound.rfdDose > 0 ? dailyDosePerKg / compound.rfdDose : 0;
 
+  // Multi-compound evaluations for all 5 PFAS compounds
+  const compoundOutputs: Record<string, CompoundIterationOutput> = {};
+  for (let i = 0; i < PFAS_COMPOUNDS.length; i++) {
+    const c = PFAS_COMPOUNDS[i];
+    const cHalfLife = compoundId === c.id ? eliminationHalfLife : c.halfLifeYears;
+    const cHalfLifeDays = cHalfLife * 365.25;
+    const cEliminationRate = Math.LN2 / Math.max(1, cHalfLifeDays);
+    const cVdTotal = Math.max(1, bodyWeight * c.volumeOfDistribution);
+    const cCss = absorbedDose / (cVdTotal * cEliminationRate);
+    const cBodyBurden = (absorbedDose / cEliminationRate) * (1 - Math.exp(-cEliminationRate * exposureDays));
+    const cClearance = cEliminationRate * c.volumeOfDistribution;
+    const cHQ = c.rfdDose > 0 ? dailyDosePerKg / c.rfdDose : 0;
+
+    compoundOutputs[c.id] = {
+      compoundId: c.id,
+      eliminationRate: cEliminationRate,
+      steadyStateConcentration: Math.max(0, cCss),
+      peakBodyBurden: Math.max(0, cBodyBurden),
+      clearanceRate: cClearance,
+      hazardQuotient: Math.max(0, cHQ),
+    };
+  }
+
   return {
     iteration: iterationIndex,
     dailyIntake,
@@ -83,7 +119,59 @@ export function calculateToxicokinetics(
     peakBodyBurden: Math.max(0, peakBodyBurden),
     clearanceRate,
     hazardQuotient: Math.max(0, hazardQuotient),
+    compoundOutputs,
   };
+}
+
+/**
+ * Generate Multi-Compound Time-Course Serum Concentration Trajectories C(t) from year 0 to 40
+ */
+export function calculateMultiCompoundTimeCourse(
+  results: IterationResult[],
+  maxYears: number = 40
+): MultiCompoundTimeCoursePoint[] {
+  if (!results || results.length === 0) return [];
+
+  const pointsCount = 41;
+  const yearStep = maxYears / (pointsCount - 1);
+  const timeSeries: MultiCompoundTimeCoursePoint[] = [];
+
+  // Downsample results if too large for trajectory averaging
+  const step = Math.max(1, Math.floor(results.length / 500));
+  const sampledResults = [];
+  for (let s = 0; s < results.length; s += step) {
+    sampledResults.push(results[s]);
+  }
+
+  for (let i = 0; i < pointsCount; i++) {
+    const tYears = i * yearStep;
+    const tDays = tYears * 365.25;
+
+    const point: MultiCompoundTimeCoursePoint = {
+      year: parseFloat(tYears.toFixed(1)),
+      pfoa: 0,
+      pfos: 0,
+      pfhxs: 0,
+      pfna: 0,
+      genx: 0,
+    };
+
+    PFAS_COMPOUNDS.forEach((c) => {
+      let sum = 0;
+      for (let j = 0; j < sampledResults.length; j++) {
+        const r = sampledResults[j];
+        const out = r.compoundOutputs?.[c.id];
+        const css = out ? out.steadyStateConcentration : r.steadyStateConcentration;
+        const elim = out ? out.eliminationRate : r.eliminationRate;
+        sum += css * (1 - Math.exp(-elim * tDays));
+      }
+      point[c.id] = parseFloat((sum / sampledResults.length).toFixed(4));
+    });
+
+    timeSeries.push(point);
+  }
+
+  return timeSeries;
 }
 
 /**
@@ -574,5 +662,118 @@ export function calculateExceedanceRangeStats(
     detailedAnalysis,
   };
 }
+
+/**
+ * Multi-Compound Summary Calculator
+ * Computes average Css, average Body Burden, critical boundaries, and exceedance ranges across all 5 PFAS compounds.
+ */
+export function calculateCompoundSummaries(
+  results: IterationResult[],
+  parameters: SimulationParameters
+): CompoundSummary[] {
+  if (!results || results.length === 0) return [];
+
+  const bwStats = extractDistributionCentralValue(parameters.bodyWeight.distribution);
+  const bioStats = extractDistributionCentralValue(parameters.bioavailability.distribution);
+  const meanBW = bwStats.mean;
+  const meanBio = Math.min(1.0, Math.max(0.01, bioStats.mean));
+
+  return PFAS_COMPOUNDS.map((compound) => {
+    const totalCount = results.length;
+    const cssVals: number[] = new Array(totalCount);
+    const bbVals: number[] = new Array(totalCount);
+    const hqVals: number[] = new Array(totalCount);
+    const exceedingCss: number[] = [];
+    const exceedingBb: number[] = [];
+
+    for (let i = 0; i < totalCount; i++) {
+      const out = results[i].compoundOutputs?.[compound.id] || {
+        steadyStateConcentration: results[i].steadyStateConcentration,
+        peakBodyBurden: results[i].peakBodyBurden,
+        hazardQuotient: results[i].hazardQuotient,
+      };
+      cssVals[i] = out.steadyStateConcentration;
+      bbVals[i] = out.peakBodyBurden;
+      hqVals[i] = out.hazardQuotient;
+
+      if (out.hazardQuotient > 1.0) {
+        exceedingCss.push(out.steadyStateConcentration);
+        exceedingBb.push(out.peakBodyBurden);
+      }
+    }
+
+    cssVals.sort((a, b) => a - b);
+    bbVals.sort((a, b) => a - b);
+
+    const sumCss = cssVals.reduce((acc, v) => acc + v, 0);
+    const meanCss = sumCss / totalCount;
+    const medianCss = quantileSorted(cssVals, 0.5);
+    const p95Css = quantileSorted(cssVals, 0.95);
+
+    const sumBb = bbVals.reduce((acc, v) => acc + v, 0);
+    const meanBodyBurden = sumBb / totalCount;
+    const medianBodyBurden = quantileSorted(bbVals, 0.5);
+    const p95BodyBurden = quantileSorted(bbVals, 0.95);
+
+    const sumHq = hqVals.reduce((acc, v) => acc + v, 0);
+    const meanHazardQuotient = sumHq / totalCount;
+    const riskExceedancePercent = (exceedingCss.length / totalCount) * 100;
+
+    const thresholds = calculateCriticalThresholds(compound, meanBW, meanBio, compound.halfLifeYears);
+
+    let exceedingSerumMin = 0;
+    let exceedingSerumMax = 0;
+    if (exceedingCss.length > 0) {
+      exceedingCss.sort((a, b) => a - b);
+      exceedingSerumMin = exceedingCss[0];
+      exceedingSerumMax = exceedingCss[exceedingCss.length - 1];
+    }
+
+    let exceedingBodyBurdenMin = 0;
+    let exceedingBodyBurdenMax = 0;
+    if (exceedingBb.length > 0) {
+      exceedingBb.sort((a, b) => a - b);
+      exceedingBodyBurdenMin = exceedingBb[0];
+      exceedingBodyBurdenMax = exceedingBb[exceedingBb.length - 1];
+    }
+
+    const isBurdenExceeded = meanBodyBurden > thresholds.criticalBodyBurden || meanHazardQuotient > 1.0;
+    const status: 'safe' | 'borderline' | 'exceeded' =
+      isBurdenExceeded
+        ? 'exceeded'
+        : meanHazardQuotient >= 0.85
+        ? 'borderline'
+        : 'safe';
+
+    return {
+      compoundId: compound.id,
+      compoundName: compound.name,
+      chemicalFormula: compound.chemicalFormula,
+      casNumber: compound.casNumber,
+      halfLifeYears: compound.halfLifeYears,
+      volumeOfDistribution: compound.volumeOfDistribution,
+      epaMCL: compound.epaMCL,
+      rfdDose: compound.rfdDose,
+      meanCss: parseFloat(meanCss.toFixed(4)),
+      medianCss: parseFloat(medianCss.toFixed(4)),
+      p95Css: parseFloat(p95Css.toFixed(4)),
+      meanBodyBurden: parseFloat(meanBodyBurden.toFixed(3)),
+      medianBodyBurden: parseFloat(medianBodyBurden.toFixed(3)),
+      p95BodyBurden: parseFloat(p95BodyBurden.toFixed(3)),
+      criticalBodyBurden: parseFloat(thresholds.criticalBodyBurden.toFixed(3)),
+      criticalSerumCss: parseFloat(thresholds.criticalSerumConcentration.toFixed(4)),
+      criticalDailyIntake: thresholds.criticalDailyIntake,
+      exceedingSerumMin: parseFloat(exceedingSerumMin.toFixed(4)),
+      exceedingSerumMax: parseFloat(exceedingSerumMax.toFixed(4)),
+      exceedingBodyBurdenMin: parseFloat(exceedingBodyBurdenMin.toFixed(3)),
+      exceedingBodyBurdenMax: parseFloat(exceedingBodyBurdenMax.toFixed(3)),
+      meanHazardQuotient: parseFloat(meanHazardQuotient.toFixed(2)),
+      riskExceedancePercent: parseFloat(riskExceedancePercent.toFixed(1)),
+      isBurdenExceeded,
+      status,
+    };
+  });
+}
+
 
 
