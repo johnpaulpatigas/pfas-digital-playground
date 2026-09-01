@@ -1,14 +1,16 @@
-import type { SimulationParameters, SamplingConfig, IterationResult, SummaryStatistics, SensitivityRank } from '../types';
+import type { SimulationParameters, SamplingConfig, IterationResult, SummaryStatistics, SensitivityRank, CompoundSummary } from '../types';
 import type { SimulationWorkerResponse } from './workers/simulationWorker';
 import { runMonteCarloSimulation } from './monteCarlo';
 import { runLatinHypercubeSimulation } from './latinHypercube';
 import { runMonteCarloLhsSimulation } from './monteCarloLhs';
 import { calculateSummaryStatistics, calculateSensitivityRanks } from './statistics';
+import { calculateCompoundSummaries } from './toxicokinetics';
 
 export interface SimulationAsyncResult {
   simResults: IterationResult[];
   summaryStats: SummaryStatistics;
   sensitivityRanks: SensitivityRank[];
+  compoundSummaries?: CompoundSummary[];
 }
 
 export interface ComparisonAsyncResult {
@@ -46,6 +48,7 @@ export function executeSimulationAsync(
                 simResults: event.data.data.simResults,
                 summaryStats: event.data.data.summaryStats,
                 sensitivityRanks: event.data.data.sensitivityRanks,
+                compoundSummaries: event.data.data.compoundSummaries || calculateCompoundSummaries(event.data.data.simResults, parameters),
               });
             } else {
               reject(new Error('Invalid worker response payload'));
@@ -82,8 +85,9 @@ export function executeSimulationAsync(
 
     const summaryStats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
     const sensitivityRanks = calculateSensitivityRanks(simResults, parameters, 'steadyStateConcentration');
+    const compoundSummaries = calculateCompoundSummaries(simResults, parameters);
 
-    resolve({ simResults, summaryStats, sensitivityRanks });
+    resolve({ simResults, summaryStats, sensitivityRanks, compoundSummaries });
   });
 }
 

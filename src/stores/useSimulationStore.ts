@@ -7,12 +7,15 @@ import type {
   SensitivityRank,
   ComparisonResult,
   DistributionParams,
+  PlaygroundMode,
+  CompoundSummary,
 } from '../types';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 
 interface SimulationState {
   // Config state
+  mode: PlaygroundMode;
   parameters: SimulationParameters;
   samplingConfig: SamplingConfig;
   activeScenarioId: string;
@@ -22,12 +25,14 @@ interface SimulationState {
   results: IterationResult[] | null;
   summaryStats: SummaryStatistics | null;
   sensitivityRanks: SensitivityRank[];
+  compoundSummaries: CompoundSummary[] | null;
   comparison: ComparisonResult | null;
 
   // Console execution log
   logs: string[];
 
   // Actions
+  setPlaygroundMode: (mode: PlaygroundMode) => void;
   setParameterDistribution: (paramId: keyof SimulationParameters, distribution: DistributionParams) => void;
   updateParameterValue: (paramId: keyof SimulationParameters, key: string, value: number) => void;
   setSamplingConfig: (config: Partial<SamplingConfig>) => void;
@@ -36,7 +41,8 @@ interface SimulationState {
   setSimulationResults: (
     results: IterationResult[],
     summaryStats: SummaryStatistics,
-    sensitivityRanks: SensitivityRank[]
+    sensitivityRanks: SensitivityRank[],
+    compoundSummaries?: CompoundSummary[]
   ) => void;
   setComparisonResults: (comparison: ComparisonResult) => void;
   setIsSimulating: (isSimulating: boolean) => void;
@@ -48,10 +54,11 @@ interface SimulationState {
 const defaultScenario = DEMOGRAPHIC_PRESETS[0];
 
 export const useSimulationStore = create<SimulationState>((set, get) => ({
+  mode: 'simple',
   parameters: defaultScenario.parameters,
   samplingConfig: {
-    method: 'monte-carlo',
-    iterations: 5000,
+    method: 'monte-carlo-lhs',
+    iterations: 100000,
     seed: 42,
     compoundId: 'pfoa',
   },
@@ -61,9 +68,21 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   results: null,
   summaryStats: null,
   sensitivityRanks: [],
+  compoundSummaries: null,
   comparison: null,
 
-  logs: [`[System] Initialized PFAS Toxicokinetic Playground with '${defaultScenario.name}' scenario preset and PFOA target.`],
+  logs: [`[System] Initialized PFAS Toxicokinetic Playground in Simple Mode with 100,000 MC+LHS iterations.`],
+
+  setPlaygroundMode: (mode) => {
+    set((state) => ({
+      mode,
+      samplingConfig:
+        mode === 'simple'
+          ? { ...state.samplingConfig, method: 'monte-carlo-lhs', iterations: 100000 }
+          : state.samplingConfig,
+    }));
+    get().addLog(`[Mode] Switched to ${mode === 'simple' ? 'Simple Mode (Multi-PFAS 100k MC+LHS)' : 'Advanced Mode (Granular Parameters)'}.`);
+  },
 
   setParameterDistribution: (paramId, distribution) => {
     set((state) => ({
@@ -134,14 +153,15 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     }
   },
 
-  setSimulationResults: (results, summaryStats, sensitivityRanks) => {
+  setSimulationResults: (results, summaryStats, sensitivityRanks, compoundSummaries) => {
     set({
       results,
       summaryStats,
       sensitivityRanks,
+      compoundSummaries: compoundSummaries || null,
       isSimulating: false,
     });
-    get().addLog(`[Simulation] Completed ${results.length} iterations. Mean Serum Css: ${summaryStats.mean.toFixed(4)} µg/L. Risk Exceedance (HQ > 1.0): ${summaryStats.riskExceedancePercent.toFixed(1)}%.`);
+    get().addLog(`[Simulation] Completed ${results.length.toLocaleString()} iterations. Mean Serum Css: ${summaryStats.mean.toFixed(4)} µg/L. Risk Exceedance (HQ > 1.0): ${summaryStats.riskExceedancePercent.toFixed(1)}%.`);
   },
 
   setComparisonResults: (comparison) => {
@@ -164,14 +184,21 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   clearLogs: () => set({ logs: [] }),
 
   resetToDefault: () => {
-    set({
+    set((state) => ({
       parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
       activeScenarioId: defaultScenario.id,
+      samplingConfig: {
+        method: state.mode === 'simple' ? 'monte-carlo-lhs' : 'monte-carlo',
+        iterations: state.mode === 'simple' ? 100000 : 5000,
+        seed: 42,
+        compoundId: 'pfoa',
+      },
       results: null,
       summaryStats: null,
       sensitivityRanks: [],
+      compoundSummaries: null,
       comparison: null,
-    });
+    }));
     get().addLog(`[System] Reset parameters to default baseline.`);
   },
 }));

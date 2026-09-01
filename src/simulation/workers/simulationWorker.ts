@@ -1,8 +1,9 @@
-import type { SimulationParameters, SamplingMethod, IterationResult } from '../../types';
+import type { SimulationParameters, SamplingMethod, IterationResult, CompoundSummary } from '../../types';
 import { runMonteCarloSimulation } from '../monteCarlo';
 import { runLatinHypercubeSimulation } from '../latinHypercube';
 import { runMonteCarloLhsSimulation } from '../monteCarloLhs';
 import { calculateSummaryStatistics, calculateSensitivityRanks } from '../statistics';
+import { calculateCompoundSummaries } from '../toxicokinetics';
 
 export interface SimulationWorkerRequest {
   id: string;
@@ -25,6 +26,7 @@ export interface SimulationWorkerResponse {
     simResults?: IterationResult[];
     summaryStats?: ReturnType<typeof calculateSummaryStatistics>;
     sensitivityRanks?: ReturnType<typeof calculateSensitivityRanks>;
+    compoundSummaries?: CompoundSummary[];
     comparisonData?: {
       mcResults: IterationResult[];
       lhsResults: IterationResult[];
@@ -37,7 +39,7 @@ export interface SimulationWorkerResponse {
 }
 
 self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
-  const { id, type, parameters, samplingConfig, iterations = 5000 } = event.data;
+  const { id, type, parameters, samplingConfig, iterations = 100000 } = event.data;
 
   try {
     if (type === 'RUN_SIMULATION' && samplingConfig) {
@@ -52,6 +54,7 @@ self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
 
       const summaryStats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
       const sensitivityRanks = calculateSensitivityRanks(simResults, parameters, 'steadyStateConcentration');
+      const compoundSummaries = calculateCompoundSummaries(simResults, parameters);
 
       const response: SimulationWorkerResponse = {
         id,
@@ -60,6 +63,7 @@ self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
           simResults,
           summaryStats,
           sensitivityRanks,
+          compoundSummaries,
         },
       };
       self.postMessage(response);

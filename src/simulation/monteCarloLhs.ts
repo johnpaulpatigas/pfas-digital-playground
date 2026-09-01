@@ -9,7 +9,7 @@ import { runLatinHypercubeSimulation } from './latinHypercube';
  */
 export function runMonteCarloLhsSimulation(
   parameters: SimulationParameters,
-  iterations: number = 5000,
+  iterations: number = 100000,
   seed: number = 42
 ): IterationResult[] {
   const mcCount = Math.floor(iterations / 2);
