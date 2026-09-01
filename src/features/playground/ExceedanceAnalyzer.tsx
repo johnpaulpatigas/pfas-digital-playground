@@ -34,10 +34,11 @@ interface ExceedanceAnalyzerProps {
 export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
   results,
   parameters,
-  compoundId,
-  samplingMethod = 'monte-carlo',
+  compoundId: defaultCompoundId,
+  samplingMethod = 'monte-carlo-lhs',
 }) => {
-  const compound = PFAS_COMPOUNDS.find((c) => c.id === compoundId) || PFAS_COMPOUNDS[0];
+  const [selectedCompoundId, setSelectedCompoundId] = useState<string>(defaultCompoundId);
+  const compound = PFAS_COMPOUNDS.find((c) => c.id === selectedCompoundId) || PFAS_COMPOUNDS[0];
   const [metricView, setMetricView] = useState<'bodyBurden' | 'serum'>('bodyBurden');
 
   const paramMeanBW = useMemo(() => {
@@ -171,6 +172,24 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
 
   return (
     <div className="space-y-5 font-sans text-xs">
+      {/* 0. Compound Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 font-mono text-[11px]">
+        {PFAS_COMPOUNDS.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => setSelectedCompoundId(c.id)}
+            className={`px-3 py-1.5 rounded-lg font-bold border transition-all cursor-pointer whitespace-nowrap ${
+              selectedCompoundId === c.id
+                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            {c.name.split(' ')[0]} (T1/2 = {c.halfLifeYears}y)
+          </button>
+        ))}
+      </div>
+
       {/* 1. Executive Toxicokinetic Baseline & Exceedance Summary */}
       <div className="card-panel p-5 rounded-xl space-y-4 bg-white border border-slate-200">
         <div className="border-b border-slate-200 pb-3">
