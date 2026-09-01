@@ -8,7 +8,7 @@ import { DistributionSelector } from './DistributionSelector';
 import { Tooltip } from '../../components/ui/Tooltip';
 import { Button } from '../../components/ui/Button';
 import type { DistributionType, DistributionParams, SimulationParameters, ParameterCriticalThreshold } from '../../types';
-import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge, Info, BookOpen } from 'lucide-react';
+import { Play, Sliders, RefreshCw, Cpu, Layers, Bookmark, FlaskConical, GitMerge, Info, BookOpen, Sparkles } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
 interface ParameterSidebarProps {
@@ -18,10 +18,12 @@ interface ParameterSidebarProps {
 
 export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulation, onOpenGuide }) => {
   const {
+    mode,
     parameters,
     samplingConfig,
     activeScenarioId,
     isSimulating,
+    setPlaygroundMode,
     setParameterDistribution,
     updateParameterValue,
     setSamplingConfig,
@@ -53,7 +55,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
       case 'latin-hypercube':
         return 'Latin Hypercube';
       case 'monte-carlo-lhs':
-        return 'Monte Carlo + LHS';
+        return 'MC + LHS';
     }
   };
 
@@ -72,39 +74,96 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
     }
   };
 
+  const isSimpleMode = mode === 'simple';
+
   return (
     <div className="w-full space-y-4 text-xs font-sans">
-      {/* Target PFAS Compound Selection Card */}
-      <div className="card-panel p-4 rounded-xl space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FlaskConical className="w-4 h-4 text-blue-600" />
-            <span className="font-bold text-slate-800 uppercase font-mono tracking-wider text-[11px]">
-              PFAS Compound &amp; Bio-Kinetics
+      {/* 1. Mode Switcher: Simple Mode vs Advanced Mode */}
+      <div className="bg-slate-100 p-1 rounded-xl border border-slate-200 grid grid-cols-2 gap-1 font-mono text-[11px]">
+        <button
+          type="button"
+          onClick={() => setPlaygroundMode('simple')}
+          className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg font-bold transition-all cursor-pointer ${
+            isSimpleMode
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+          <span>Simple Mode</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setPlaygroundMode('advanced')}
+          className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg font-bold transition-all cursor-pointer ${
+            !isSimpleMode
+              ? 'bg-slate-900 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+          }`}
+        >
+          <Sliders className="w-3.5 h-3.5 text-purple-400" />
+          <span>Advanced Mode</span>
+        </button>
+      </div>
+
+      {/* Target PFAS Compound Selection Card (Advanced Mode) or Informational Multi-Compound Card (Simple Mode) */}
+      {isSimpleMode ? (
+        <div className="card-panel p-4 rounded-xl space-y-2 bg-gradient-to-br from-blue-50/40 via-white to-slate-50 border border-blue-200/70 shadow-xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-blue-600" />
+              <span className="font-bold text-slate-900 uppercase font-mono tracking-wider text-[11px]">
+                Multi-PFAS Auto-Evaluation
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-blue-800 bg-blue-100/70 px-2 py-0.5 rounded border border-blue-200 font-bold">
+              5 Compounds
             </span>
           </div>
-          <span className="text-[10px] font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-medium">
-            EPA MCL: {activeCompound.epaMCL} ng/L
-          </span>
+          <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
+            Automatically evaluates all 5 standard PFAS chemicals in parallel: <strong>PFOA</strong>, <strong>PFOS</strong>, <strong>PFHxS</strong>, <strong>PFNA</strong>, and <strong>GenX</strong>.
+          </p>
+          <div className="flex flex-wrap gap-1 pt-1 font-mono text-[10px]">
+            {PFAS_COMPOUNDS.map((c) => (
+              <span key={c.id} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-medium">
+                {c.name.split(' ')[0]}
+              </span>
+            ))}
+          </div>
         </div>
+      ) : (
+        <div className="card-panel p-4 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-blue-600" />
+              <span className="font-bold text-slate-800 uppercase font-mono tracking-wider text-[11px]">
+                PFAS Compound &amp; Bio-Kinetics
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-medium">
+              EPA MCL: {activeCompound.epaMCL} ng/L
+            </span>
+          </div>
 
-        <select
-          value={samplingConfig.compoundId}
-          onChange={(e) => setCompoundId(e.target.value)}
-          className="w-full bg-white border border-slate-300 text-slate-900 rounded-md px-3 py-1.5 text-xs font-bold font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          {PFAS_COMPOUNDS.map((compound) => (
-            <option key={compound.id} value={compound.id}>
-              {compound.name} (T1/2 = {compound.halfLifeYears} yrs)
-            </option>
-          ))}
-        </select>
+          <select
+            value={samplingConfig.compoundId}
+            onChange={(e) => setCompoundId(e.target.value)}
+            className="w-full bg-white border border-slate-300 text-slate-900 rounded-md px-3 py-1.5 text-xs font-bold font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            {PFAS_COMPOUNDS.map((compound) => (
+              <option key={compound.id} value={compound.id}>
+                {compound.name} (T1/2 = {compound.halfLifeYears} yrs)
+              </option>
+            ))}
+          </select>
 
-        <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between font-mono">
-          <span>Formula: <MathView math={activeCompound.chemicalFormula} /></span>
-          <span className="text-slate-500">CAS: {activeCompound.casNumber}</span>
+          <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between font-mono">
+            <span>Formula: <MathView math={activeCompound.chemicalFormula} /></span>
+            <span className="text-slate-500">CAS: {activeCompound.casNumber}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Scenario Presets Bar */}
       <div className="card-panel p-4 rounded-xl space-y-3">
@@ -146,85 +205,116 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
       {/* Sampling Engine Setup */}
       <div className="card-panel p-4 rounded-xl space-y-4">
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-          <Sliders className="w-4 h-4 text-purple-600" />
-          <span className="font-bold text-slate-800 uppercase font-mono tracking-wider text-[11px]">
-            Sampling Method &amp; Iterations
-          </span>
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div className="flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-purple-600" />
+            <span className="font-bold text-slate-800 uppercase font-mono tracking-wider text-[11px]">
+              Sampling Engine &amp; Iterations
+            </span>
+          </div>
+          {isSimpleMode && (
+            <span className="text-[10px] font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200 font-bold">
+              MC + LHS
+            </span>
+          )}
         </div>
 
-        {/* Method Toggle Buttons */}
-        <div className="grid grid-cols-3 gap-1.5">
-          <button
-            type="button"
-            onClick={() => setSamplingConfig({ method: 'monte-carlo' })}
-            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight ${
-              samplingConfig.method === 'monte-carlo'
-                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-            title="Monte Carlo Sampling"
-          >
-            <Cpu className="w-3.5 h-3.5 mb-1" />
-            <span className="text-center">Monte Carlo</span>
-          </button>
+        {/* Sampling Method Controls (Advanced Mode Only) */}
+        {!isSimpleMode && (
+          <div className="grid grid-cols-3 gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSamplingConfig({ method: 'monte-carlo' })}
+              className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight cursor-pointer ${
+                samplingConfig.method === 'monte-carlo'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Monte Carlo Sampling"
+            >
+              <Cpu className="w-3.5 h-3.5 mb-1" />
+              <span className="text-center">Monte Carlo</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setSamplingConfig({ method: 'latin-hypercube' })}
-            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight ${
-              samplingConfig.method === 'latin-hypercube'
-                ? 'bg-purple-900 text-white border-purple-900 shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-            title="Latin Hypercube Sampling"
-          >
-            <Layers className="w-3.5 h-3.5 mb-1" />
-            <span className="text-center">Latin Hypercube</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setSamplingConfig({ method: 'latin-hypercube' })}
+              className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight cursor-pointer ${
+                samplingConfig.method === 'latin-hypercube'
+                  ? 'bg-purple-900 text-white border-purple-900 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Latin Hypercube Sampling"
+            >
+              <Layers className="w-3.5 h-3.5 mb-1" />
+              <span className="text-center">Latin Hypercube</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setSamplingConfig({ method: 'monte-carlo-lhs' })}
-            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight ${
-              samplingConfig.method === 'monte-carlo-lhs'
-                ? 'bg-teal-900 text-white border-teal-900 shadow-xs'
-                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-            }`}
-            title="Combined Monte Carlo + Latin Hypercube Hybrid"
-          >
-            <GitMerge className="w-3.5 h-3.5 mb-1" />
-            <span className="text-center">MC + LHS</span>
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => setSamplingConfig({ method: 'monte-carlo-lhs' })}
+              className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight cursor-pointer ${
+                samplingConfig.method === 'monte-carlo-lhs'
+                  ? 'bg-teal-900 text-white border-teal-900 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              }`}
+              title="Combined Monte Carlo + Latin Hypercube Hybrid"
+            >
+              <GitMerge className="w-3.5 h-3.5 mb-1" />
+              <span className="text-center">MC + LHS</span>
+            </button>
+          </div>
+        )}
 
-        {/* Iterations Slider */}
-        <div className="space-y-1.5 font-mono">
+        {/* Iterations Slider & Quick Preset Buttons */}
+        <div className="space-y-2 font-mono">
           <div className="flex items-center justify-between text-slate-700">
-            <span>Iterations (N)</span>
+            <span>Iterations (<MathView math="N" />)</span>
             <span className="text-slate-900 font-bold">{samplingConfig.iterations.toLocaleString()}</span>
           </div>
+
           <input
             type="range"
-            min="500"
-            max="20000"
-            step="500"
+            min={isSimpleMode ? "10000" : "500"}
+            max={isSimpleMode ? "200000" : "20000"}
+            step={isSimpleMode ? "10000" : "500"}
             value={samplingConfig.iterations}
             onChange={(e) => setSamplingConfig({ iterations: parseInt(e.target.value, 10) })}
             className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
           />
+
+          {isSimpleMode && (
+            <div className="flex items-center justify-between gap-1 pt-0.5">
+              {[25000, 50000, 100000, 150000].map((presetVal) => (
+                <button
+                  key={presetVal}
+                  type="button"
+                  onClick={() => setSamplingConfig({ iterations: presetVal })}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border transition-all cursor-pointer ${
+                    samplingConfig.iterations === presetVal
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {(presetVal / 1000)}k
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Random Seed Input */}
-        <div className="flex items-center justify-between gap-3 font-mono">
-          <span className="text-slate-600 text-[11px]">PRNG Seed</span>
-          <input
-            type="number"
-            value={samplingConfig.seed || 42}
-            onChange={(e) => setSamplingConfig({ seed: parseInt(e.target.value, 10) || 42 })}
-            className="w-24 bg-white border border-slate-300 text-slate-900 rounded-md px-2 py-1 text-center text-xs focus:outline-none focus:border-slate-900"
-          />
-        </div>
+        {/* Random Seed Input (Advanced Mode Only) */}
+        {!isSimpleMode && (
+          <div className="flex items-center justify-between gap-3 font-mono">
+            <span className="text-slate-600 text-[11px]">PRNG Seed</span>
+            <input
+              type="number"
+              value={samplingConfig.seed || 42}
+              onChange={(e) => setSamplingConfig({ seed: parseInt(e.target.value, 10) || 42 })}
+              className="w-24 bg-white border border-slate-300 text-slate-900 rounded-md px-2 py-1 text-center text-xs focus:outline-none focus:border-slate-900"
+            />
+          </div>
+        )}
 
         {/* Run Simulation Trigger */}
         <Button
@@ -235,7 +325,11 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           className="w-full mt-1 font-mono uppercase tracking-wider text-xs"
           icon={<Play className="w-4 h-4 fill-current" />}
         >
-          {isSimulating ? 'Simulating...' : `Execute ${getMethodName()}`}
+          {isSimulating
+            ? 'Simulating...'
+            : isSimpleMode
+            ? `Execute Simulation (${(samplingConfig.iterations / 1000)}k Samples)`
+            : `Execute ${getMethodName()}`}
         </Button>
       </div>
 

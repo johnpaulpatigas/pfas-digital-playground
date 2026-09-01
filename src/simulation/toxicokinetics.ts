@@ -138,7 +138,7 @@ export function calculateMultiCompoundTimeCourse(
 
   // Downsample results if too large for trajectory averaging
   const step = Math.max(1, Math.floor(results.length / 500));
-  const sampledResults = [];
+  const sampledResults: IterationResult[] = [];
   for (let s = 0; s < results.length; s += step) {
     sampledResults.push(results[s]);
   }
