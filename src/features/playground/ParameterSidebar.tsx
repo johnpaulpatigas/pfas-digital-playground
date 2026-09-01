@@ -196,7 +196,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
               <span className="font-bold text-slate-800 text-xs">Simulating All 5 PFAS Types</span>
             </div>
             <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-              100k MC+LHS
+              5k–50k MC+LHS
             </span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
@@ -271,9 +271,9 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
           <input
             type="range"
-            min={isSimpleMode ? "10000" : "500"}
-            max={isSimpleMode ? "200000" : "20000"}
-            step={isSimpleMode ? "10000" : "500"}
+            min={isSimpleMode ? "5000" : "1000"}
+            max="50000"
+            step={isSimpleMode ? "2500" : "1000"}
             value={samplingConfig.iterations}
             onChange={(e) => setSamplingConfig({ iterations: parseInt(e.target.value, 10) })}
             className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
@@ -281,7 +281,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
           {isSimpleMode && (
             <div className="flex items-center justify-between gap-1 pt-0.5">
-              {[25000, 50000, 100000, 150000].map((presetVal) => (
+              {[5000, 10000, 25000, 50000].map((presetVal) => (
                 <button
                   key={presetVal}
                   type="button"

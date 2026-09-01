@@ -77,7 +77,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   parameters: initialDerived.parameters,
   samplingConfig: {
     method: 'monte-carlo-lhs',
-    iterations: 100000,
+    iterations: 25000,
     seed: 42,
     compoundId: 'pfoa',
   },
@@ -100,11 +100,11 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         parameters: derived ? derived.parameters : state.parameters,
         samplingConfig:
           mode === 'simple'
-            ? { ...state.samplingConfig, method: 'monte-carlo-lhs', iterations: 100000 }
+            ? { ...state.samplingConfig, method: 'monte-carlo-lhs', iterations: 25000 }
             : state.samplingConfig,
       };
     });
-    get().addLog(`[Mode] Switched to ${mode === 'simple' ? 'Simple Mode (3-Input Auto-Parameters & 100k MC+LHS)' : 'Advanced Mode (Granular Parameters)'}.`);
+    get().addLog(`[Mode] Switched to ${mode === 'simple' ? 'Simple Mode (3-Input Auto-Parameters & MC+LHS)' : 'Advanced Mode (Granular Parameters)'}.`);
   },
 
   updateSimpleProfile: (profileUpdate) => {
@@ -229,7 +229,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         activeScenarioId: defaultScenario.id,
         samplingConfig: {
           method: state.mode === 'simple' ? 'monte-carlo-lhs' : 'monte-carlo',
-          iterations: state.mode === 'simple' ? 100000 : 5000,
+          iterations: state.mode === 'simple' ? 25000 : 5000,
           seed: 42,
           compoundId: 'pfoa',
         },

@@ -109,7 +109,7 @@ export const PlaygroundPage: React.FC = () => {
           </div>
           <p className="text-xs text-slate-500 font-mono">
             {isSimpleMode
-              ? 'Multi-PFAS 100k MC+LHS Simulation • Evaluating PFOA, PFOS, PFHxS, PFNA & GenX'
+              ? 'Multi-PFAS MC+LHS Hybrid Simulation • Evaluating PFOA, PFOS, PFHxS, PFNA & GenX'
               : <>Probabilistic 1-Compartment Modeling • Target: Bioaccumulation Serum (<MathView math="C_{ss}" />)</>}
           </p>
         </div>
