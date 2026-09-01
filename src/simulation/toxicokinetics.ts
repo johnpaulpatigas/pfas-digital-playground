@@ -278,8 +278,7 @@ export function calculateCriticalThresholds(
   compound: PFASCompound,
   bodyWeight: number = 55,
   bioavailability: number = 0.9,
-  halfLifeYears?: number,
-  _exposureDurationYears: number = 25
+  halfLifeYears?: number
 ): CriticalThresholds {
   const halfLife = halfLifeYears && halfLifeYears > 0 ? halfLifeYears : compound.halfLifeYears;
   const halfLifeDays = halfLife * 365.25;
@@ -328,8 +327,7 @@ export function calculateCriticalThresholds(
  */
 export function calculateDetailedCriticalAnalysis(
   compound: PFASCompound,
-  parameters: SimulationParameters,
-  _results?: IterationResult[]
+  parameters: SimulationParameters
 ): DetailedCriticalAnalysis {
   const bwStats = extractDistributionCentralValue(parameters.bodyWeight.distribution);
   const intakeStats = extractDistributionCentralValue(parameters.dailyIntake.distribution);
@@ -349,7 +347,7 @@ export function calculateDetailedCriticalAnalysis(
   const eliminationRate = Math.LN2 / Math.max(1, halfLifeDays);
   const exposureDays = meanDuration * 365.25;
 
-  const thresholds = calculateCriticalThresholds(compound, meanBW, meanBio, meanHalfLife, meanDuration);
+  const thresholds = calculateCriticalThresholds(compound, meanBW, meanBio, meanHalfLife);
 
   // Toxicokinetic body burden calculations
   const currentAbsorbedDose = meanIntake * meanBio;
@@ -593,7 +591,7 @@ export function calculateExceedanceRangeStats(
 ): ExceedanceRangeStats {
   const totalCount = results.length;
   const thresholds = calculateCriticalThresholds(compound, meanBodyWeight, meanBioavailability, meanHalfLife);
-  const detailedAnalysis = parameters ? calculateDetailedCriticalAnalysis(compound, parameters, results) : undefined;
+  const detailedAnalysis = parameters ? calculateDetailedCriticalAnalysis(compound, parameters) : undefined;
 
   if (totalCount === 0) {
     return {

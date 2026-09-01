@@ -4,7 +4,7 @@ import type { SummaryStatistics, SensitivityRank, IterationResult, SimulationPar
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { calculateExceedanceRangeStats, calculateCompoundSummaries } from '../../simulation/toxicokinetics';
 import { useSimulationStore } from '../../stores/useSimulationStore';
-import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info, Scale, ChevronRight, Layers } from 'lucide-react';
+import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info, Scale, ChevronRight } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
 
 interface SummaryPanelProps {

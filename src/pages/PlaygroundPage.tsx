@@ -35,6 +35,7 @@ import { Button } from '../components/ui/Button';
 
 export const PlaygroundPage: React.FC = () => {
   const {
+    mode,
     parameters,
     samplingConfig,
     results,
@@ -45,6 +46,8 @@ export const PlaygroundPage: React.FC = () => {
     setSimulationResults,
   } = useSimulationStore();
 
+  const isSimpleMode = mode === 'simple';
+
   const [activeTab, setActiveTab] = useState<
     'thresholds' | 'histogram' | 'cdf' | 'timecourse' | 'scatter' | 'tornado' | 'convergence' | 'table'
   >('thresholds');
@@ -54,15 +57,14 @@ export const PlaygroundPage: React.FC = () => {
   const [tableFilter, setTableFilter] = useState<'all' | 'exceeding' | 'safe'>('all');
   const [tablePage, setTablePage] = useState(1);
 
-
   const activeCompound = PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
 
   const executeSimulation = useCallback(() => {
     setIsSimulating(true);
 
     executeSimulationAsync(parameters, samplingConfig)
-      .then(({ simResults, summaryStats, sensitivityRanks }) => {
-        setSimulationResults(simResults, summaryStats, sensitivityRanks);
+      .then(({ simResults, summaryStats, sensitivityRanks, compoundSummaries }) => {
+        setSimulationResults(simResults, summaryStats, sensitivityRanks, compoundSummaries);
       })
       .catch((err) => {
         console.error('Simulation execution error:', err);
@@ -102,11 +104,13 @@ export const PlaygroundPage: React.FC = () => {
               PFAS Toxicokinetic Simulation Playground
             </h1>
             <span className="px-2.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-mono font-bold">
-              {activeCompound.name}
+              {isSimpleMode ? '5 PFAS Types Parallel Evaluation' : activeCompound.name}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-mono">
-            Probabilistic 1-Compartment Modeling • Target: Bioaccumulation Serum (<MathView math="C_{ss}" />)
+            {isSimpleMode
+              ? 'Multi-PFAS 100k MC+LHS Simulation • Evaluating PFOA, PFOS, PFHxS, PFNA & GenX'
+              : <>Probabilistic 1-Compartment Modeling • Target: Bioaccumulation Serum (<MathView math="C_{ss}" />)</>}
           </p>
         </div>
 
@@ -297,29 +301,76 @@ export const PlaygroundPage: React.FC = () => {
                               <th className="p-2">#</th>
                               <th className="p-2">Intake (µg/d)</th>
                               <th className="p-2">BW (kg)</th>
-                              <th className="p-2">Half-Life (yr)</th>
-                              <th className="p-2 text-amber-800">Body Burden (µg)</th>
-                              <th className="p-2 text-blue-700">Serum Css (µg/L)</th>
-                              <th className="p-2 text-red-700">HQ</th>
+                              {isSimpleMode ? (
+                                <>
+                                  <th className="p-2 text-blue-700">PFOA Css</th>
+                                  <th className="p-2 text-teal-700">PFOS Css</th>
+                                  <th className="p-2 text-purple-700">PFHxS Css</th>
+                                  <th className="p-2 text-amber-700">PFNA Css</th>
+                                  <th className="p-2 text-rose-700">GenX Css</th>
+                                  <th className="p-2 text-slate-900">Burden (µg)</th>
+                                  <th className="p-2 text-red-700">Max HQ</th>
+                                </>
+                              ) : (
+                                <>
+                                  <th className="p-2">Half-Life (yr)</th>
+                                  <th className="p-2 text-amber-800">Body Burden (µg)</th>
+                                  <th className="p-2 text-blue-700">Serum Css (µg/L)</th>
+                                  <th className="p-2 text-red-700">HQ</th>
+                                </>
+                              )}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100 text-slate-800">
-                            {paginatedResults.map((row) => (
-                              <tr
-                                key={row.iteration}
-                                className={`hover:bg-slate-50 ${row.hazardQuotient > 1.0 ? 'bg-red-50/25' : ''}`}
-                              >
-                                <td className="p-2 text-slate-400">{row.iteration}</td>
-                                <td className="p-2 font-mono">{row.dailyIntake.toFixed(4)}</td>
-                                <td className="p-2">{row.bodyWeight.toFixed(1)}</td>
-                                <td className="p-2">{row.eliminationHalfLife.toFixed(2)}</td>
-                                <td className="p-2 font-mono text-amber-900 font-semibold">{row.peakBodyBurden.toFixed(3)}</td>
-                                <td className="p-2 font-mono text-blue-700 font-bold">{row.steadyStateConcentration.toFixed(4)}</td>
-                                <td className={`p-2 font-mono font-bold ${row.hazardQuotient > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}>
-                                  {row.hazardQuotient.toFixed(2)}
-                                </td>
-                              </tr>
-                            ))}
+                            {paginatedResults.map((row) => {
+                              const pfoaCss = row.compoundOutputs?.pfoa?.steadyStateConcentration ?? row.steadyStateConcentration;
+                              const pfosCss = row.compoundOutputs?.pfos?.steadyStateConcentration ?? row.steadyStateConcentration;
+                              const pfhxsCss = row.compoundOutputs?.pfhxs?.steadyStateConcentration ?? row.steadyStateConcentration;
+                              const pfnaCss = row.compoundOutputs?.pfna?.steadyStateConcentration ?? row.steadyStateConcentration;
+                              const genxCss = row.compoundOutputs?.genx?.steadyStateConcentration ?? row.steadyStateConcentration;
+                              const maxHq = isSimpleMode && row.compoundOutputs
+                                ? Math.max(
+                                    row.compoundOutputs.pfoa.hazardQuotient,
+                                    row.compoundOutputs.pfos.hazardQuotient,
+                                    row.compoundOutputs.pfhxs.hazardQuotient,
+                                    row.compoundOutputs.pfna.hazardQuotient,
+                                    row.compoundOutputs.genx.hazardQuotient
+                                  )
+                                : row.hazardQuotient;
+
+                              return (
+                                <tr
+                                  key={row.iteration}
+                                  className={`hover:bg-slate-50 ${maxHq > 1.0 ? 'bg-red-50/25' : ''}`}
+                                >
+                                  <td className="p-2 text-slate-400">{row.iteration}</td>
+                                  <td className="p-2 font-mono">{row.dailyIntake.toFixed(4)}</td>
+                                  <td className="p-2">{row.bodyWeight.toFixed(1)}</td>
+                                  {isSimpleMode ? (
+                                    <>
+                                      <td className="p-2 font-mono text-blue-700 font-semibold">{pfoaCss.toFixed(4)}</td>
+                                      <td className="p-2 font-mono text-teal-700 font-semibold">{pfosCss.toFixed(4)}</td>
+                                      <td className="p-2 font-mono text-purple-700 font-semibold">{pfhxsCss.toFixed(4)}</td>
+                                      <td className="p-2 font-mono text-amber-700 font-semibold">{pfnaCss.toFixed(4)}</td>
+                                      <td className="p-2 font-mono text-rose-700 font-semibold">{genxCss.toFixed(4)}</td>
+                                      <td className="p-2 font-mono text-slate-900">{row.peakBodyBurden.toFixed(3)}</td>
+                                      <td className={`p-2 font-mono font-bold ${maxHq > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                                        {maxHq.toFixed(2)}
+                                      </td>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <td className="p-2">{row.eliminationHalfLife.toFixed(2)}</td>
+                                      <td className="p-2 font-mono text-amber-900 font-semibold">{row.peakBodyBurden.toFixed(3)}</td>
+                                      <td className="p-2 font-mono text-blue-700 font-bold">{row.steadyStateConcentration.toFixed(4)}</td>
+                                      <td className={`p-2 font-mono font-bold ${row.hazardQuotient > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                                        {row.hazardQuotient.toFixed(2)}
+                                      </td>
+                                    </>
+                                  )}
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>

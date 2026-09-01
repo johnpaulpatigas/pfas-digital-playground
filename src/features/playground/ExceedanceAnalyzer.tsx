@@ -82,14 +82,13 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
       compound,
       paramMeanBW,
       paramMeanBioavail,
-      paramMeanHalfLife,
-      paramMeanDuration
+      paramMeanHalfLife
     );
-  }, [compound, paramMeanBW, paramMeanBioavail, paramMeanHalfLife, paramMeanDuration]);
+  }, [compound, paramMeanBW, paramMeanBioavail, paramMeanHalfLife]);
 
   const criticalAnalysis = useMemo(() => {
-    return calculateDetailedCriticalAnalysis(compound, parameters, results || undefined);
-  }, [compound, parameters, results]);
+    return calculateDetailedCriticalAnalysis(compound, parameters);
+  }, [compound, parameters]);
 
   const exceedanceStats = useMemo(() => {
     if (!results || results.length === 0) return null;

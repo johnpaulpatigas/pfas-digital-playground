@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { runMonteCarloSimulation } from '../monteCarlo';
 import { runLatinHypercubeSimulation } from '../latinHypercube';
+import { runMonteCarloLhsSimulation } from '../monteCarloLhs';
 import type { SimulationParameters, DistributionParams, ExposureParameterConfig } from '../../types';
 
 const createConfig = (id: string, name: string, dist: DistributionParams): ExposureParameterConfig => ({
@@ -40,4 +41,17 @@ describe('Simulation Engines', () => {
     expect(results2.length).toBe(100);
     expect(results1[0].steadyStateConcentration).toBe(results2[0].steadyStateConcentration);
   });
+
+  it('runMonteCarloLhsSimulation combines MC and LHS seamlessly with multi-compound outputs', () => {
+    const results = runMonteCarloLhsSimulation(defaultParameters, 1000, 42);
+
+    expect(results.length).toBe(1000);
+    expect(results[0].compoundOutputs).toBeDefined();
+    expect(results[0].compoundOutputs?.pfoa).toBeDefined();
+    expect(results[0].compoundOutputs?.pfos).toBeDefined();
+    expect(results[0].compoundOutputs?.pfhxs).toBeDefined();
+    expect(results[0].compoundOutputs?.pfna).toBeDefined();
+    expect(results[0].compoundOutputs?.genx).toBeDefined();
+  });
 });
+

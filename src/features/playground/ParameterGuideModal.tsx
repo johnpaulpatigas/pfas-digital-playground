@@ -33,6 +33,7 @@ export interface ParameterReferenceRow {
   criticalCutoff: string;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
   {
     id: 'dailyIntake',
