@@ -67,6 +67,9 @@ export interface SimulationParameters {
   exposureDuration: ExposureParameterConfig;   // years
 }
 
+// Playground Interaction Modes
+export type PlaygroundMode = 'simple' | 'advanced';
+
 // Sampling Configuration
 export type SamplingMethod = 'monte-carlo' | 'latin-hypercube' | 'monte-carlo-lhs';
 
@@ -75,6 +78,16 @@ export interface SamplingConfig {
   iterations: number;
   seed?: number;
   compoundId: string; // e.g. 'pfoa', 'pfos', 'pfhxs', 'pfna', 'genx'
+}
+
+// Single Compound Output within an Iteration
+export interface CompoundIterationOutput {
+  compoundId: string;
+  eliminationRate: number;          // day^-1
+  steadyStateConcentration: number; // ug/L (ng/mL) in blood serum
+  peakBodyBurden: number;           // ug
+  clearanceRate: number;            // L/kg/day
+  hazardQuotient: number;           // HQ = Dose / RfD
 }
 
 // Single Sample Iteration Output
@@ -88,12 +101,50 @@ export interface IterationResult {
   eliminationHalfLife: number;
   exposureDuration: number;
   
-  // Calculated Toxicokinetic Outputs
+  // Calculated Toxicokinetic Outputs (Primary / Active Compound)
   eliminationRate: number;          // day^-1
   steadyStateConcentration: number; // ug/L (ng/mL) in blood serum
   peakBodyBurden: number;           // ug
   clearanceRate: number;            // L/kg/day
   hazardQuotient: number;           // HQ = Dose / RfD
+
+  // Multi-Compound Results (PFOA, PFOS, PFHxS, PFNA, GenX)
+  compoundOutputs?: Record<string, CompoundIterationOutput>;
+}
+
+// Multi-Compound Summary Metrics for Simple Mode and Cross-Comparison
+export interface CompoundSummary {
+  compoundId: string;
+  compoundName: string;
+  chemicalFormula: string;
+  casNumber: string;
+  halfLifeYears: number;
+  volumeOfDistribution: number;
+  epaMCL: number;
+  rfdDose: number;
+
+  // Mean & Central Metrics
+  meanCss: number;             // Average Css (ug/L)
+  medianCss: number;           // Median Css (ug/L)
+  p95Css: number;              // 95th Percentile Css (ug/L)
+  meanBodyBurden: number;      // Average Peak Body Burden (ug)
+  medianBodyBurden: number;    // Median Body Burden (ug)
+  p95BodyBurden: number;       // 95th Percentile Body Burden (ug)
+
+  // Critical Limits & Exceedances
+  criticalBodyBurden: number;  // Critical Threshold Body Burden (ug)
+  criticalSerumCss: number;    // Critical Threshold Css (ug/L)
+  criticalDailyIntake: number; // Critical Daily Intake (ug/day)
+  exceedingSerumMin: number;   // Min Css in exceeding cohort (ug/L)
+  exceedingSerumMax: number;   // Max Css in exceeding cohort (ug/L)
+  exceedingBodyBurdenMin: number; // Min Body Burden in exceeding cohort (ug)
+  exceedingBodyBurdenMax: number; // Max Body Burden in exceeding cohort (ug)
+
+  // Risk Metrics
+  meanHazardQuotient: number;  // Mean HQ
+  riskExceedancePercent: number; // % of cohort exceeding HQ > 1.0
+  isBurdenExceeded: boolean;
+  status: 'safe' | 'borderline' | 'exceeded';
 }
 
 // Time-Course Dynamic Bioaccumulation Curve Point
