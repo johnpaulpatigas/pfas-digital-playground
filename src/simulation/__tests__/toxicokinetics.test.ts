@@ -7,6 +7,7 @@ import {
   calculateDetailedCriticalAnalysis,
   calculateExceedanceRangeStats,
   calculateCompoundSummaries,
+  deriveAutomatedParameters,
 } from '../toxicokinetics';
 import { PFAS_COMPOUNDS } from '../pfasCompounds';
 import type { IterationResult, SimulationParameters, ParameterCriticalThreshold } from '../../types';
@@ -272,6 +273,33 @@ describe('Toxicokinetics Engine', () => {
       expect(s.criticalBodyBurden).toBeGreaterThan(0);
       expect(s.status).toBeDefined();
     });
+  });
+
+  it('deriveAutomatedParameters accurately computes aggregate daily intake, exposure duration, and physiological distributions from 3 user inputs', () => {
+    const profile = {
+      bodyWeight: 55.4,
+      age: 30,
+      waterConsumption: 2.0,
+      waterConcentrationNgL: 20, // 20 ng/L = 0.020 µg/L
+    };
+
+    const derived = deriveAutomatedParameters(profile);
+
+    // Water intake = 2.0 L * 0.020 µg/L = 0.040 µg/day
+    expect(derived.derivedIntakeWaterUg).toBeCloseTo(0.040, 4);
+    // Dietary intake = 55.4 kg * 0.0005 µg/kg/d = 0.0277 µg/day
+    expect(derived.derivedIntakeDietaryUg).toBeCloseTo(0.0277, 4);
+    // Total intake = 0.040 + 0.0277 = 0.0677 µg/day
+    expect(derived.derivedTotalIntakeUg).toBeCloseTo(0.0677, 4);
+    // Exposure duration = clamp(30 - 10, 1, 40) = 20 years
+    expect(derived.derivedExposureYears).toBe(20);
+    expect(derived.derivedBioavailability).toBe(0.92);
+
+    expect(derived.parameters.dailyIntake.distribution.type).toBe('lognormal');
+    expect(derived.parameters.bodyWeight.distribution.type).toBe('normal');
+    expect(derived.parameters.age.distribution.type).toBe('fixed');
+    expect(derived.parameters.waterConsumption.distribution.type).toBe('lognormal');
+    expect(derived.parameters.bioavailability.distribution.type).toBe('fixed');
   });
 });
 

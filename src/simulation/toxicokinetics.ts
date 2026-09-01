@@ -773,5 +773,151 @@ export function calculateCompoundSummaries(
   });
 }
 
+export interface DerivedExposureProfile {
+  bodyWeight: number; // kg
+  age: number; // years
+  waterConsumption: number; // L/day
+  waterConcentrationNgL?: number; // ng/L (default: 20)
+}
+
+export interface DerivedParametersResult {
+  parameters: SimulationParameters;
+  derivedIntakeWaterUg: number;
+  derivedIntakeDietaryUg: number;
+  derivedTotalIntakeUg: number;
+  derivedExposureYears: number;
+  derivedBioavailability: number;
+}
+
+/**
+ * Automates technical exposure and pharmacokinetic parameters from 3 user inputs:
+ * 1. Body Weight (kg)
+ * 2. Age (years)
+ * 3. Daily Drinking Water Consumption (L/day)
+ *
+ * Derivations:
+ * - Daily Intake I = (Water_L * C_water) + (BW * 0.0005 µg/kg/d dietary background)
+ * - Exposure Duration t = clamp(Age - 10, 1, 40) years
+ * - Bioavailability = 0.92 (EFSA/EPA consensus)
+ */
+export function deriveAutomatedParameters(
+  profile: DerivedExposureProfile
+): DerivedParametersResult {
+  const bw = Math.max(20, Math.min(150, profile.bodyWeight || 55.4));
+  const age = Math.max(1, Math.min(100, profile.age || 30));
+  const waterL = Math.max(0.2, Math.min(8.0, profile.waterConsumption || 2.0));
+  const waterConcUgL = (profile.waterConcentrationNgL !== undefined ? profile.waterConcentrationNgL : 20) / 1000; // 20 ng/L = 0.020 µg/L
+
+  // 1. Water-based PFAS intake: L/day * µg/L
+  const derivedIntakeWaterUg = waterL * waterConcUgL;
+
+  // 2. Dietary & background intake: 0.0005 µg/kg/day * BW
+  const derivedIntakeDietaryUg = bw * 0.0005;
+
+  // 3. Aggregate Daily Intake (µg/day)
+  const derivedTotalIntakeUg = derivedIntakeWaterUg + derivedIntakeDietaryUg;
+
+  // 4. Chronic exposure duration (years)
+  const derivedExposureYears = Math.max(1, Math.min(40, age - 10));
+
+  // 5. Bioavailability consensus
+  const derivedBioavailability = 0.92;
+
+  const defaultHalfLife = 3.8; // PFOA reference baseline
+
+  const updatedParameters: SimulationParameters = {
+    dailyIntake: {
+      id: 'dailyIntake',
+      name: 'Estimated PFAS Daily Intake',
+      unit: 'µg/day',
+      description: 'Aggregate ingested PFAS from drinking water and background dietary sources.',
+      scientificContext: 'Calculated from daily water intake and body mass background dietary factors (US EPA/EFSA).',
+      distribution: {
+        type: 'lognormal',
+        mean: parseFloat(derivedTotalIntakeUg.toFixed(5)),
+        sd: parseFloat((derivedTotalIntakeUg * 0.25).toFixed(5)),
+      },
+    },
+    bodyWeight: {
+      id: 'bodyWeight',
+      name: 'Body Weight',
+      unit: 'kg',
+      description: 'Total body mass in kilograms.',
+      scientificContext: 'DOST-FNRI / CDC NHANES physiological reference cohort distribution.',
+      distribution: {
+        type: 'normal',
+        mean: parseFloat(bw.toFixed(1)),
+        sd: parseFloat((bw * 0.12).toFixed(1)),
+      },
+    },
+    age: {
+      id: 'age',
+      name: 'Age',
+      unit: 'years',
+      description: 'Chronological age in years.',
+      scientificContext: 'Determines chronic exposure accumulation horizon.',
+      distribution: {
+        type: 'fixed',
+        value: parseFloat(age.toFixed(1)),
+      },
+    },
+    waterConsumption: {
+      id: 'waterConsumption',
+      name: 'Daily Drinking Water Consumption',
+      unit: 'L/day',
+      description: 'Volume of direct tap and prepared beverage water consumed per day.',
+      scientificContext: 'US EPA Exposure Factors Handbook average adult ingestion distribution.',
+      distribution: {
+        type: 'lognormal',
+        mean: parseFloat(waterL.toFixed(2)),
+        sd: parseFloat((waterL * 0.2).toFixed(2)),
+      },
+    },
+    bioavailability: {
+      id: 'bioavailability',
+      name: 'Gastrointestinal Bioavailability',
+      unit: 'fraction',
+      description: 'Fraction of ingested PFAS absorbed into systemic circulation.',
+      scientificContext: 'Clinical standard gastrointestinal absorption rate for PFAS (EFSA 2020).',
+      distribution: {
+        type: 'fixed',
+        value: derivedBioavailability,
+      },
+    },
+    eliminationHalfLife: {
+      id: 'eliminationHalfLife',
+      name: 'Serum Elimination Half-Life',
+      unit: 'years',
+      description: 'Time required for blood serum PFAS concentration to decrease by half.',
+      scientificContext: 'Empirically derived from human cohort occupational and community exposure kinetics.',
+      distribution: {
+        type: 'fixed',
+        value: defaultHalfLife,
+      },
+    },
+    exposureDuration: {
+      id: 'exposureDuration',
+      name: 'Chronic Exposure Duration',
+      unit: 'years',
+      description: 'Cumulative duration of exposure to the contaminated environment.',
+      scientificContext: 'Estimated chronic adult residential exposure duration derived from chronological age.',
+      distribution: {
+        type: 'fixed',
+        value: derivedExposureYears,
+      },
+    },
+  };
+
+  return {
+    parameters: updatedParameters,
+    derivedIntakeWaterUg: parseFloat(derivedIntakeWaterUg.toFixed(5)),
+    derivedIntakeDietaryUg: parseFloat(derivedIntakeDietaryUg.toFixed(5)),
+    derivedTotalIntakeUg: parseFloat(derivedTotalIntakeUg.toFixed(5)),
+    derivedExposureYears,
+    derivedBioavailability,
+  };
+}
+
+
 
 
