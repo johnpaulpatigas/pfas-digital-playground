@@ -12,7 +12,7 @@ import type {
 } from '../types';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
-import { deriveAutomatedParameters, type DerivedExposureProfile } from '../simulation/toxicokinetics';
+import { deriveAutomatedParameters } from '../simulation/toxicokinetics';
 
 export interface SimpleProfile {
   bodyWeight: number; // kg
