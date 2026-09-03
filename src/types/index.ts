@@ -272,6 +272,14 @@ export interface ExceedanceRangeStats {
 }
 
 
+// Simple Profile for 3-Input Mode
+export interface SimpleProfile {
+  bodyWeight: number; // kg
+  age: number; // years
+  waterConsumption: number; // L/day
+  waterConcentrationNgL?: number; // ng/L in drinking water
+}
+
 // Preset Scenario Profile
 export interface DemographicScenario {
   id: string;
@@ -279,5 +287,7 @@ export interface DemographicScenario {
   description: string;
   targetGroup: string;
   parameters: SimulationParameters;
+  simpleProfile?: SimpleProfile;
 }
+
 

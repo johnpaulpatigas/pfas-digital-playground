@@ -9,17 +9,12 @@ import type {
   DistributionParams,
   PlaygroundMode,
   CompoundSummary,
+  SimpleProfile,
 } from '../types';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 import { deriveAutomatedParameters } from '../simulation/toxicokinetics';
 
-export interface SimpleProfile {
-  bodyWeight: number; // kg
-  age: number; // years
-  waterConsumption: number; // L/day
-  waterConcentrationNgL: number; // ng/L
-}
 
 interface SimulationState {
   // Config state
@@ -94,10 +89,18 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
   setPlaygroundMode: (mode) => {
     set((state) => {
-      const derived = mode === 'simple' ? deriveAutomatedParameters(state.simpleProfile) : null;
+      const activeScenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === state.activeScenarioId);
+      let newParams = state.parameters;
+      if (mode === 'simple') {
+        if (activeScenario && state.activeScenarioId !== 'custom') {
+          newParams = JSON.parse(JSON.stringify(activeScenario.parameters));
+        } else {
+          newParams = deriveAutomatedParameters(state.simpleProfile).parameters;
+        }
+      }
       return {
         mode,
-        parameters: derived ? derived.parameters : state.parameters,
+        parameters: newParams,
         samplingConfig:
           mode === 'simple'
             ? { ...state.samplingConfig, method: 'monte-carlo-lhs', iterations: 25000 }
@@ -111,9 +114,17 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     set((state) => {
       const newProfile = { ...state.simpleProfile, ...profileUpdate };
       const derived = deriveAutomatedParameters(newProfile);
+      const activeScenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === state.activeScenarioId);
+      const isStillPreset = activeScenario?.simpleProfile
+        ? Math.abs(newProfile.bodyWeight - activeScenario.simpleProfile.bodyWeight) < 0.01 &&
+          newProfile.age === activeScenario.simpleProfile.age &&
+          Math.abs(newProfile.waterConsumption - activeScenario.simpleProfile.waterConsumption) < 0.01
+        : false;
+
       return {
         simpleProfile: newProfile,
         parameters: derived.parameters,
+        activeScenarioId: isStillPreset ? state.activeScenarioId : 'custom',
       };
     });
     const current = get().simpleProfile;
@@ -181,9 +192,22 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   loadScenario: (scenarioId) => {
     const scenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === scenarioId);
     if (scenario) {
+      const updatedProfile: SimpleProfile = scenario.simpleProfile
+        ? { ...scenario.simpleProfile }
+        : {
+            bodyWeight:
+              scenario.parameters.bodyWeight.distribution.type === 'normal'
+                ? scenario.parameters.bodyWeight.distribution.mean
+                : 55.4,
+            age: 30,
+            waterConsumption: 2.0,
+            waterConcentrationNgL: 20,
+          };
+
       set({
         parameters: JSON.parse(JSON.stringify(scenario.parameters)),
         activeScenarioId: scenario.id,
+        simpleProfile: updatedProfile,
       });
       get().addLog(`[Preset] Loaded scenario profile '${scenario.name}'.`);
     }
@@ -221,11 +245,12 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
   resetToDefault: () => {
     set((state) => {
-      const defaultProfile = { ...initialSimpleProfile };
-      const derived = deriveAutomatedParameters(defaultProfile);
+      const defaultProfile = defaultScenario.simpleProfile
+        ? { ...defaultScenario.simpleProfile }
+        : { ...initialSimpleProfile };
       return {
         simpleProfile: defaultProfile,
-        parameters: state.mode === 'simple' ? derived.parameters : JSON.parse(JSON.stringify(defaultScenario.parameters)),
+        parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
         activeScenarioId: defaultScenario.id,
         samplingConfig: {
           method: state.mode === 'simple' ? 'monte-carlo-lhs' : 'monte-carlo',

@@ -6,6 +6,12 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     name: 'Average Filipino Woman',
     targetGroup: 'General Adult Female Cohort',
     description: 'Baseline physiological and exposure values for adult women in the Philippines, derived from national health and nutrition surveys.',
+    simpleProfile: {
+      bodyWeight: 55.4,
+      age: 30,
+      waterConsumption: 2.0,
+      waterConcentrationNgL: 20,
+    },
     parameters: {
       dailyIntake: {
         id: 'dailyIntake',
@@ -70,6 +76,12 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     name: 'Pregnant Female Profile',
     targetGroup: 'Maternal Physiology Cohort',
     description: 'Adjusted for plasma volume expansion and maternal physiological changes during pregnancy.',
+    simpleProfile: {
+      bodyWeight: 65.2,
+      age: 29,
+      waterConsumption: 2.8,
+      waterConcentrationNgL: 20,
+    },
     parameters: {
       dailyIntake: {
         id: 'dailyIntake',
@@ -134,6 +146,12 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     name: 'Critical Baseline Threshold (25 to 30 yr Chronic)',
     targetGroup: 'Toxicological Benchmark Cohort',
     description: 'Configures a 25 to 30 year exposure period with baseline threshold parameters to evaluate steady-state PFAS body burden and exceedance.',
+    simpleProfile: {
+      bodyWeight: 55.4,
+      age: 40,
+      waterConsumption: 2.0,
+      waterConcentrationNgL: 20,
+    },
     parameters: {
       dailyIntake: {
         id: 'dailyIntake',
