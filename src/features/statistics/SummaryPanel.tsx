@@ -43,6 +43,53 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
     return [];
   }, [storeCompoundSummaries, results, parameters]);
 
+  const highestCompound = useMemo(() => {
+    if (!multiCompoundSummaries || multiCompoundSummaries.length === 0) return null;
+    return multiCompoundSummaries.reduce((highest, current) => {
+      return current.meanCss > highest.meanCss ? current : highest;
+    }, multiCompoundSummaries[0]);
+  }, [multiCompoundSummaries]);
+
+  const highestCompoundStats = useMemo(() => {
+    if (!highestCompound) return null;
+    if (!results || results.length === 0) {
+      return {
+        meanCss: highestCompound.meanCss,
+        ci95Lower: summaryStats?.ci95Lower ?? 0,
+        ci95Upper: summaryStats?.ci95Upper ?? 0,
+      };
+    }
+
+    const count = results.length;
+    let sum = 0;
+    const values: number[] = new Array(count);
+    const cId = highestCompound.compoundId;
+
+    for (let i = 0; i < count; i++) {
+      const val = results[i].compoundOutputs?.[cId]?.steadyStateConcentration ?? results[i].steadyStateConcentration;
+      values[i] = val;
+      sum += val;
+    }
+
+    const mean = sum / count;
+    let varianceSum = 0;
+    for (let i = 0; i < count; i++) {
+      const diff = values[i] - mean;
+      varianceSum += diff * diff;
+    }
+    const variance = count > 1 ? varianceSum / (count - 1) : 0;
+    const stdDev = Math.sqrt(variance);
+    const stdError = stdDev / Math.sqrt(count);
+    const ci95Lower = Math.max(0, mean - 1.96 * stdError);
+    const ci95Upper = mean + 1.96 * stdError;
+
+    return {
+      meanCss: mean,
+      ci95Lower,
+      ci95Upper,
+    };
+  }, [highestCompound, results, summaryStats]);
+
   const exceedanceStats = useMemo(() => {
     if (!results || results.length === 0 || !parameters) return null;
     const pBw = parameters.bodyWeight.distribution;
@@ -75,27 +122,48 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
     return samplingMethod.toUpperCase();
   };
 
+  const displayMeanCss = isSimpleMode && highestCompound ? highestCompound.meanCss : summaryStats.mean;
+  const displayCiLower = isSimpleMode && highestCompoundStats ? highestCompoundStats.ci95Lower : summaryStats.ci95Lower;
+  const displayCiUpper = isSimpleMode && highestCompoundStats ? highestCompoundStats.ci95Upper : summaryStats.ci95Upper;
+
   return (
     <div className="w-full space-y-4 font-mono text-xs">
       {/* Primary Top KPI Card */}
-      <div className="card-panel-teal p-4 rounded-xl space-y-1.5 relative overflow-hidden">
+      <div className="card-panel-teal p-4 rounded-xl space-y-2 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <span className="text-[11px] text-slate-600 uppercase tracking-wider font-bold">
             {isSimpleMode ? 'Multi-PFAS Simulation' : `Expected Mean Serum (${activeCompound.name.split(' ')[0]})`}
           </span>
-          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-bold">
-            {isSimpleMode ? '100K MC + LHS' : getMethodBadge()}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {isSimpleMode && highestCompound && (
+              <span className="px-2 py-0.5 rounded bg-teal-100/90 text-teal-900 border border-teal-200 text-[10px] font-bold">
+                Highest: {highestCompound.compoundName.split(' ')[0]}
+              </span>
+            )}
+            <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-bold">
+              {isSimpleMode ? '100K MC + LHS' : getMethodBadge()}
+            </span>
+          </div>
         </div>
-        <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
-          {summaryStats.mean.toFixed(4)} <span className="text-sm font-medium text-teal-700">µg/L</span>
+
+        <div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
+            {displayMeanCss.toFixed(4)} <span className="text-sm font-medium text-teal-700">µg/L</span>
+          </div>
+          {isSimpleMode && highestCompound && (
+            <div className="text-[11px] text-teal-800 font-medium flex flex-wrap items-center gap-x-1 mt-0.5">
+              <span>Highest Serum <MathView math="C_{ss}" />:</span>
+              <span className="font-bold text-slate-900 font-sans">{highestCompound.compoundName}</span>
+            </div>
+          )}
         </div>
+
         <div className="text-[11px] text-slate-600 flex items-center justify-between pt-0.5">
           <span className="text-teal-800 font-semibold">
             N = {summaryStats.count.toLocaleString()} iterations
           </span>
           <span className="text-slate-500">
-            95% CI: [{summaryStats.ci95Lower.toFixed(3)} to {summaryStats.ci95Upper.toFixed(3)}]
+            95% CI: [{displayCiLower.toFixed(3)} to {displayCiUpper.toFixed(3)}]
           </span>
         </div>
       </div>
@@ -179,6 +247,11 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                     <span className="text-[10px] text-slate-500 font-mono">
                       (T1/2 = {summary.halfLifeYears} yrs)
                     </span>
+                    {highestCompound && summary.compoundId === highestCompound.compoundId && (
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-teal-100 text-teal-800 border border-teal-200">
+                        Highest C<sub>ss</sub>
+                      </span>
+                    )}
                   </div>
                   <span
                     className={`px-1.5 py-0.2 rounded text-[9px] font-bold border ${

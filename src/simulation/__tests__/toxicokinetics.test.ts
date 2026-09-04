@@ -273,6 +273,13 @@ describe('Toxicokinetics Engine', () => {
       expect(s.criticalBodyBurden).toBeGreaterThan(0);
       expect(s.status).toBeDefined();
     });
+
+    // Verify identification of the compound with highest Css
+    const highestCompound = summaries.reduce((highest, current) => {
+      return current.meanCss > highest.meanCss ? current : highest;
+    }, summaries[0]);
+    expect(highestCompound.compoundId).toBe('pfhxs');
+    expect(highestCompound.meanCss).toBeGreaterThan(summaries.find((s) => s.compoundId === 'pfoa')!.meanCss);
   });
 
   it('deriveAutomatedParameters accurately computes aggregate daily intake, exposure duration, and physiological distributions from 3 user inputs', () => {
