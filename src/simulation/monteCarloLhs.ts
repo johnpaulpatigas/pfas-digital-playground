@@ -10,13 +10,14 @@ import { runLatinHypercubeSimulation } from './latinHypercube';
 export function runMonteCarloLhsSimulation(
   parameters: SimulationParameters,
   iterations: number = 25000,
-  seed: number = 42
+  seed: number = 42,
+  compoundId: string = 'pfoa'
 ): IterationResult[] {
   const mcCount = Math.floor(iterations / 2);
   const lhsCount = iterations - mcCount;
 
-  const mcResults = runMonteCarloSimulation(parameters, mcCount, seed);
-  const lhsResults = runLatinHypercubeSimulation(parameters, lhsCount, seed + 100000);
+  const mcResults = runMonteCarloSimulation(parameters, mcCount, seed, compoundId);
+  const lhsResults = runLatinHypercubeSimulation(parameters, lhsCount, seed + 100000, compoundId);
 
   const combined: IterationResult[] = [];
   const maxLen = Math.max(mcResults.length, lhsResults.length);

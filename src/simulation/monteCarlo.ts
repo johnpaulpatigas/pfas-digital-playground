@@ -9,7 +9,8 @@ import { calculateToxicokinetics } from './toxicokinetics';
 export function runMonteCarloSimulation(
   parameters: SimulationParameters,
   iterations: number = 5000,
-  seed: number = 42
+  seed: number = 42,
+  compoundId: string = 'pfoa'
 ): IterationResult[] {
   const prng = createPRNG(seed);
   const results: IterationResult[] = new Array(iterations);
@@ -32,6 +33,7 @@ export function runMonteCarloSimulation(
         bioavailability: Math.max(0.01, Math.min(1.0, bioavailability)),
         eliminationHalfLife: Math.max(0.1, eliminationHalfLife),
         exposureDuration: Math.max(0.1, exposureDuration),
+        compoundId,
       },
       i + 1
     );

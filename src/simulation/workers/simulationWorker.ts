@@ -44,12 +44,13 @@ self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
   try {
     if (type === 'RUN_SIMULATION' && samplingConfig) {
       let simResults: IterationResult[];
+      const activeCompoundId = samplingConfig.compoundId || 'pfoa';
       if (samplingConfig.method === 'monte-carlo') {
-        simResults = runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+        simResults = runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
       } else if (samplingConfig.method === 'latin-hypercube') {
-        simResults = runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+        simResults = runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
       } else {
-        simResults = runMonteCarloLhsSimulation(parameters, samplingConfig.iterations, samplingConfig.seed);
+        simResults = runMonteCarloLhsSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
       }
 
       const summaryStats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');

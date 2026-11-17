@@ -40,7 +40,8 @@ function generateLHSParameterSamples(
 export function runLatinHypercubeSimulation(
   parameters: SimulationParameters,
   iterations: number = 5000,
-  seed: number = 42
+  seed: number = 42,
+  compoundId: string = 'pfoa'
 ): IterationResult[] {
   const prng = createPRNG(seed);
 
@@ -64,6 +65,7 @@ export function runLatinHypercubeSimulation(
         bioavailability: Math.max(0.01, Math.min(1.0, bioavailabilitySamples[i])),
         eliminationHalfLife: Math.max(0.1, eliminationHalfLifeSamples[i]),
         exposureDuration: Math.max(0.1, exposureDurationSamples[i]),
+        compoundId,
       },
       i + 1
     );

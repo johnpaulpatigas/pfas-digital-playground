@@ -53,5 +53,15 @@ describe('Simulation Engines', () => {
     expect(results[0].compoundOutputs?.pfna).toBeDefined();
     expect(results[0].compoundOutputs?.genx).toBeDefined();
   });
+
+  it('correctly uses compoundId to parameterize active chemical kinetics', () => {
+    const pfoaResults = runMonteCarloSimulation(defaultParameters, 50, 42, 'pfoa');
+    const genxResults = runMonteCarloSimulation(defaultParameters, 50, 42, 'genx');
+
+    // GenX has higher Vd (0.40 vs 0.17) -> lower serum Css for same dose
+    expect(genxResults[0].steadyStateConcentration).toBeLessThan(pfoaResults[0].steadyStateConcentration);
+    // GenX has higher RfD (0.03 vs 0.0015) -> lower HQ for same dose
+    expect(genxResults[0].hazardQuotient).toBeLessThan(pfoaResults[0].hazardQuotient);
+  });
 });
 
