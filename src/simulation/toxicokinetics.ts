@@ -539,7 +539,7 @@ export function calculateDetailedCriticalAnalysis(
       isExceeded: durationExceeded,
       status: durationStatus,
       direction: 'range',
-      explanation: 'Chronic exposure duration (25 to 30 years) achieving 99%+ of steady-state equilibrium capacity for PFOA/PFNA (5 to 8 biological half-lives), and ~87–91% for longer-lived PFHxS.',
+      explanation: 'Chronic exposure duration (25 to 30 years) achieving 99%+ of steady-state equilibrium capacity for PFOA/PFNA (5 to 8 biological half-lives), and 87% to 91% for longer-lived PFHxS.',
       formula: 't_{\\text{crit}} = -\\frac{T_{1/2}}{\\ln(2)} \\ln\\left(1 - \\frac{BW \\times \\text{RfD}}{I}\\right)',
     },
   ];

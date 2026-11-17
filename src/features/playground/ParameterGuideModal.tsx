@@ -123,7 +123,7 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '40 to 50 years',
     recommendedDist: 'Uniform (25 to 30) for baseline average, or Fixed (30)',
     source: 'US EPA Superfund Standard Default Exposure Factors (30-yr residential)',
-    description: 'Duration of chronic exposure. For PFOA and PFNA (half-lives ~3.2–3.8 years), 25 to 30 years represents 6.5 to 9 half-lives, reaching over 99% of steady-state accumulation (and ~87–91% for longer-lived PFHxS).',
+    description: 'Duration of chronic exposure. For PFOA and PFNA (half-lives approximately 3.2 to 3.8 years), 25 to 30 years represents 6.5 to 9 half-lives, reaching over 99% of steady-state accumulation (and 87% to 91% for longer-lived PFHxS).',
     criticalCutoff: 't \\ge 25\\text{ to }30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
   },
 ];
@@ -373,7 +373,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                     Click <strong>&quot;Execute Simulation&quot;</strong> and view the analytical tabs:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
-                    <li><strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient <MathView math="HQ = 1.0" />.</li>
+                    <li><strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient <MathView math="HQ = 1.0" /> and cumulative mixture Hazard Index <MathView math="HI = 1.0" />.</li>
                     <li><strong>Histogram and CDF:</strong> Population serum concentration density and tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</li>
                     <li><strong>Time-Course Kinetics:</strong> Dynamic multi-year bioaccumulation curves up to 40 years.</li>
                     <li><strong>Tornado Sensitivity:</strong> Spearman rank correlation (<MathView math="\rho" />) identifying primary exposure drivers.</li>

@@ -155,6 +155,10 @@ export const DocsPage: React.FC = () => {
                 <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                 <span>Maintains random variation across the sample while ensuring coverage of upper-tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</span>
               </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <span>Offloads sampling computations to a background Web Worker so the main browser thread stays responsive.</span>
+              </li>
             </ul>
           </div>
         </div>
@@ -189,6 +193,16 @@ export const DocsPage: React.FC = () => {
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               At chronic exposure durations (<MathView math="t = 25 - 30\text{ years}" />), internal retention reaches &gt;99% of steady-state capacity for PFOA/PFNA and &gt;87% for PFHxS (<MathView math="B_{\text{crit, ss}} = \frac{BW \cdot \text{RfD} \cdot f_{\text{abs}}}{k_e}" />).
+            </p>
+          </div>
+
+          <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5 col-span-1 md:col-span-2">
+            <h3 className="text-teal-900 font-bold text-sm font-heading">Cumulative PFAS mixture Hazard Index (HI)</h3>
+            <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
+              <MathView math="HI = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}" block />
+            </div>
+            <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
+              Under US EPA and ATSDR guidelines for PFAS mixtures, cumulative risk is evaluated by summing individual hazard quotients across target chemicals. An <MathView math="HI \le 1.0" /> indicates that combined mixture exposure remains within non-cancer safety benchmarks, while an <MathView math="HI > 1.0" /> indicates elevated cumulative risk.
             </p>
           </div>
         </div>

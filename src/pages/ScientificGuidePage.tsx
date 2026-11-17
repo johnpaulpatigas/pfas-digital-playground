@@ -68,7 +68,7 @@ export const ScientificGuidePage: React.FC = () => {
               <span>Risk assessment</span>
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
-              Hazard Quotient (HQ), MCL thresholds, and population tail risk (<MathView math="P_{95}" />, <MathView math="P_{99}" />).
+              Hazard Quotient (HQ), Mixture Hazard Index (HI), and population tail risk (<MathView math="P_{95}" />, <MathView math="P_{99}" />).
             </p>
           </button>
 
@@ -147,10 +147,10 @@ export const ScientificGuidePage: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
-                    1. Health risk assessment and Hazard Quotient (HQ)
+                    1. Health risk assessment: Hazard Quotient (HQ) and Hazard Index (HI)
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
-                    Evaluating predicted exposure against regulatory and toxicological safety benchmarks.
+                    Evaluating predicted exposure against regulatory benchmarks and oral reference doses.
                   </p>
                 </div>
               </div>
@@ -166,30 +166,43 @@ export const ScientificGuidePage: React.FC = () => {
               </div>
 
               {/* Mathematical Equations Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-mono text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 font-mono text-xs">
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-900 text-sm font-heading">Hazard Quotient (HQ)</span>
                     <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">Equation 1</span>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
-                    <MathView math="HQ = \frac{C_{ss}}{\text{Guideline MCL}}" block />
+                    <MathView math="HQ = \frac{I / BW}{\text{RfD}}" block />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                    Ratio of predicted steady-state serum concentration (<MathView math="C_{ss}" />) to the compound Maximum Contaminant Level (MCL) or reference concentration.
+                    Ratio of estimated daily chemical intake per kilogram (<MathView math="I / BW" /> in &micro;g/kg/day) to the chemical-specific oral Reference Dose (<MathView math="\text{RfD}" />).
                   </p>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-sm font-heading">Population exceedance fraction</span>
+                    <span className="font-bold text-slate-900 text-sm font-heading">Mixture Hazard Index (HI)</span>
                     <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">Equation 2</span>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
-                    <MathView math="P(HQ > 1.0) = \frac{1}{N}\sum_{i=1}^N \mathbb{I}(HQ_i > 1.0) \times 100\%" block />
+                    <MathView math="HI = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}" block />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                    The proportion of sampled iterations where predicted exposure exceeds the benchmark safety threshold (<MathView math="HQ > 1.0" />).
+                    Cumulative risk metric summing individual hazard quotients across target PFAS compounds under an assumption of dose additivity.
+                  </p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-sm font-heading">Population exceedance</span>
+                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">Equation 3</span>
+                  </div>
+                  <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
+                    <MathView math="P(HQ > 1) = \frac{1}{N}\sum_{i=1}^N \mathbb{I}(HQ_i > 1)" block />
+                  </div>
+                  <p className="text-slate-600 text-xs font-sans leading-relaxed">
+                    Proportion of sampled iterations where individual exposure (<MathView math="HQ > 1.0" />) or cumulative mixture exposure (<MathView math="HI > 1.0" />) crosses the safety benchmark.
                   </p>
                 </div>
               </div>
@@ -197,26 +210,26 @@ export const ScientificGuidePage: React.FC = () => {
               {/* Decision Benchmark Table */}
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <h3 className="font-bold text-slate-900 font-heading text-sm">
-                  Hazard Quotient (HQ) decision benchmarks
+                  Hazard Quotient (HQ) and Hazard Index (HI) decision benchmarks
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
                   <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      <span className="font-bold font-mono text-emerald-900">HQ &le; 1.0: within acceptable safety benchmark</span>
+                      <span className="font-bold font-mono text-emerald-900">HQ &le; 1.0 and HI &le; 1.0: within acceptable safety benchmark</span>
                     </div>
                     <p className="text-emerald-800 leading-relaxed text-[11px]">
-                      The predicted steady-state serum level is within non-cancer toxicological safety limits. No adverse effect is anticipated under chronic baseline conditions.
+                      Predicted intake and cumulative mixture exposure remain below non-cancer toxicological safety thresholds. No adverse effect is anticipated under chronic baseline conditions.
                     </p>
                   </div>
 
                   <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-950 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                      <span className="font-bold font-mono text-rose-900">HQ &gt; 1.0: elevated risk threshold</span>
+                      <span className="font-bold font-mono text-rose-900">HQ &gt; 1.0 or HI &gt; 1.0: elevated risk threshold</span>
                     </div>
                     <p className="text-rose-800 leading-relaxed text-[11px]">
-                      Predicted exposure exceeds the health reference dose. Indicates that exposure reduction, water filtration, or biomonitoring should be evaluated.
+                      Predicted individual dose or combined mixture exposure exceeds toxicological reference levels. Indicates that exposure reduction, water filtration, or biomonitoring should be evaluated.
                     </p>
                   </div>
                 </div>
@@ -503,7 +516,7 @@ export const ScientificGuidePage: React.FC = () => {
                     </div>
                     <div className="flex justify-between p-2 rounded bg-white border border-slate-200">
                       <span>Elimination half-life:</span>
-                      <strong>Mean 3.2 yrs (PFOA/PFOS)</strong>
+                      <strong>3.2 to 5.4 yrs (PFOA, PFOS, PFNA)</strong>
                     </div>
                   </div>
                 </div>
