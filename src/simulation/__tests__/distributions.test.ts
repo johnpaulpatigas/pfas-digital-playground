@@ -5,6 +5,7 @@ import {
   normalInverseCDF,
   sampleDistribution,
   quantileDistribution,
+  getDistributionMean,
 } from '../distributions';
 
 describe('Distributions Engine', () => {
@@ -77,5 +78,29 @@ describe('Distributions Engine', () => {
     const triangularVal = quantileDistribution({ type: 'triangular', min: 0, mode: 5, max: 10 }, 0.5);
     expect(triangularVal).toBeGreaterThan(0);
     expect(triangularVal).toBeLessThan(10);
+
+    const lognormalVal = quantileDistribution({ type: 'lognormal', mean: 50, sd: 10 }, 0.5);
+    expect(lognormalVal).toBeGreaterThan(45);
+    expect(lognormalVal).toBeLessThan(55);
+  });
+
+  it('sampleDistribution accurately produces lognormal samples with matching arithmetic mean', () => {
+    const prng = createPRNG(42);
+    const m = 55.4;
+    const s = 8.2;
+    const samples: number[] = [];
+    for (let i = 0; i < 10000; i++) {
+      samples.push(sampleDistribution({ type: 'lognormal', mean: m, sd: s }, prng));
+    }
+    const sampleMean = samples.reduce((a, b) => a + b, 0) / samples.length;
+    expect(sampleMean).toBeCloseTo(m, 0); // Should be very close to 55.4
+  });
+
+  it('getDistributionMean correctly extracts expected values across all distribution types', () => {
+    expect(getDistributionMean({ type: 'fixed', value: 42 })).toBe(42);
+    expect(getDistributionMean({ type: 'uniform', min: 10, max: 30 })).toBe(20);
+    expect(getDistributionMean({ type: 'normal', mean: 70, sd: 5 })).toBe(70);
+    expect(getDistributionMean({ type: 'lognormal', mean: 55.4, sd: 8.2 })).toBe(55.4);
+    expect(getDistributionMean({ type: 'triangular', min: 1, mode: 2, max: 3 })).toBe(2);
   });
 });

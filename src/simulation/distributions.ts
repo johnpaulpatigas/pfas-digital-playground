@@ -74,11 +74,14 @@ export function sampleDistribution(dist: DistributionParams, prng: () => number)
     }
 
     case 'lognormal': {
-      // Mean & SD of underlying normal distribution
       const z = sampleStandardNormal(prng);
-      // If mean > 0 and user provided arithmetic values, convert or use directly
-      const mu = Math.log(dist.mean);
-      const sigma = dist.sd;
+      const m = Math.max(1e-9, dist.mean);
+      const s = Math.max(0, dist.sd);
+      if (s === 0) return m;
+      // Convert arithmetic mean (m) and arithmetic standard deviation (s) to log-normal parameters
+      const varianceRatio = (s * s) / (m * m);
+      const sigma = Math.sqrt(Math.log(1 + varianceRatio));
+      const mu = Math.log(m) - (sigma * sigma) / 2;
       return Math.exp(mu + z * sigma);
     }
 
@@ -115,8 +118,12 @@ export function quantileDistribution(dist: DistributionParams, p: number): numbe
 
     case 'lognormal': {
       const z = normalInverseCDF(prob);
-      const mu = Math.log(dist.mean);
-      const sigma = dist.sd;
+      const m = Math.max(1e-9, dist.mean);
+      const s = Math.max(0, dist.sd);
+      if (s === 0) return m;
+      const varianceRatio = (s * s) / (m * m);
+      const sigma = Math.sqrt(Math.log(1 + varianceRatio));
+      const mu = Math.log(m) - (sigma * sigma) / 2;
       return Math.exp(mu + z * sigma);
     }
 
@@ -128,5 +135,24 @@ export function quantileDistribution(dist: DistributionParams, p: number): numbe
         return dist.max - Math.sqrt((1 - prob) * (dist.max - dist.min) * (dist.max - dist.mode));
       }
     }
+  }
+}
+
+/**
+ * Compute the analytical expected value (mean) of any parameter distribution
+ */
+export function getDistributionMean(dist: DistributionParams, fallback: number = 0): number {
+  switch (dist.type) {
+    case 'fixed':
+      return dist.value;
+    case 'uniform':
+      return (dist.min + dist.max) / 2;
+    case 'normal':
+    case 'lognormal':
+      return dist.mean;
+    case 'triangular':
+      return (dist.min + dist.mode + dist.max) / 3;
+    default:
+      return fallback;
   }
 }
