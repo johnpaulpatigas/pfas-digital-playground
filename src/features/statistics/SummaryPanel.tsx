@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { SummaryStatistics, SensitivityRank, IterationResult, SimulationParameters } from '../../types';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { calculateExceedanceRangeStats, calculateCompoundSummaries } from '../../simulation/toxicokinetics';
+import { getDistributionMean } from '../../simulation/distributions';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info, Scale, ChevronRight } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
@@ -92,12 +93,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   const exceedanceStats = useMemo(() => {
     if (!results || results.length === 0 || !parameters) return null;
-    const pBw = parameters.bodyWeight.distribution;
-    const meanBW = pBw.type === 'fixed' ? pBw.value : (pBw.type === 'normal' || pBw.type === 'lognormal') ? pBw.mean : 55;
-    const pBio = parameters.bioavailability.distribution;
-    const meanBio = pBio.type === 'fixed' ? pBio.value : (pBio.type === 'normal' || pBio.type === 'lognormal') ? pBio.mean : 0.9;
-    const pHalfLife = parameters.eliminationHalfLife.distribution;
-    const meanHalfLife = pHalfLife.type === 'fixed' ? pHalfLife.value : (pHalfLife.type === 'normal' || pHalfLife.type === 'lognormal') ? pHalfLife.mean : activeCompound.halfLifeYears;
+    const meanBW = getDistributionMean(parameters.bodyWeight.distribution, 55);
+    const meanBio = getDistributionMean(parameters.bioavailability.distribution, 0.9);
+    const meanHalfLife = getDistributionMean(parameters.eliminationHalfLife.distribution, activeCompound.halfLifeYears);
     return calculateExceedanceRangeStats(results, activeCompound, meanBW, meanBio, meanHalfLife, parameters);
   }, [results, activeCompound, parameters]);
 

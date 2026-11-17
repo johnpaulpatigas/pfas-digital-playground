@@ -5,6 +5,7 @@ import {
   calculateDetailedCriticalAnalysis,
   calculateExceedanceRangeStats,
 } from '../../simulation/toxicokinetics';
+import { getDistributionMean } from '../../simulation/distributions';
 import type { IterationResult, SimulationParameters, ParameterCriticalThreshold } from '../../types';
 import { MathView } from '../../components/ui/MathView';
 import {
@@ -41,41 +42,13 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
   const compound = PFAS_COMPOUNDS.find((c) => c.id === selectedCompoundId) || PFAS_COMPOUNDS[0];
   const [metricView, setMetricView] = useState<'bodyBurden' | 'serum'>('bodyBurden');
 
-  const paramMeanBW = useMemo(() => {
-    const p = parameters.bodyWeight.distribution;
-    if (p.type === 'fixed') return p.value;
-    if (p.type === 'uniform') return (p.min + p.max) / 2;
-    if (p.type === 'normal' || p.type === 'lognormal') return p.mean;
-    if (p.type === 'triangular') return (p.min + p.mode + p.max) / 3;
-    return 55;
-  }, [parameters.bodyWeight]);
-
-  const paramMeanBioavail = useMemo(() => {
-    const p = parameters.bioavailability.distribution;
-    if (p.type === 'fixed') return p.value;
-    if (p.type === 'uniform') return (p.min + p.max) / 2;
-    if (p.type === 'normal' || p.type === 'lognormal') return p.mean;
-    if (p.type === 'triangular') return (p.min + p.mode + p.max) / 3;
-    return 0.9;
-  }, [parameters.bioavailability]);
-
-  const paramMeanHalfLife = useMemo(() => {
-    const p = parameters.eliminationHalfLife.distribution;
-    if (p.type === 'fixed') return p.value;
-    if (p.type === 'uniform') return (p.min + p.max) / 2;
-    if (p.type === 'normal' || p.type === 'lognormal') return p.mean;
-    if (p.type === 'triangular') return (p.min + p.mode + p.max) / 3;
-    return compound.halfLifeYears;
-  }, [parameters.eliminationHalfLife, compound.halfLifeYears]);
-
-  const paramMeanDuration = useMemo(() => {
-    const p = parameters.exposureDuration.distribution;
-    if (p.type === 'fixed') return p.value;
-    if (p.type === 'uniform') return (p.min + p.max) / 2;
-    if (p.type === 'normal' || p.type === 'lognormal') return p.mean;
-    if (p.type === 'triangular') return (p.min + p.mode + p.max) / 3;
-    return 20;
-  }, [parameters.exposureDuration]);
+  const paramMeanBW = useMemo(() => getDistributionMean(parameters.bodyWeight.distribution, 55), [parameters.bodyWeight]);
+  const paramMeanBioavail = useMemo(() => getDistributionMean(parameters.bioavailability.distribution, 0.9), [parameters.bioavailability]);
+  const paramMeanHalfLife = useMemo(
+    () => getDistributionMean(parameters.eliminationHalfLife.distribution, compound.halfLifeYears),
+    [parameters.eliminationHalfLife, compound.halfLifeYears]
+  );
+  const paramMeanDuration = useMemo(() => getDistributionMean(parameters.exposureDuration.distribution, 20), [parameters.exposureDuration]);
 
   const analyticalThresholds = useMemo(() => {
     return calculateCriticalThresholds(
