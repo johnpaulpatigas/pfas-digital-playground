@@ -68,9 +68,9 @@ describe('Toxicokinetics Engine', () => {
     const pfoa = PFAS_COMPOUNDS.find((c) => c.id === 'pfoa')!;
     const thresholds = calculateCriticalThresholds(pfoa, 55, 0.9, 3.8);
 
-    // Critical daily intake = BW * RfD = 55 * 1.5e-6 = 8.25e-5 ug/day
-    expect(thresholds.criticalDailyIntake).toBeCloseTo(55 * 1.5e-6, 8);
-    expect(thresholds.criticalDailyDosePerKg).toBe(1.5e-6);
+    // Critical daily intake = BW * RfD = 55 * 0.0015 = 0.0825 ug/day
+    expect(thresholds.criticalDailyIntake).toBeCloseTo(55 * 0.0015, 6);
+    expect(thresholds.criticalDailyDosePerKg).toBe(0.0015);
     expect(thresholds.criticalSerumConcentration).toBeGreaterThan(0);
     expect(thresholds.criticalBodyBurden).toBeGreaterThan(0);
     expect(thresholds.epaMCLConcentration).toBe(0.004); // 4 ng/L = 0.004 ug/L
@@ -145,9 +145,9 @@ describe('Toxicokinetics Engine', () => {
   it('calculateDetailedCriticalAnalysis accurately evaluates all 6 critical parameters and detects body burden exceedance', () => {
     const pfoa = PFAS_COMPOUNDS.find((c) => c.id === 'pfoa')!;
 
-    // Scenario 1: Safe baseline below critical thresholds
+    // Scenario 1: Safe baseline below critical thresholds (0.05 ug/d for 55.4kg => HQ ~ 0.60)
     const safeParams: SimulationParameters = {
-      dailyIntake: { id: 'dailyIntake', name: 'Daily Intake', unit: 'µg/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.00005 } },
+      dailyIntake: { id: 'dailyIntake', name: 'Daily Intake', unit: 'µg/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.05 } },
       bodyWeight: { id: 'bodyWeight', name: 'Body Weight', unit: 'kg', description: '', scientificContext: '', distribution: { type: 'fixed', value: 55.4 } },
       age: { id: 'age', name: 'Age', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 30 } },
       waterConsumption: { id: 'waterConsumption', name: 'Water', unit: 'L/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 2.0 } },

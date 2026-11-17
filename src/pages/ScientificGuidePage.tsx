@@ -266,7 +266,7 @@ export const ScientificGuidePage: React.FC = () => {
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
                     <strong className="text-purple-950 block">6. Exposure duration (<MathView math="t" />)</strong>
                     <div className="text-purple-900 font-bold">25 to 30 years (equilibrium)</div>
-                    <p className="text-slate-600 text-[10px] font-sans">Corresponds to 6.5 to 8.0 half-lives, reaching more than 99% of steady-state body burden.</p>
+                    <p className="text-slate-600 text-[10px] font-sans">Corresponds to 6.5 to 8.0 half-lives for PFOA/PFNA, reaching over 99% of steady-state body burden (&gt;87% for PFHxS).</p>
                   </div>
                 </div>
               </div>

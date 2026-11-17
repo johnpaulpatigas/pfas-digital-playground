@@ -20,7 +20,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     halfLifeYears: 3.8,
     volumeOfDistribution: 0.17,
     epaMCL: 4.0, // 4 ng/L
-    rfdDose: 0.0000015, // 1.5e-6 ug/kg/day
+    rfdDose: 0.0015, // 0.0015 ug/kg/day = 1.5 ng/kg/day (US EPA toxicological benchmark)
   },
   {
     id: 'pfos',
@@ -31,7 +31,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     halfLifeYears: 5.4,
     volumeOfDistribution: 0.23,
     epaMCL: 4.0, // 4 ng/L
-    rfdDose: 0.0000018, // 1.8e-6 ug/kg/day
+    rfdDose: 0.0018, // 0.0018 ug/kg/day = 1.8 ng/kg/day (US EPA toxicological benchmark)
   },
   {
     id: 'pfhxs',
@@ -42,7 +42,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     halfLifeYears: 8.5,
     volumeOfDistribution: 0.28,
     epaMCL: 10.0, // 10 ng/L
-    rfdDose: 0.000005,
+    rfdDose: 0.005, // 0.005 ug/kg/day = 5.0 ng/kg/day (US EPA toxicological benchmark)
   },
   {
     id: 'pfna',
@@ -53,7 +53,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     halfLifeYears: 3.2,
     volumeOfDistribution: 0.20,
     epaMCL: 10.0, // 10 ng/L
-    rfdDose: 0.000003,
+    rfdDose: 0.003, // 0.003 ug/kg/day = 3.0 ng/kg/day (US EPA toxicological benchmark)
   },
   {
     id: 'genx',
@@ -64,6 +64,6 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     halfLifeYears: 0.2,
     volumeOfDistribution: 0.40,
     epaMCL: 10.0, // 10 ng/L
-    rfdDose: 0.00003,
+    rfdDose: 0.03, // 0.03 ug/kg/day = 30.0 ng/kg/day (US EPA toxicological benchmark)
   },
 ];

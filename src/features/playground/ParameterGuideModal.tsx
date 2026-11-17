@@ -123,7 +123,7 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '40 to 50 years',
     recommendedDist: 'Uniform (25 to 30) for baseline average, or Fixed (30)',
     source: 'US EPA Superfund Standard Default Exposure Factors (30-yr residential)',
-    description: 'Duration of chronic exposure. Because target PFAS half-lives range from 2.7 to 8.5 years, 25 to 30 years represents 5 to 8 half-lives, reaching over 99% of steady-state accumulation.',
+    description: 'Duration of chronic exposure. For PFOA and PFNA (half-lives ~3.2–3.8 years), 25 to 30 years represents 6.5 to 9 half-lives, reaching over 99% of steady-state accumulation (and ~87–91% for longer-lived PFHxS).',
     criticalCutoff: 't \\ge 25\\text{ to }30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
   },
 ];

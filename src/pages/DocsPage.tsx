@@ -188,7 +188,7 @@ export const DocsPage: React.FC = () => {
               <MathView math="B_{\text{crit}}(t) = \frac{BW \cdot \text{RfD} \cdot f_{\text{abs}}}{k_e} \left(1 - e^{-k_e \cdot t}\right)" block />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-              At chronic exposure durations (<MathView math="t = 25 - 30\text{ years}" />), internal retention reaches &gt;99% of steady-state capacity (<MathView math="B_{\text{crit, ss}} = \frac{BW \cdot \text{RfD} \cdot f_{\text{abs}}}{k_e}" />).
+              At chronic exposure durations (<MathView math="t = 25 - 30\text{ years}" />), internal retention reaches &gt;99% of steady-state capacity for PFOA/PFNA and &gt;87% for PFHxS (<MathView math="B_{\text{crit, ss}} = \frac{BW \cdot \text{RfD} \cdot f_{\text{abs}}}{k_e}" />).
             </p>
           </div>
         </div>
