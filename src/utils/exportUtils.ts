@@ -34,6 +34,8 @@ export function exportToCSV(results: IterationResult[], filename = 'pfas_simulat
     'Steady_State_Serum_Css_ug_L',
     'Peak_Body_Burden_ug',
     'Clearance_Rate_L_kg_day',
+    'Hazard_Quotient_HQ',
+    'Mixture_Hazard_Index_HI',
   ];
 
   const rows = results.map((r) => [
@@ -49,6 +51,8 @@ export function exportToCSV(results: IterationResult[], filename = 'pfas_simulat
     r.steadyStateConcentration,
     r.peakBodyBurden,
     r.clearanceRate,
+    parseFloat(r.hazardQuotient.toFixed(4)),
+    parseFloat((r.hazardIndex ?? r.hazardQuotient).toFixed(4)),
   ]);
 
   const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
