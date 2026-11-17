@@ -32,6 +32,8 @@ describe('Toxicokinetics Engine', () => {
     expect(result.peakBodyBurden).toBeGreaterThan(0);
     expect(result.clearanceRate).toBeGreaterThan(0);
     expect(result.hazardQuotient).toBeGreaterThanOrEqual(0);
+    expect(result.hazardIndex).toBeDefined();
+    expect(result.hazardIndex!).toBeGreaterThanOrEqual(result.hazardQuotient);
   });
 
   it('calculateTimeCourseTrajectory generates valid time-course data series', () => {

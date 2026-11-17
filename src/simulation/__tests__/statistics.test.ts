@@ -49,6 +49,8 @@ describe('Statistics Engine', () => {
     expect(stats.p99).toBeGreaterThanOrEqual(stats.p95);
     expect(stats.riskExceedancePercent).toBeGreaterThanOrEqual(0);
     expect(stats.riskExceedancePercent).toBeLessThanOrEqual(100);
+    expect(stats.meanHazardIndex).toBeDefined();
+    expect(stats.mixtureExceedancePercent).toBeDefined();
   });
 
   it('calculateSensitivityRanks computes Spearman correlation ranks', () => {

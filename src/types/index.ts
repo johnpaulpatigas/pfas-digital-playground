@@ -107,6 +107,7 @@ export interface IterationResult {
   peakBodyBurden: number;           // ug
   clearanceRate: number;            // L/kg/day
   hazardQuotient: number;           // HQ = Dose / RfD
+  hazardIndex?: number;             // Cumulative mixture Hazard Index HI = sum(HQ_j)
 
   // Multi-Compound Results (PFOA, PFOS, PFHxS, PFNA, GenX)
   compoundOutputs?: Record<string, CompoundIterationOutput>;
@@ -173,6 +174,8 @@ export interface SummaryStatistics {
   ci95Upper: number;
   meanHazardQuotient: number;
   riskExceedancePercent: number; // Percentage of population exceeding HQ > 1.0
+  meanHazardIndex?: number;      // Mean Cumulative Mixture Hazard Index HI = sum(HQ_j)
+  mixtureExceedancePercent?: number; // Percentage of population exceeding HI > 1.0
 }
 
 // Parameter Sensitivity Ranking

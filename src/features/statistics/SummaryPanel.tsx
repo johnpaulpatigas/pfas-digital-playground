@@ -198,11 +198,23 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-slate-700">
-          <span>Population exceeding HQ &gt; 1.0:</span>
+          <span>Target ({compoundId.toUpperCase()}) HQ &gt; 1.0:</span>
           <span className={`font-bold ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
             {summaryStats.riskExceedancePercent.toFixed(1)}%
           </span>
         </div>
+
+        {summaryStats.meanHazardIndex !== undefined && (
+          <div className="flex items-center justify-between text-[11px] text-slate-700 pt-1.5 border-t border-slate-200/60">
+            <span className="text-slate-600">PFAS Mixture Hazard Index (HI):</span>
+            <span className="font-mono font-bold text-slate-800">
+              Mean HI = {summaryStats.meanHazardIndex.toFixed(2)}{' '}
+              <span className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}>
+                ({(summaryStats.mixtureExceedancePercent || 0).toFixed(1)}% &gt; 1.0)
+              </span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Revamped Critical Burden & Exceedance Matrix: Simple Mode (All 5 PFAS Types) */}

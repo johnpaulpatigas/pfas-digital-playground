@@ -82,8 +82,9 @@ export function calculateToxicokinetics(
   // Hazard Quotient HQ = Dose / Reference Dose (RfD)
   const hazardQuotient = compound.rfdDose > 0 ? dailyDosePerKg / compound.rfdDose : 0;
 
-  // Multi-compound evaluations for all 5 PFAS compounds
+  // Multi-compound evaluations for all 5 PFAS compounds and mixture Hazard Index (HI)
   const compoundOutputs: Record<string, CompoundIterationOutput> = {};
+  let hazardIndex = 0;
   for (let i = 0; i < PFAS_COMPOUNDS.length; i++) {
     const c = PFAS_COMPOUNDS[i];
     const cHalfLife = compoundId === c.id ? eliminationHalfLife : c.halfLifeYears;
@@ -94,6 +95,7 @@ export function calculateToxicokinetics(
     const cBodyBurden = (absorbedDose / cEliminationRate) * (1 - Math.exp(-cEliminationRate * exposureDays));
     const cClearance = cEliminationRate * c.volumeOfDistribution;
     const cHQ = c.rfdDose > 0 ? dailyDosePerKg / c.rfdDose : 0;
+    hazardIndex += cHQ;
 
     compoundOutputs[c.id] = {
       compoundId: c.id,
@@ -119,6 +121,7 @@ export function calculateToxicokinetics(
     peakBodyBurden: Math.max(0, peakBodyBurden),
     clearanceRate,
     hazardQuotient: Math.max(0, hazardQuotient),
+    hazardIndex: Math.max(0, hazardIndex),
     compoundOutputs,
   };
 }

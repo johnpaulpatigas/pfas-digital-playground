@@ -65,6 +65,12 @@ export function calculateSummaryStatistics(
   const exceedanceCount = hqValues.filter((hq) => hq > 1.0).length;
   const riskExceedancePercent = (exceedanceCount / count) * 100;
 
+  // Cumulative Mixture Hazard Index (HI = sum(HQ_j))
+  const hiValues = results.map((r) => (r.hazardIndex !== undefined ? r.hazardIndex : r.hazardQuotient));
+  const meanHazardIndex = hiValues.reduce((acc, v) => acc + v, 0) / count;
+  const mixtureExceedanceCount = hiValues.filter((hi) => hi > 1.0).length;
+  const mixtureExceedancePercent = (mixtureExceedanceCount / count) * 100;
+
   return {
     count,
     mean,
@@ -82,6 +88,8 @@ export function calculateSummaryStatistics(
     ci95Upper,
     meanHazardQuotient,
     riskExceedancePercent,
+    meanHazardIndex,
+    mixtureExceedancePercent,
   };
 }
 
