@@ -18,21 +18,23 @@ interface ScatterPlotChartProps {
 }
 
 export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) => {
-  const { mode } = useSimulationStore();
+  const { mode, samplingConfig } = useSimulationStore();
   const isSimpleMode = mode === 'simple';
-  const [selectedCompoundId, setSelectedCompoundId] = useState<string>('pfoa');
+  const [selectedCompoundId, setSelectedCompoundId] = useState<string | null>(null);
+
+  const activeCompoundId = selectedCompoundId ?? samplingConfig.compoundId ?? 'pfoa';
 
   const { safePoints, exceedingPoints, activeCompound } = useMemo(() => {
     if (!results || results.length === 0) return { safePoints: [], exceedingPoints: [], activeCompound: PFAS_COMPOUNDS[0] };
 
-    const compound = PFAS_COMPOUNDS.find((c) => c.id === selectedCompoundId) || PFAS_COMPOUNDS[0];
+    const compound = PFAS_COMPOUNDS.find((c) => c.id === activeCompoundId) || PFAS_COMPOUNDS[0];
     const step = Math.max(1, Math.floor(results.length / 500));
     const safe: Array<{ x: number; y: number; bw: number; hq: number; bb: number }> = [];
     const exceeding: Array<{ x: number; y: number; bw: number; hq: number; bb: number }> = [];
 
     for (let i = 0; i < results.length; i += step) {
       const r = results[i];
-      const out = isSimpleMode && r.compoundOutputs ? r.compoundOutputs[compound.id] : null;
+      const out = r.compoundOutputs ? r.compoundOutputs[compound.id] : null;
 
       const y = out ? out.steadyStateConcentration : r.steadyStateConcentration;
       const hq = out ? out.hazardQuotient : r.hazardQuotient;
@@ -54,11 +56,11 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
     }
 
     return { safePoints: safe, exceedingPoints: exceeding, activeCompound: compound };
-  }, [results, isSimpleMode, selectedCompoundId]);
+  }, [results, activeCompoundId]);
 
   return (
     <div className="w-full space-y-2 font-mono select-none">
-      {isSimpleMode && (
+      {(isSimpleMode || results?.[0]?.compoundOutputs) && (
         <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[10px]">
           <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">PFAS View:</span>
           {PFAS_COMPOUNDS.map((c) => (
@@ -67,7 +69,7 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
               type="button"
               onClick={() => setSelectedCompoundId(c.id)}
               className={`px-2 py-0.5 rounded font-bold border transition-all cursor-pointer ${
-                selectedCompoundId === c.id
+                activeCompoundId === c.id
                   ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
               }`}
