@@ -91,4 +91,26 @@ describe('useSimulationStore demographic scenario and simple mode synchronizatio
     expect(state.simpleProfile.age).toBe(30);
     expect(state.simpleProfile.waterConsumption).toBe(2.0);
   });
+
+  it('setCompoundId properly updates fixed and distribution parameters for active compound', () => {
+    const store = useSimulationStore.getState();
+
+    // 1. Test fixed distribution update (e.g. GenX half-life = 0.2 yr)
+    store.setParameterDistribution('eliminationHalfLife', { type: 'fixed', value: 3.8 });
+    store.setCompoundId('genx');
+    const genxDist = useSimulationStore.getState().parameters.eliminationHalfLife.distribution;
+    expect(genxDist.type).toBe('fixed');
+    if (genxDist.type === 'fixed') {
+      expect(genxDist.value).toBe(0.2);
+    }
+
+    // 2. Test normal distribution update (e.g. PFHxS half-life = 8.5 yr)
+    store.setParameterDistribution('eliminationHalfLife', { type: 'normal', mean: 3.8, sd: 0.8 });
+    store.setCompoundId('pfhxs');
+    const pfhxsDist = useSimulationStore.getState().parameters.eliminationHalfLife.distribution;
+    expect(pfhxsDist.type).toBe('normal');
+    if (pfhxsDist.type === 'normal') {
+      expect(pfhxsDist.mean).toBe(8.5);
+    }
+  });
 });

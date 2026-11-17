@@ -172,19 +172,62 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   setCompoundId: (compoundId) => {
     const compound = PFAS_COMPOUNDS.find((c) => c.id === compoundId);
     if (compound) {
-      set((state) => ({
-        samplingConfig: { ...state.samplingConfig, compoundId: compound.id },
-        parameters: {
-          ...state.parameters,
-          eliminationHalfLife: {
-            ...state.parameters.eliminationHalfLife,
-            distribution: {
-              ...state.parameters.eliminationHalfLife.distribution,
+      set((state) => {
+        const curDist = state.parameters.eliminationHalfLife.distribution;
+        let updatedDist: DistributionParams;
+
+        switch (curDist.type) {
+          case 'fixed':
+            updatedDist = { type: 'fixed', value: compound.halfLifeYears };
+            break;
+          case 'normal': {
+            const sdRatio = curDist.mean > 0 ? curDist.sd / curDist.mean : 0.25;
+            updatedDist = {
+              type: 'normal',
               mean: compound.halfLifeYears,
-            } as DistributionParams,
+              sd: parseFloat((compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2)),
+            };
+            break;
+          }
+          case 'lognormal': {
+            const sdRatio = curDist.mean > 0 ? curDist.sd / curDist.mean : 0.25;
+            updatedDist = {
+              type: 'lognormal',
+              mean: compound.halfLifeYears,
+              sd: parseFloat((compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2)),
+            };
+            break;
+          }
+          case 'triangular': {
+            updatedDist = {
+              type: 'triangular',
+              min: parseFloat((compound.halfLifeYears * 0.7).toFixed(2)),
+              mode: compound.halfLifeYears,
+              max: parseFloat((compound.halfLifeYears * 1.3).toFixed(2)),
+            };
+            break;
+          }
+          case 'uniform': {
+            updatedDist = {
+              type: 'uniform',
+              min: parseFloat((compound.halfLifeYears * 0.8).toFixed(2)),
+              max: parseFloat((compound.halfLifeYears * 1.2).toFixed(2)),
+            };
+            break;
+          }
+        }
+
+        return {
+          samplingConfig: { ...state.samplingConfig, compoundId: compound.id },
+          parameters: {
+            ...state.parameters,
+            eliminationHalfLife: {
+              ...state.parameters.eliminationHalfLife,
+              distribution: updatedDist,
+            },
           },
-        },
-      }));
+        };
+      });
       get().addLog(`[Compound] Selected chemical compound '${compound.name}' (Half-Life T1/2 = ${compound.halfLifeYears} yrs).`);
     }
   },
