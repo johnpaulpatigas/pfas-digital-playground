@@ -2,13 +2,16 @@ import {
   Activity,
   BarChart2,
   BookOpen,
+  ChevronDown,
   Clock,
   Download,
+  ExternalLink,
   FileSpreadsheet,
   Flame,
   GraduationCap,
   LineChart as LineChartIcon,
   ScatterChart as ScatterIcon,
+  Sparkles,
   Table as TableIcon,
   Zap,
 } from 'lucide-react';
@@ -33,6 +36,137 @@ import { executeSimulationAsync } from '../simulation/runSimulationAsync';
 import { useSimulationStore } from '../stores/useSimulationStore';
 import { exportToCSV, exportToJSON } from '../utils/exportUtils';
 
+type TabId =
+  | 'thresholds'
+  | 'histogram'
+  | 'cdf'
+  | 'timecourse'
+  | 'scatter'
+  | 'tornado'
+  | 'convergence'
+  | 'table';
+
+interface TabMeta {
+  id: TabId;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  whatToLookFor: string[];
+}
+
+const TAB_METADATA: Record<TabId, TabMeta> = {
+  thresholds: {
+    id: 'thresholds',
+    label: 'Exceedance analyzer',
+    icon: Zap,
+    title: 'Toxicokinetic Exceedance & Safety Thresholds',
+    description:
+      'Compares simulated internal exposure against toxicological reference limits (EPA RfD) to determine whether body burden or serum concentration exceeds safe benchmark limits (HQ > 1.0).',
+    whatToLookFor: [
+      'In the area chart, the vertical red dashed line marks the critical threshold; the red shaded area to the right shows iterations with HQ > 1.0.',
+      'Use the toggle buttons to switch between Body Burden (µg) and Serum Concentration (µg/L) views.',
+      'Check the status banner for the baseline Hazard Quotient (HQ) and equilibrium progress percentage.',
+      'Review the Analytical Parameter Thresholds table to identify which input variable is closest to or exceeding its critical limit.',
+    ],
+  },
+  histogram: {
+    id: 'histogram',
+    label: 'Histogram',
+    icon: BarChart2,
+    title: 'Blood Serum Concentration Distribution (Css)',
+    description:
+      'Shows the frequency distribution of predicted steady-state blood serum concentrations (Css) across all simulated iterations.',
+    whatToLookFor: [
+      'The highest bar indicates the modal concentration range where most simulated iterations cluster.',
+      'Bars stretching toward the right show iterations that reached higher concentrations due to combinations of higher daily intake, lower body weight, or longer half-life.',
+      'Hover over any bar to see its concentration midpoint and exact percentage frequency.',
+      'Use the PFAS View buttons above the chart to inspect serum concentration distributions for each compound.',
+    ],
+  },
+  cdf: {
+    id: 'cdf',
+    label: 'CDF',
+    icon: LineChartIcon,
+    title: 'Cumulative Distribution Function (CDF)',
+    description:
+      'Plots the cumulative percentage of simulation iterations resulting in serum concentrations at or below any given value.',
+    whatToLookFor: [
+      'Locate where the curve crosses the horizontal dashed lines at 50% (P50 median) and 95% (P95 upper boundary).',
+      'In Simple Mode, compare all 5 PFAS curves side-by-side to see which compounds shift furthest right toward higher concentrations.',
+      'Steeper S-curves indicate tighter clustering of iteration values; flatter curves reflect wider input variability.',
+    ],
+  },
+  timecourse: {
+    id: 'timecourse',
+    label: 'Time course C(t)',
+    icon: Clock,
+    title: 'Dynamic Bioaccumulation Trajectory C(t)',
+    description:
+      'Models chronic serum accumulation over up to 40 years of exposure using 1-compartment first-order elimination kinetics (C(t) = Css(1 - e^(-ke*t))).',
+    whatToLookFor: [
+      'In Simple Mode, compare trajectories across all 5 compounds: long half-life PFAS (PFHxS 8.5y, PFOS 5.4y, PFOA 3.8y) climb for decades, while GenX (0.2y) plateaus in months.',
+      'In Advanced Mode, observe the solid blue Mean trajectory bounded by the shaded P95 upper area and dashed P5 lower line.',
+      'The point where a curve levels off horizontally marks steady-state equilibrium where daily intake equals daily elimination.',
+    ],
+  },
+  scatter: {
+    id: 'scatter',
+    label: 'Scatter plot',
+    icon: ScatterIcon,
+    title: 'Intake Rate vs. Serum Concentration Correlation',
+    description:
+      'Plots daily intake (µg/day) against steady-state serum concentration (µg/L) for sampled simulation iterations.',
+    whatToLookFor: [
+      'Teal dots represent safe iterations (HQ ≤ 1.0); red dots represent iterations exceeding reference limits (HQ > 1.0).',
+      'Vertical spread at the same intake level reflects variations in sampled body weight and elimination half-life.',
+      'Hover over any point to inspect that iteration’s intake, serum concentration, body burden, and calculated HQ.',
+      'Use the PFAS View buttons above the chart to switch between compounds.',
+    ],
+  },
+  tornado: {
+    id: 'tornado',
+    label: 'Sensitivity rankings',
+    icon: Flame,
+    title: 'Sensitivity Analysis & Parameter Rankings (Tornado)',
+    description:
+      'Ranks input parameters by their Spearman rank correlation (ρ) with steady-state serum concentration.',
+    whatToLookFor: [
+      'The top bar has the strongest correlation with serum concentration (|ρ|), meaning it drives the most variance in the output.',
+      'Teal bars pointing right (ρ > 0) indicate positive correlation (increasing the input increases serum concentration).',
+      'Red bars pointing left (ρ < 0) indicate negative correlation (e.g. higher body weight dilutes the concentration across a larger volume).',
+      'Bars near zero (|ρ| < 0.1) have little effect on serum concentration variance.',
+    ],
+  },
+  convergence: {
+    id: 'convergence',
+    label: 'Convergence',
+    icon: Activity,
+    title: 'Monte Carlo Convergence Stability',
+    description:
+      'Plots the running mean of steady-state concentration as simulation iterations accumulate to evaluate sample stability.',
+    whatToLookFor: [
+      'In Simple Mode, compare running means for all 5 compounds; in Advanced Mode, observe the single compound mean trajectory.',
+      'Check whether the running mean line fluctuates at low iteration counts and flattens into a horizontal line as iterations accumulate.',
+      'A flat, horizontal line confirms that the number of iterations (N) is sufficiently large to eliminate random sampling error.',
+    ],
+  },
+  table: {
+    id: 'table',
+    label: 'Data table',
+    icon: TableIcon,
+    title: 'Raw Simulation Iteration Records',
+    description:
+      'Provides record-level inspection of individual simulation iterations with sampled inputs and calculated outputs.',
+    whatToLookFor: [
+      'Filter records using the "All", "Exceeding HQ > 1.0", or "Safe" buttons to focus on specific cohorts.',
+      'Use the search box to locate a specific iteration number.',
+      'In Simple Mode, compare compound columns (PFOA, PFOS, PFHxS, PFNA, GenX) and Max HQ for each iteration.',
+      'In Advanced Mode, inspect sampled Half-Life alongside resulting Body Burden, Serum Css, and HQ.',
+    ],
+  },
+};
+
 export const PlaygroundPage: React.FC = () => {
   const {
     mode,
@@ -48,16 +182,8 @@ export const PlaygroundPage: React.FC = () => {
 
   const isSimpleMode = mode === 'simple';
 
-  const [activeTab, setActiveTab] = useState<
-    | 'thresholds'
-    | 'histogram'
-    | 'cdf'
-    | 'timecourse'
-    | 'scatter'
-    | 'tornado'
-    | 'convergence'
-    | 'table'
-  >('thresholds');
+  const [activeTab, setActiveTab] = useState<TabId>('thresholds');
+  const [isGuidanceOpen, setIsGuidanceOpen] = useState(false);
 
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
   const [tableSearch, setTableSearch] = useState('');
@@ -66,6 +192,9 @@ export const PlaygroundPage: React.FC = () => {
 
   const activeCompound =
     PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
+
+  const activeTabMeta = TAB_METADATA[activeTab];
+  const ActiveTabIcon = activeTabMeta.icon;
 
   const executeSimulation = useCallback(() => {
     setIsSimulating(true);
@@ -186,22 +315,14 @@ export const PlaygroundPage: React.FC = () => {
             {/* Scrollable Navigation Tabs on Mobile */}
             <div className="border-b border-slate-200 pb-3">
               <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap no-scrollbar py-1">
-                {[
-                  { id: 'thresholds', label: 'Exceedance analyzer', icon: Zap },
-                  { id: 'histogram', label: 'Histogram', icon: BarChart2 },
-                  { id: 'cdf', label: 'CDF', icon: LineChartIcon },
-                  { id: 'timecourse', label: 'Time course C(t)', icon: Clock },
-                  { id: 'scatter', label: 'Scatter plot', icon: ScatterIcon },
-                  { id: 'tornado', label: 'Sensitivity rankings', icon: Flame },
-                  { id: 'convergence', label: 'Convergence', icon: Activity },
-                  { id: 'table', label: 'Data table', icon: TableIcon },
-                ].map((tab) => {
+                {Object.values(TAB_METADATA).map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
                   return (
                     <button
                       key={tab.id}
-                      onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
                       className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium font-mono transition-colors flex-shrink-0 cursor-pointer ${
                         isActive
                           ? 'text-white font-semibold'
@@ -223,6 +344,72 @@ export const PlaygroundPage: React.FC = () => {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Active Tab Description Header */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 sm:p-3.5 text-xs space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2 font-bold text-slate-800 font-heading text-xs">
+                  <ActiveTabIcon className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>{activeTabMeta.title}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsGuidanceOpen((prev) => !prev)}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-sans font-semibold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 shadow-2xs transition-all cursor-pointer"
+                    aria-expanded={isGuidanceOpen}
+                    aria-label="Toggle what to look for guidance"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                    <span>What to look for</span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 text-blue-600 transition-transform duration-200 ${
+                        isGuidanceOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+              <p className="text-[11px] font-sans text-slate-600 leading-relaxed">
+                {activeTabMeta.description}
+              </p>
+
+              {/* Collapsible Guidance Dropdown */}
+              <AnimatePresence initial={false}>
+                {isGuidanceOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.18, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-2.5 border-t border-slate-200/60 bg-blue-50/50 p-3 rounded-md border border-blue-100/80 text-[11px] space-y-2 mt-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 text-blue-900 font-bold font-sans text-[11px]">
+                          <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <span>Specific indicators to look for:</span>
+                        </div>
+                        <Link
+                          to="/guide"
+                          className="text-[10.5px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 transition-colors"
+                        >
+                          <span>Full scientific guide</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </div>
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700 text-[10.5px] font-sans list-disc list-inside">
+                        {activeTabMeta.whatToLookFor.map((item, idx) => (
+                          <li key={idx} className="leading-snug marker:text-blue-500">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Active Chart View */}

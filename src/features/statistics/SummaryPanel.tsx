@@ -4,7 +4,6 @@ import {
   Award,
   ChevronRight,
   Cpu,
-  Info,
   Scale,
   ShieldAlert,
   ShieldCheck,
@@ -12,7 +11,7 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { GuidanceTooltip } from '../../components/ui/GuidanceTooltip';
 import { MathView } from '../../components/ui/MathView';
 import { getDistributionMean } from '../../simulation/distributions';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
@@ -205,13 +204,17 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
               Health risk quotient (HQ)
             </span>
-            <Link
-              to="/guide"
-              title="Read scientific guide on health risk assessment and HQ"
-              className="text-slate-400 hover:text-blue-600 transition-colors p-0.5"
-            >
-              <Info className="w-3.5 h-3.5" />
-            </Link>
+            <GuidanceTooltip
+              title="Health Risk Quotient (HQ) & Mixture Risk"
+              summary="Toxicological comparison of simulated daily intake against EPA reference doses."
+              items={[
+                'Hazard Quotient (HQ): Ratio of daily intake to the compound Reference Dose (RfD). HQ ≤ 1.0 is within benchmark limits; HQ > 1.0 indicates the RfD is exceeded.',
+                'Target HQ > 1.0 %: Percentage of simulated iterations where daily intake per kg body weight exceeds the RfD for this compound.',
+                'Mixture Hazard Index (HI): Sum of Hazard Quotients across all 5 PFAS compounds (∑ HQ_i). HI > 1.0 indicates combined exposure exceeds the cumulative threshold even if individual compounds are below 1.0.',
+              ]}
+              guideLink="/guide"
+              align="right"
+            />
           </div>
           <span
             className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
@@ -407,13 +410,17 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 Top exposure driver
               </span>
             </div>
-            <Link
-              to="/guide"
-              title="Read scientific guide on sensitivity analysis and Spearman rank"
-              className="text-amber-700 hover:text-amber-950 transition-colors p-0.5"
-            >
-              <Info className="w-3.5 h-3.5" />
-            </Link>
+            <GuidanceTooltip
+              title="Top Exposure Driver & Sensitivity Ranking"
+              summary="Spearman rank correlation measures which input variables drive variance in steady-state serum concentration."
+              items={[
+                'Top Parameter: The input variable with the strongest correlation to predicted steady-state serum concentration.',
+                'Spearman Rank (ρ): Values near +1.0 indicate positive drivers (e.g. higher water intake increases serum concentration); values near -1.0 indicate inverse relationships (e.g. higher body weight dilutes dose across volume).',
+                'Application: Shows which parameter change produces the largest reduction in serum concentration.',
+              ]}
+              guideLink="/guide"
+              align="right"
+            />
           </div>
           <div className="text-slate-900 font-bold text-xs font-sans">
             {sensitivityRanks[0].parameterName}
