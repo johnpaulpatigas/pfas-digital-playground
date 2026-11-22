@@ -143,7 +143,9 @@ export interface CompoundSummary {
 
   // Risk Metrics
   meanHazardQuotient: number; // Mean HQ
+  medianHazardQuotient: number; // Median HQ (needed for H0 4)
   riskExceedancePercent: number; // % of cohort exceeding HQ > 1.0
+  wilcoxonTest?: WilcoxonOneSampleResult; // Formal H0 4 test result against threshold 1.0
   isBurdenExceeded: boolean;
   status: 'safe' | 'borderline' | 'exceeded';
 }

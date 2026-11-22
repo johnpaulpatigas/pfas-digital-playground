@@ -9,6 +9,7 @@ import type {
   ParameterCriticalThreshold,
   SimulationParameters,
 } from '../types';
+import { calculateOneSampleWilcoxon } from './statistics';
 import { PFAS_COMPOUNDS, type PFASCompound } from './pfasCompounds';
 
 export interface ToxicokineticInput {
@@ -741,7 +742,10 @@ export function calculateCompoundSummaries(
 
     const sumHq = hqVals.reduce((acc, v) => acc + v, 0);
     const meanHazardQuotient = sumHq / totalCount;
+    const sortedHq = [...hqVals].sort((a, b) => a - b);
+    const medianHazardQuotient = quantileSorted(sortedHq, 0.5);
     const riskExceedancePercent = (exceedingCss.length / totalCount) * 100;
+    const wilcoxonTest = calculateOneSampleWilcoxon(hqVals, 1.0);
 
     const thresholds = calculateCriticalThresholds(
       compound,
@@ -797,7 +801,9 @@ export function calculateCompoundSummaries(
       exceedingBodyBurdenMin: parseFloat(exceedingBodyBurdenMin.toFixed(3)),
       exceedingBodyBurdenMax: parseFloat(exceedingBodyBurdenMax.toFixed(3)),
       meanHazardQuotient: parseFloat(meanHazardQuotient.toFixed(2)),
+      medianHazardQuotient: parseFloat(medianHazardQuotient.toFixed(2)),
       riskExceedancePercent: parseFloat(riskExceedancePercent.toFixed(1)),
+      wilcoxonTest,
       isBurdenExceeded,
       status,
     };

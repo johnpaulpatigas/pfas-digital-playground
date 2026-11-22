@@ -124,6 +124,18 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                       (T1/2 = {summary.halfLifeYears} yrs)
                     </span>
                   </div>
+                  <div className="flex items-center gap-1 text-[10px]">
+                    <span className="text-slate-500">Median HQ:</span>
+                    <span
+                      className={`font-mono font-bold ${
+                        (summary.medianHazardQuotient ?? 0) > 1.0
+                          ? 'text-red-600'
+                          : 'text-slate-800'
+                      }`}
+                    >
+                      {(summary.medianHazardQuotient ?? summary.meanHazardQuotient).toFixed(2)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* 2-Column Side-by-Side: Average Css beside Average Body Burden */}
@@ -182,12 +194,12 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       <div
         className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-2.5 gap-y-1.5 border-b border-slate-200 pb-2">
           <div className="flex items-center gap-1.5">
             {isHighRisk ? (
-              <AlertTriangle className="w-4 h-4 text-red-600" />
+              <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
             ) : (
-              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
             )}
             <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
               Health risk quotient (HQ)
@@ -203,35 +215,85 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
               align="right"
             />
           </div>
-          <span
-            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-              isHighRisk
-                ? 'bg-red-50 text-red-700 border-red-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
-            }`}
-          >
-            Mean HQ = {summaryStats.meanHazardQuotient.toFixed(2)}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+            <span
+              className={`px-2 py-0.5 rounded text-[10px] font-bold border whitespace-nowrap shrink-0 ${
+                isHighRisk
+                  ? 'bg-red-50 text-red-700 border-red-200'
+                  : 'bg-blue-50 text-blue-700 border-blue-200'
+              }`}
+            >
+              Median HQ = {(summaryStats.medianHazardQuotient ?? summaryStats.meanHazardQuotient).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap shrink-0">
+              (Mean {summaryStats.meanHazardQuotient.toFixed(2)})
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-700">
+        <div className="flex items-center justify-between gap-2 text-[11px] text-slate-700">
           <span>Target ({compoundId.toUpperCase()}) HQ &gt; 1.0:</span>
-          <span className={`font-bold ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
+          <span className={`font-bold font-mono shrink-0 whitespace-nowrap ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
             {summaryStats.riskExceedancePercent.toFixed(1)}%
           </span>
         </div>
 
-        {summaryStats.meanHazardIndex !== undefined && (
-          <div className="flex items-center justify-between text-[11px] text-slate-700 pt-1.5 border-t border-slate-200/60">
-            <span className="text-slate-600">PFAS Mixture Hazard Index (HI):</span>
-            <span className="font-mono font-bold text-slate-800">
-              Mean HI = {summaryStats.meanHazardIndex.toFixed(2)}{' '}
-              <span
-                className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}
-              >
-                ({(summaryStats.mixtureExceedancePercent || 0).toFixed(1)}% &gt; 1.0)
+        {/* H0 4 Wilcoxon Signed-Rank Test Evaluation for Target Compound */}
+        {summaryStats.wilcoxonHQ && (
+          <div className="pt-1.5 border-t border-slate-200/60 text-[10px] space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-slate-600 font-medium">
+                H₀ 4 Test (Median HQ ≤ 1.0):
               </span>
-            </span>
+              <span
+                className={`font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 whitespace-nowrap border ${
+                  summaryStats.wilcoxonHQ.isSignificantRisk
+                    ? 'bg-red-100 text-red-800 border border-red-200'
+                    : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                }`}
+              >
+                {summaryStats.wilcoxonHQ.isSignificantRisk
+                  ? 'Reject H₀ 4 (Significant)'
+                  : 'Fail to Reject H₀ 4'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[9px] text-slate-400 font-mono">
+              <span className="whitespace-nowrap">
+                Wilcoxon {summaryStats.wilcoxonHQ.pValue < 0.001 ? 'p < 0.001' : `p = ${summaryStats.wilcoxonHQ.pValue.toFixed(4)}`}
+              </span>
+              <span className="whitespace-nowrap">Z = {summaryStats.wilcoxonHQ.zScore.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+
+        {summaryStats.meanHazardIndex !== undefined && (
+          <div className="pt-2 border-t border-slate-200/60 space-y-1">
+            <div className="flex items-center justify-between gap-2 text-[11px] text-slate-700">
+              <span className="text-slate-600">PFAS Mixture Hazard Index:</span>
+              <span className="font-mono font-bold text-slate-800 shrink-0 whitespace-nowrap">
+                Median = {(summaryStats.medianHazardIndex ?? summaryStats.meanHazardIndex).toFixed(2)}{' '}
+                <span
+                  className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}
+                >
+                  ({(summaryStats.mixtureExceedancePercent || 0).toFixed(1)}% &gt; 1.0)
+                </span>
+              </span>
+            </div>
+            {summaryStats.wilcoxonHI && (
+              <div className="flex items-center justify-between gap-2 text-[10px] text-slate-500 pt-0.5">
+                <span>Mixture HI Test (Median ≤ 1.0):</span>
+                <span
+                  className={`font-semibold text-[9px] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap border ${
+                    summaryStats.wilcoxonHI.isSignificantRisk
+                      ? 'text-red-700 bg-red-50 border-red-200'
+                      : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                  }`}
+                >
+                  {summaryStats.wilcoxonHI.isSignificantRisk ? 'Reject H₀ 4' : 'Fail to Reject H₀ 4'}{' '}
+                  ({summaryStats.wilcoxonHI.pValue < 0.001 ? 'p < 0.001' : `p = ${summaryStats.wilcoxonHI.pValue.toFixed(4)}`})
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>
