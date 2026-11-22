@@ -173,9 +173,45 @@ export interface SummaryStatistics {
   ci95Lower: number;
   ci95Upper: number;
   meanHazardQuotient: number;
+  medianHazardQuotient?: number;
   riskExceedancePercent: number; // Percentage of population exceeding HQ > 1.0
   meanHazardIndex?: number; // Mean Cumulative Mixture Hazard Index HI = sum(HQ_j)
+  medianHazardIndex?: number;
   mixtureExceedancePercent?: number; // Percentage of population exceeding HI > 1.0
+  wilcoxonHQ?: WilcoxonOneSampleResult;
+  wilcoxonHI?: WilcoxonOneSampleResult;
+}
+
+// Non-Parametric Mann-Whitney U Cohort Comparison Result
+export interface MannWhitneyUResult {
+  uStat: number;
+  u1: number;
+  u2: number;
+  zScore: number;
+  pValue: number;
+  rankBiserialCorrelation: number; // Effect size: 1 - 2U / (n1 * n2)
+  isSignificant: boolean; // p < 0.05
+}
+
+// Partial Rank Correlation Coefficient (PRCC) Result
+export interface PRCCResult {
+  parameterId: string;
+  parameterName: string;
+  prcc: number;
+  tStatistic: number;
+  pValue: number;
+  isSignificant: boolean; // |PRCC| >= 0.10 && p < 0.05
+  rank: number;
+}
+
+// One-Sample Wilcoxon Signed-Rank Test Result (against threshold 1.0)
+export interface WilcoxonOneSampleResult {
+  medianValue: number;
+  wStat: number;
+  zScore: number;
+  pValue: number;
+  exceedancePercent: number;
+  isSignificantRisk: boolean; // p < 0.05 && medianValue > 1.0
 }
 
 // Parameter Sensitivity Ranking
@@ -184,6 +220,10 @@ export interface SensitivityRank {
   parameterName: string;
   correlationCoefficient: number; // Spearman rank rho
   rank: number;
+  prcc?: number; // Partial Rank Correlation Coefficient
+  tStatistic?: number;
+  pValue?: number;
+  isSignificant?: boolean;
 }
 
 // Head to Head Comparison Result
