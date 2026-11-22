@@ -1,8 +1,13 @@
-import type { SimulationParameters, SamplingMethod, IterationResult, CompoundSummary } from '../../types';
-import { runMonteCarloSimulation } from '../monteCarlo';
+import type {
+  CompoundSummary,
+  IterationResult,
+  SamplingMethod,
+  SimulationParameters,
+} from '../../types';
 import { runLatinHypercubeSimulation } from '../latinHypercube';
+import { runMonteCarloSimulation } from '../monteCarlo';
 import { runMonteCarloLhsSimulation } from '../monteCarloLhs';
-import { calculateSummaryStatistics, calculateSensitivityRanks } from '../statistics';
+import { calculateSensitivityRanks, calculateSummaryStatistics } from '../statistics';
 import { calculateCompoundSummaries } from '../toxicokinetics';
 
 export interface SimulationWorkerRequest {
@@ -46,15 +51,34 @@ self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
       let simResults: IterationResult[];
       const activeCompoundId = samplingConfig.compoundId || 'pfoa';
       if (samplingConfig.method === 'monte-carlo') {
-        simResults = runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
+        simResults = runMonteCarloSimulation(
+          parameters,
+          samplingConfig.iterations,
+          samplingConfig.seed,
+          activeCompoundId,
+        );
       } else if (samplingConfig.method === 'latin-hypercube') {
-        simResults = runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
+        simResults = runLatinHypercubeSimulation(
+          parameters,
+          samplingConfig.iterations,
+          samplingConfig.seed,
+          activeCompoundId,
+        );
       } else {
-        simResults = runMonteCarloLhsSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
+        simResults = runMonteCarloLhsSimulation(
+          parameters,
+          samplingConfig.iterations,
+          samplingConfig.seed,
+          activeCompoundId,
+        );
       }
 
       const summaryStats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
-      const sensitivityRanks = calculateSensitivityRanks(simResults, parameters, 'steadyStateConcentration');
+      const sensitivityRanks = calculateSensitivityRanks(
+        simResults,
+        parameters,
+        'steadyStateConcentration',
+      );
       const compoundSummaries = calculateCompoundSummaries(simResults, parameters);
 
       const response: SimulationWorkerResponse = {

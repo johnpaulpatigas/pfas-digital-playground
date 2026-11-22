@@ -1,16 +1,23 @@
-import React, { useEffect, useLayoutEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion } from 'motion/react';
 import { App as CapApp } from '@capacitor/app';
 import { Capacitor, SystemBars, SystemBarsStyle } from '@capacitor/core';
 import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
+import { AnimatePresence, motion } from 'motion/react';
+import type React from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react';
+import { HashRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { MainLayout } from './layouts/MainLayout';
 import { HomePage } from './pages/HomePage';
 
-const PlaygroundPage = lazy(() => import('./pages/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })));
-const ComparePage = lazy(() => import('./pages/ComparePage').then((m) => ({ default: m.ComparePage })));
+const PlaygroundPage = lazy(() =>
+  import('./pages/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
+);
+const ComparePage = lazy(() =>
+  import('./pages/ComparePage').then((m) => ({ default: m.ComparePage })),
+);
 const DocsPage = lazy(() => import('./pages/DocsPage').then((m) => ({ default: m.DocsPage })));
-const ScientificGuidePage = lazy(() => import('./pages/ScientificGuidePage').then((m) => ({ default: m.ScientificGuidePage })));
+const ScientificGuidePage = lazy(() =>
+  import('./pages/ScientificGuidePage').then((m) => ({ default: m.ScientificGuidePage })),
+);
 
 function BackButtonHandler() {
   const location = useLocation();
@@ -50,9 +57,7 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
       transition={{ duration: 0.12, ease: 'easeOut' }}
       className="flex-1 flex flex-col w-full"
     >
-      <Suspense fallback={<PageLoadingFallback />}>
-        {children}
-      </Suspense>
+      <Suspense fallback={<PageLoadingFallback />}>{children}</Suspense>
     </motion.div>
   );
 }

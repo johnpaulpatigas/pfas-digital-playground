@@ -1,4 +1,4 @@
-import type { SimulationParameters, IterationResult, DistributionParams } from '../types';
+import type { DistributionParams, IterationResult, SimulationParameters } from '../types';
 import { createPRNG, quantileDistribution } from './distributions';
 import { calculateToxicokinetics } from './toxicokinetics';
 
@@ -20,7 +20,7 @@ function shuffle<T>(array: T[], prng: () => number): T[] {
 function generateLHSParameterSamples(
   dist: DistributionParams,
   N: number,
-  prng: () => number
+  prng: () => number,
 ): number[] {
   const samples = new Array<number>(N);
   for (let k = 0; k < N; k++) {
@@ -41,17 +41,41 @@ export function runLatinHypercubeSimulation(
   parameters: SimulationParameters,
   iterations: number = 5000,
   seed: number = 42,
-  compoundId: string = 'pfoa'
+  compoundId: string = 'pfoa',
 ): IterationResult[] {
   const prng = createPRNG(seed);
 
-  const dailyIntakeSamples = generateLHSParameterSamples(parameters.dailyIntake.distribution, iterations, prng);
-  const bodyWeightSamples = generateLHSParameterSamples(parameters.bodyWeight.distribution, iterations, prng);
+  const dailyIntakeSamples = generateLHSParameterSamples(
+    parameters.dailyIntake.distribution,
+    iterations,
+    prng,
+  );
+  const bodyWeightSamples = generateLHSParameterSamples(
+    parameters.bodyWeight.distribution,
+    iterations,
+    prng,
+  );
   const ageSamples = generateLHSParameterSamples(parameters.age.distribution, iterations, prng);
-  const waterConsumptionSamples = generateLHSParameterSamples(parameters.waterConsumption.distribution, iterations, prng);
-  const bioavailabilitySamples = generateLHSParameterSamples(parameters.bioavailability.distribution, iterations, prng);
-  const eliminationHalfLifeSamples = generateLHSParameterSamples(parameters.eliminationHalfLife.distribution, iterations, prng);
-  const exposureDurationSamples = generateLHSParameterSamples(parameters.exposureDuration.distribution, iterations, prng);
+  const waterConsumptionSamples = generateLHSParameterSamples(
+    parameters.waterConsumption.distribution,
+    iterations,
+    prng,
+  );
+  const bioavailabilitySamples = generateLHSParameterSamples(
+    parameters.bioavailability.distribution,
+    iterations,
+    prng,
+  );
+  const eliminationHalfLifeSamples = generateLHSParameterSamples(
+    parameters.eliminationHalfLife.distribution,
+    iterations,
+    prng,
+  );
+  const exposureDurationSamples = generateLHSParameterSamples(
+    parameters.exposureDuration.distribution,
+    iterations,
+    prng,
+  );
 
   const results: IterationResult[] = new Array(iterations);
 
@@ -67,7 +91,7 @@ export function runLatinHypercubeSimulation(
         exposureDuration: Math.max(0.1, exposureDurationSamples[i]),
         compoundId,
       },
-      i + 1
+      i + 1,
     );
   }
 

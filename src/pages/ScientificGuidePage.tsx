@@ -1,27 +1,30 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
 import {
-  ShieldAlert,
-  Flame,
-  Users,
+  Activity,
+  AlertTriangle,
+  ArrowRight,
   BookOpen,
   CheckCircle2,
-  AlertTriangle,
-  Lightbulb,
-  ArrowRight,
-  Sparkles,
-  Activity,
+  Flame,
   Layers,
+  Lightbulb,
   Scale,
+  ShieldAlert,
+  Sparkles,
+  Users,
 } from 'lucide-react';
-import { MathView } from '../components/ui/MathView';
+import { AnimatePresence, motion } from 'motion/react';
+import type React from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { MathView } from '../components/ui/MathView';
 import { PARAMETER_REFERENCES } from '../features/playground/ParameterGuideModal';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 
 export const ScientificGuidePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'risk' | 'sensitivity' | 'scenario' | 'parameters'>('risk');
+  const [activeTab, setActiveTab] = useState<'risk' | 'sensitivity' | 'scenario' | 'parameters'>(
+    'risk',
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
@@ -49,7 +52,8 @@ export const ScientificGuidePage: React.FC = () => {
             Scientific guide: risk, sensitivity, and scenario analysis
           </h1>
           <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-3xl font-sans">
-            Reference guide for toxicological formulas, physiological ranges, sensitivity analysis, and demographic exposure scenarios.
+            Reference guide for toxicological formulas, physiological ranges, sensitivity analysis,
+            and demographic exposure scenarios.
           </p>
         </div>
 
@@ -68,7 +72,9 @@ export const ScientificGuidePage: React.FC = () => {
               <span>Risk assessment</span>
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
-              Hazard Quotient (HQ), Mixture Hazard Index (HI), and population tail risk (<MathView math="P_{95}" />, <MathView math="P_{99}" />).
+              Hazard Quotient (HQ), Mixture Hazard Index (HI), and population tail risk (
+              <MathView math="P_{95}" />, <MathView math="P_{99}" />
+              ).
             </p>
           </button>
 
@@ -85,7 +91,8 @@ export const ScientificGuidePage: React.FC = () => {
               <span>Sensitivity analysis</span>
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
-              Spearman rank (<MathView math="\rho" />), tornado rankings, and key exposure drivers.
+              Spearman rank (<MathView math="\rho" />
+              ), tornado rankings, and key exposure drivers.
             </p>
           </button>
 
@@ -102,7 +109,8 @@ export const ScientificGuidePage: React.FC = () => {
               <span>Scenario analysis</span>
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
-              Baseline female cohorts compared with gestational hemodilution and transplacental kinetics.
+              Baseline female cohorts compared with gestational hemodilution and transplacental
+              kinetics.
             </p>
           </button>
 
@@ -119,7 +127,8 @@ export const ScientificGuidePage: React.FC = () => {
               <span>Parameter ranges</span>
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
-              Minimum, baseline, and maximum physiological bounds, distributions, and literature sources.
+              Minimum, baseline, and maximum physiological bounds, distributions, and literature
+              sources.
             </p>
           </button>
         </div>
@@ -150,18 +159,25 @@ export const ScientificGuidePage: React.FC = () => {
                     1. Health risk assessment: Hazard Quotient (HQ) and Hazard Index (HI)
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
-                    Evaluating predicted exposure against regulatory benchmarks and oral reference doses.
+                    Evaluating predicted exposure against regulatory benchmarks and oral reference
+                    doses.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4 text-slate-700 font-sans leading-relaxed text-sm sm:text-base">
                 <p>
-                  Deterministic risk assessments use single point estimates, such as average body weight and median water intake.
-                  This conceals the upper tail of the population distribution, where individuals with lower body weight, higher water consumption, or longer excretion half-lives face elevated exposure.
+                  Deterministic risk assessments use single point estimates, such as average body
+                  weight and median water intake. This conceals the upper tail of the population
+                  distribution, where individuals with lower body weight, higher water consumption,
+                  or longer excretion half-lives face elevated exposure.
                 </p>
                 <p>
-                  Coupling Monte Carlo or Latin hypercube sampling with a 1-compartment model produces empirical risk distributions, providing both median values (<MathView math="P_{50}" />) and upper-tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />).
+                  Coupling Monte Carlo or Latin hypercube sampling with a 1-compartment model
+                  produces empirical risk distributions, providing both median values (
+                  <MathView math="P_{50}" />) and upper-tail percentiles (<MathView math="P_{95}" />
+                  , <MathView math="P_{99}" />
+                  ).
                 </p>
               </div>
 
@@ -169,40 +185,64 @@ export const ScientificGuidePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5 font-mono text-xs">
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-sm font-heading">Hazard Quotient (HQ)</span>
-                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">Equation 1</span>
+                    <span className="font-bold text-slate-900 text-sm font-heading">
+                      Hazard Quotient (HQ)
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
+                      Equation 1
+                    </span>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
                     <MathView math="HQ = \frac{I / BW}{\text{RfD}}" block />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                    Ratio of estimated daily chemical intake per kilogram (<MathView math="I / BW" /> in &micro;g/kg/day) to the chemical-specific oral Reference Dose (<MathView math="\text{RfD}" />).
+                    Ratio of estimated daily chemical intake per kilogram (
+                    <MathView math="I / BW" /> in &micro;g/kg/day) to the chemical-specific oral
+                    Reference Dose (<MathView math="\text{RfD}" />
+                    ).
                   </p>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-sm font-heading">Mixture Hazard Index (HI)</span>
-                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">Equation 2</span>
+                    <span className="font-bold text-slate-900 text-sm font-heading">
+                      Mixture Hazard Index (HI)
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
+                      Equation 2
+                    </span>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
-                    <MathView math="HI = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}" block />
+                    <MathView
+                      math="HI = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}"
+                      block
+                    />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                    Cumulative risk metric summing individual hazard quotients across target PFAS compounds under an assumption of dose additivity.
+                    Cumulative risk metric summing individual hazard quotients across target PFAS
+                    compounds under an assumption of dose additivity.
                   </p>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-sm font-heading">Population exceedance</span>
-                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">Equation 3</span>
+                    <span className="font-bold text-slate-900 text-sm font-heading">
+                      Population exceedance
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
+                      Equation 3
+                    </span>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
-                    <MathView math="P(HQ > 1) = \frac{1}{N}\sum_{i=1}^N \mathbb{I}(HQ_i > 1)" block />
+                    <MathView
+                      math="P(HQ > 1) = \frac{1}{N}\sum_{i=1}^N \mathbb{I}(HQ_i > 1)"
+                      block
+                    />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                    Proportion of sampled iterations where individual exposure (<MathView math="HQ > 1.0" />) or cumulative mixture exposure (<MathView math="HI > 1.0" />) crosses the safety benchmark.
+                    Proportion of sampled iterations where individual exposure (
+                    <MathView math="HQ > 1.0" />) or cumulative mixture exposure (
+                    <MathView math="HI > 1.0" />) crosses the safety benchmark.
                   </p>
                 </div>
               </div>
@@ -216,20 +256,28 @@ export const ScientificGuidePage: React.FC = () => {
                   <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                      <span className="font-bold font-mono text-emerald-900">HQ &le; 1.0 and HI &le; 1.0: within acceptable safety benchmark</span>
+                      <span className="font-bold font-mono text-emerald-900">
+                        HQ &le; 1.0 and HI &le; 1.0: within acceptable safety benchmark
+                      </span>
                     </div>
                     <p className="text-emerald-800 leading-relaxed text-[11px]">
-                      Predicted intake and cumulative mixture exposure remain below non-cancer toxicological safety thresholds. No adverse effect is anticipated under chronic baseline conditions.
+                      Predicted intake and cumulative mixture exposure remain below non-cancer
+                      toxicological safety thresholds. No adverse effect is anticipated under
+                      chronic baseline conditions.
                     </p>
                   </div>
 
                   <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-950 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
-                      <span className="font-bold font-mono text-rose-900">HQ &gt; 1.0 or HI &gt; 1.0: elevated risk threshold</span>
+                      <span className="font-bold font-mono text-rose-900">
+                        HQ &gt; 1.0 or HI &gt; 1.0: elevated risk threshold
+                      </span>
                     </div>
                     <p className="text-rose-800 leading-relaxed text-[11px]">
-                      Predicted individual dose or combined mixture exposure exceeds toxicological reference levels. Indicates that exposure reduction, water filtration, or biomonitoring should be evaluated.
+                      Predicted individual dose or combined mixture exposure exceeds toxicological
+                      reference levels. Indicates that exposure reduction, water filtration, or
+                      biomonitoring should be evaluated.
                     </p>
                   </div>
                 </div>
@@ -242,44 +290,85 @@ export const ScientificGuidePage: React.FC = () => {
                   <span>Critical parameter limits and 25 to 30 year equilibrium</span>
                 </div>
                 <p className="text-slate-700 leading-relaxed">
-                  Each parameter in the 1-compartment model has a threshold where predicted internal body burden (<MathView math="B(t)" />) reaches the Reference Dose (<MathView math="\text{RfD}" />):
+                  Each parameter in the 1-compartment model has a threshold where predicted internal
+                  body burden (<MathView math="B(t)" />) reaches the Reference Dose (
+                  <MathView math="\text{RfD}" />
+                  ):
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-[11px]">
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
-                    <strong className="text-purple-950 block">1. Estimated PFAS intake (<MathView math="I" />)</strong>
-                    <div className="text-purple-900 font-bold"><MathView math="I_{\text{crit}} = BW \times \text{RfD}" /></div>
-                    <p className="text-slate-600 text-[10px] font-sans">Intake level where daily dose per kg reaches the toxicological reference dose.</p>
+                    <strong className="text-purple-950 block">
+                      1. Estimated PFAS intake (<MathView math="I" />)
+                    </strong>
+                    <div className="text-purple-900 font-bold">
+                      <MathView math="I_{\text{crit}} = BW \times \text{RfD}" />
+                    </div>
+                    <p className="text-slate-600 text-[10px] font-sans">
+                      Intake level where daily dose per kg reaches the toxicological reference dose.
+                    </p>
                   </div>
 
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
-                    <strong className="text-purple-950 block">2. Body weight (<MathView math="BW" />)</strong>
-                    <div className="text-purple-900 font-bold"><MathView math="BW_{\text{crit}} = \frac{I}{\text{RfD}}" /></div>
-                    <p className="text-slate-600 text-[10px] font-sans">Lower body mass concentrates analyte per kg, causing exceedance below this cutoff.</p>
+                    <strong className="text-purple-950 block">
+                      2. Body weight (<MathView math="BW" />)
+                    </strong>
+                    <div className="text-purple-900 font-bold">
+                      <MathView math="BW_{\text{crit}} = \frac{I}{\text{RfD}}" />
+                    </div>
+                    <p className="text-slate-600 text-[10px] font-sans">
+                      Lower body mass concentrates analyte per kg, causing exceedance below this
+                      cutoff.
+                    </p>
                   </div>
 
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
-                    <strong className="text-purple-950 block">3. Drinking water (<MathView math="W" />)</strong>
-                    <div className="text-purple-900 font-bold"><MathView math="W_{\text{crit}} = \frac{BW \times \text{RfD}}{\text{EPA MCL}}" /></div>
-                    <p className="text-slate-600 text-[10px] font-sans">Hydration volume where water at EPA MCL alone accounts for 100% of the reference dose.</p>
+                    <strong className="text-purple-950 block">
+                      3. Drinking water (<MathView math="W" />)
+                    </strong>
+                    <div className="text-purple-900 font-bold">
+                      <MathView math="W_{\text{crit}} = \frac{BW \times \text{RfD}}{\text{EPA MCL}}" />
+                    </div>
+                    <p className="text-slate-600 text-[10px] font-sans">
+                      Hydration volume where water at EPA MCL alone accounts for 100% of the
+                      reference dose.
+                    </p>
                   </div>
 
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
-                    <strong className="text-purple-950 block">4. Bioavailability (<MathView math="f_{abs}" />)</strong>
-                    <div className="text-purple-900 font-bold"><MathView math="f_{\text{abs, crit}} = \frac{BW \times \text{RfD}}{I}" /></div>
-                    <p className="text-slate-600 text-[10px] font-sans">GI absorption fraction required for absorbed mass to cross the safety threshold.</p>
+                    <strong className="text-purple-950 block">
+                      4. Bioavailability (<MathView math="f_{abs}" />)
+                    </strong>
+                    <div className="text-purple-900 font-bold">
+                      <MathView math="f_{\text{abs, crit}} = \frac{BW \times \text{RfD}}{I}" />
+                    </div>
+                    <p className="text-slate-600 text-[10px] font-sans">
+                      GI absorption fraction required for absorbed mass to cross the safety
+                      threshold.
+                    </p>
                   </div>
 
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
-                    <strong className="text-purple-950 block">5. Half-life (<MathView math="T_{1/2}" />)</strong>
-                    <div className="text-purple-900 font-bold"><MathView math="T_{1/2, \text{crit}} = \frac{BW \times \text{RfD}}{I} \times T_{1/2}" /></div>
-                    <p className="text-slate-600 text-[10px] font-sans">Slower excretion prolongs residence time, elevating steady-state mass.</p>
+                    <strong className="text-purple-950 block">
+                      5. Half-life (<MathView math="T_{1/2}" />)
+                    </strong>
+                    <div className="text-purple-900 font-bold">
+                      <MathView math="T_{1/2, \text{crit}} = \frac{BW \times \text{RfD}}{I} \times T_{1/2}" />
+                    </div>
+                    <p className="text-slate-600 text-[10px] font-sans">
+                      Slower excretion prolongs residence time, elevating steady-state mass.
+                    </p>
                   </div>
 
                   <div className="p-3 bg-white rounded-xl border border-purple-200 space-y-1">
-                    <strong className="text-purple-950 block">6. Exposure duration (<MathView math="t" />)</strong>
+                    <strong className="text-purple-950 block">
+                      6. Exposure duration (<MathView math="t" />)
+                    </strong>
                     <div className="text-purple-900 font-bold">25 to 30 years (equilibrium)</div>
-                    <p className="text-slate-600 text-[10px] font-sans">Corresponds to 6.5 to 8.0 half-lives for PFOA/PFNA, reaching over 99% of steady-state body burden (&gt;87% for PFHxS).</p>
+                    <p className="text-slate-600 text-[10px] font-sans">
+                      Corresponds to 6.5 to 8.0 half-lives for PFOA/PFNA, reaching over 99% of
+                      steady-state body burden (&gt;87% for PFHxS).
+                    </p>
                   </div>
                 </div>
               </div>
@@ -293,12 +382,19 @@ export const ScientificGuidePage: React.FC = () => {
                   </h3>
                   <div className="space-y-2 text-xs font-sans text-slate-600 leading-relaxed">
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                      <strong className="text-slate-900 font-mono block">US EPA NPDWR (2024):</strong>
-                      Maximum Contaminant Levels of <strong>4.0 ng/L (ppt)</strong> for PFOA and PFOS, and <strong>10.0 ng/L</strong> for PFNA, PFHxS, and GenX (HFPO-DA).
+                      <strong className="text-slate-900 font-mono block">
+                        US EPA NPDWR (2024):
+                      </strong>
+                      Maximum Contaminant Levels of <strong>4.0 ng/L (ppt)</strong> for PFOA and
+                      PFOS, and <strong>10.0 ng/L</strong> for PFNA, PFHxS, and GenX (HFPO-DA).
                     </div>
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-                      <strong className="text-slate-900 font-mono block">European Food Safety Authority (EFSA):</strong>
-                      Group Tolerable Weekly Intake (TWI) of <strong>4.4 ng/kg body weight per week</strong> for the sum of four legacy PFAS (PFOA, PFOS, PFNA, PFHxS).
+                      <strong className="text-slate-900 font-mono block">
+                        European Food Safety Authority (EFSA):
+                      </strong>
+                      Group Tolerable Weekly Intake (TWI) of{' '}
+                      <strong>4.4 ng/kg body weight per week</strong> for the sum of four legacy
+                      PFAS (PFOA, PFOS, PFNA, PFHxS).
                     </div>
                   </div>
                 </div>
@@ -312,19 +408,25 @@ export const ScientificGuidePage: React.FC = () => {
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
-                        <strong>Examine the Exceedance Analyzer tab:</strong> Compares parameter inputs with critical thresholds and checks whether body burden exceeds the reference limit.
+                        <strong>Examine the Exceedance Analyzer tab:</strong> Compares parameter
+                        inputs with critical thresholds and checks whether body burden exceeds the
+                        reference limit.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
-                        <strong>Test 25 to 30 year exposure:</strong> Loading the <em>Critical Baseline Threshold</em> scenario preset configures the 25 to 30 year exposure range to evaluate steady-state equilibrium.
+                        <strong>Test 25 to 30 year exposure:</strong> Loading the{' '}
+                        <em>Critical Baseline Threshold</em> scenario preset configures the 25 to 30
+                        year exposure range to evaluate steady-state equilibrium.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
-                        <strong>Compound comparison:</strong> Switch compounds in the sidebar to observe how short-chain chemicals (GenX) and long-chain acids (PFOS) differ in serum retention.
+                        <strong>Compound comparison:</strong> Switch compounds in the sidebar to
+                        observe how short-chain chemicals (GenX) and long-chain acids (PFOS) differ
+                        in serum retention.
                       </span>
                     </li>
                   </ul>
@@ -356,31 +458,45 @@ export const ScientificGuidePage: React.FC = () => {
                     2. Sensitivity analysis and Spearman rank correlation (<MathView math="\rho" />)
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
-                    Identifying primary exposure drivers and physiological determinants of serum accumulation.
+                    Identifying primary exposure drivers and physiological determinants of serum
+                    accumulation.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4 text-slate-700 font-sans leading-relaxed text-sm sm:text-base">
                 <p>
-                  Toxicokinetic relationships are non-linear. To determine which input uncertainties drive the greatest variation in steady-state serum concentration (<MathView math="C_{ss}" />), the simulation calculates non-parametric <strong>Spearman rank correlation coefficients</strong> (<MathView math="\rho" />).
+                  Toxicokinetic relationships are non-linear. To determine which input uncertainties
+                  drive the greatest variation in steady-state serum concentration (
+                  <MathView math="C_{ss}" />
+                  ), the simulation calculates non-parametric{' '}
+                  <strong>Spearman rank correlation coefficients</strong> (<MathView math="\rho" />
+                  ).
                 </p>
                 <p>
-                  Rank correlation evaluates monotonic trends between inputs and outputs without requiring linear relationships or normal error distributions.
+                  Rank correlation evaluates monotonic trends between inputs and outputs without
+                  requiring linear relationships or normal error distributions.
                 </p>
               </div>
 
               {/* Spearman Formula Card */}
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 font-mono text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-sm font-heading">Spearman rank correlation formula</span>
-                  <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">Equation 3</span>
+                  <span className="font-bold text-slate-900 text-sm font-heading">
+                    Spearman rank correlation formula
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">
+                    Equation 3
+                  </span>
                 </div>
                 <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
                   <MathView math="\rho = 1 - \frac{6 \sum_{i=1}^N d_i^2}{N(N^2 - 1)}" block />
                 </div>
                 <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                  Where <MathView math="d_i = \text{rank}(X_i) - \text{rank}(Y_i)" /> is the difference in rank between input parameter <MathView math="X" /> and resulting serum concentration <MathView math="Y" /> across <MathView math="N" /> sample iterations.
+                  Where <MathView math="d_i = \text{rank}(X_i) - \text{rank}(Y_i)" /> is the
+                  difference in rank between input parameter <MathView math="X" /> and resulting
+                  serum concentration <MathView math="Y" /> across <MathView math="N" /> sample
+                  iterations.
                 </p>
               </div>
 
@@ -388,28 +504,62 @@ export const ScientificGuidePage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs font-sans">
                 <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 text-amber-950 space-y-2">
                   <span className="font-bold font-mono text-amber-900 text-sm block">
-                    Positive correlation (<MathView math="\rho > 0" />): direct drivers
+                    Positive correlation (<MathView math="\rho > 0" />
+                    ): direct drivers
                   </span>
                   <p className="text-amber-800 leading-relaxed text-[11px]">
                     Higher values lead to higher serum accumulation:
                   </p>
                   <ul className="space-y-1.5 text-amber-900 text-[11px] list-disc list-inside">
-                    <li><strong>Daily intake (<MathView math="I" />):</strong> Usually the strongest driver (<MathView math="\rho \approx +0.75 \text{ to } +0.90" />).</li>
-                    <li><strong>Elimination half-life (<MathView math="T_{1/2}" />):</strong> Slower renal clearance leads to longer internal residence.</li>
-                    <li><strong>Bioavailability (<MathView math="f_{abs}" />):</strong> Greater gastrointestinal uptake elevates systemic circulation.</li>
+                    <li>
+                      <strong>
+                        Daily intake (<MathView math="I" />
+                        ):
+                      </strong>{' '}
+                      Usually the strongest driver (
+                      <MathView math="\rho \approx +0.75 \text{ to } +0.90" />
+                      ).
+                    </li>
+                    <li>
+                      <strong>
+                        Elimination half-life (<MathView math="T_{1/2}" />
+                        ):
+                      </strong>{' '}
+                      Slower renal clearance leads to longer internal residence.
+                    </li>
+                    <li>
+                      <strong>
+                        Bioavailability (<MathView math="f_{abs}" />
+                        ):
+                      </strong>{' '}
+                      Greater gastrointestinal uptake elevates systemic circulation.
+                    </li>
                   </ul>
                 </div>
 
                 <div className="p-5 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-950 space-y-2">
                   <span className="font-bold font-mono text-blue-900 text-sm block">
-                    Negative correlation (<MathView math="\rho < 0" />): inverse factors
+                    Negative correlation (<MathView math="\rho < 0" />
+                    ): inverse factors
                   </span>
                   <p className="text-blue-800 leading-relaxed text-[11px]">
                     Higher values reduce steady-state serum concentration:
                   </p>
                   <ul className="space-y-1.5 text-blue-900 text-[11px] list-disc list-inside">
-                    <li><strong>Body weight (<MathView math="BW" />):</strong> Expands total volume of distribution (<MathView math="V_d \cdot BW" />), diluting serum levels (<MathView math="\rho \approx -0.40 \text{ to } -0.60" />).</li>
-                    <li><strong>Renal clearance rate:</strong> Faster elimination reduces the steady-state plateau.</li>
+                    <li>
+                      <strong>
+                        Body weight (<MathView math="BW" />
+                        ):
+                      </strong>{' '}
+                      Expands total volume of distribution (<MathView math="V_d \cdot BW" />
+                      ), diluting serum levels (
+                      <MathView math="\rho \approx -0.40 \text{ to } -0.60" />
+                      ).
+                    </li>
+                    <li>
+                      <strong>Renal clearance rate:</strong> Faster elimination reduces the
+                      steady-state plateau.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -420,25 +570,36 @@ export const ScientificGuidePage: React.FC = () => {
                   Translating sensitivity results into public health priorities
                 </h3>
                 <p className="text-slate-600 leading-relaxed">
-                  Sensitivity rankings clarify which intervention points have the greatest impact on population body burden:
+                  Sensitivity rankings clarify which intervention points have the greatest impact on
+                  population body burden:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <strong className="text-slate-900 font-mono text-xs block">1. Water remediation</strong>
+                    <strong className="text-slate-900 font-mono text-xs block">
+                      1. Water remediation
+                    </strong>
                     <p className="text-slate-600 text-[11px]">
-                      When daily intake is the primary driver, granular activated carbon or ion exchange water treatment produces the largest decrease in population serum levels.
+                      When daily intake is the primary driver, granular activated carbon or ion
+                      exchange water treatment produces the largest decrease in population serum
+                      levels.
                     </p>
                   </div>
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <strong className="text-slate-900 font-mono text-xs block">2. Protecting lower-weight cohorts</strong>
+                    <strong className="text-slate-900 font-mono text-xs block">
+                      2. Protecting lower-weight cohorts
+                    </strong>
                     <p className="text-slate-600 text-[11px]">
-                      Because body weight has an inverse correlation, lower-weight individuals experience higher body burden per unit intake.
+                      Because body weight has an inverse correlation, lower-weight individuals
+                      experience higher body burden per unit intake.
                     </p>
                   </div>
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <strong className="text-slate-900 font-mono text-xs block">3. Dietary advisories</strong>
+                    <strong className="text-slate-900 font-mono text-xs block">
+                      3. Dietary advisories
+                    </strong>
                     <p className="text-slate-600 text-[11px]">
-                      Informs local public health recommendations regarding consumption of marine species with high bioaccumulation factors.
+                      Informs local public health recommendations regarding consumption of marine
+                      species with high bioaccumulation factors.
                     </p>
                   </div>
                 </div>
@@ -469,15 +630,16 @@ export const ScientificGuidePage: React.FC = () => {
                     3. Demographic scenario analysis and maternal physiology
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
-                    Physiological parameters for adult female and pregnant cohorts in the Philippines.
+                    Physiological parameters for adult female and pregnant cohorts in the
+                    Philippines.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4 text-slate-700 font-sans leading-relaxed text-sm sm:text-base">
                 <p>
-                  Exposure risks and toxicokinetics differ across biological life stages.
-                  The simulation includes physiological presets calibrated for Filipino female cohorts.
+                  Exposure risks and toxicokinetics differ across biological life stages. The
+                  simulation includes physiological presets calibrated for Filipino female cohorts.
                 </p>
               </div>
 
@@ -490,7 +652,9 @@ export const ScientificGuidePage: React.FC = () => {
                       <h3 className="font-bold text-slate-900 font-heading text-sm">
                         Average Filipino woman
                       </h3>
-                      <span className="text-[11px] text-slate-500 font-mono">General adult female cohort</span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        General adult female cohort
+                      </span>
                     </div>
                     <span className="px-2.5 py-1 rounded-md bg-teal-100 text-teal-800 font-mono font-bold text-[10px]">
                       Baseline
@@ -498,7 +662,8 @@ export const ScientificGuidePage: React.FC = () => {
                   </div>
 
                   <p className="text-slate-600 leading-relaxed text-xs">
-                    Physiological parameters derived from Philippine National Nutrition Council (NNC) surveys and tropical hydration studies:
+                    Physiological parameters derived from Philippine National Nutrition Council
+                    (NNC) surveys and tropical hydration studies:
                   </p>
 
                   <div className="space-y-2 font-mono text-[11px] text-slate-800">
@@ -528,7 +693,9 @@ export const ScientificGuidePage: React.FC = () => {
                       <h3 className="font-bold text-purple-950 font-heading text-sm">
                         Pregnant female profile
                       </h3>
-                      <span className="text-[11px] text-purple-700 font-mono">Maternal physiology cohort</span>
+                      <span className="text-[11px] text-purple-700 font-mono">
+                        Maternal physiology cohort
+                      </span>
                     </div>
                     <span className="px-2.5 py-1 rounded-md bg-purple-100 text-purple-800 font-mono font-bold text-[10px]">
                       Maternal
@@ -567,8 +734,9 @@ export const ScientificGuidePage: React.FC = () => {
                   <span>Note on maternal serum levels</span>
                 </div>
                 <p className="text-amber-800 leading-relaxed text-[11px]">
-                  During pregnancy, maternal serum PFAS concentrations often measure lower than non-pregnant baselines.
-                  This reflects expanded blood plasma volume (hemodilution) and transplacental transfer to the fetus, rather than lower cumulative exposure.
+                  During pregnancy, maternal serum PFAS concentrations often measure lower than
+                  non-pregnant baselines. This reflects expanded blood plasma volume (hemodilution)
+                  and transplacental transfer to the fetus, rather than lower cumulative exposure.
                 </p>
               </div>
 
@@ -579,21 +747,32 @@ export const ScientificGuidePage: React.FC = () => {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <strong className="text-slate-900 font-mono text-xs block">1. Preset swapping</strong>
+                    <strong className="text-slate-900 font-mono text-xs block">
+                      1. Preset swapping
+                    </strong>
                     <p className="text-slate-600 text-[11px]">
-                      Switch between Average Filipino Woman and Pregnant Female in the sidebar to observe shifts in steady-state concentration (<MathView math="C_{ss}" />) and Hazard Quotient (<MathView math="HQ" />).
+                      Switch between Average Filipino Woman and Pregnant Female in the sidebar to
+                      observe shifts in steady-state concentration (<MathView math="C_{ss}" />) and
+                      Hazard Quotient (<MathView math="HQ" />
+                      ).
                     </p>
                   </div>
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <strong className="text-slate-900 font-mono text-xs block">2. Distribution changes</strong>
+                    <strong className="text-slate-900 font-mono text-xs block">
+                      2. Distribution changes
+                    </strong>
                     <p className="text-slate-600 text-[11px]">
-                      Adjust daily intake parameters to model water filtration interventions or clean water distribution.
+                      Adjust daily intake parameters to model water filtration interventions or
+                      clean water distribution.
                     </p>
                   </div>
                   <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
-                    <strong className="text-slate-900 font-mono text-xs block">3. Sampling method comparison</strong>
+                    <strong className="text-slate-900 font-mono text-xs block">
+                      3. Sampling method comparison
+                    </strong>
                     <p className="text-slate-600 text-[11px]">
-                      Use the <em>MC vs LHS Compare</em> page to observe how Latin hypercube sampling achieves lower variance across iterations.
+                      Use the <em>MC vs LHS Compare</em> page to observe how Latin hypercube
+                      sampling achieves lower variance across iterations.
                     </p>
                   </div>
                 </div>
@@ -624,7 +803,8 @@ export const ScientificGuidePage: React.FC = () => {
                     </h2>
                   </div>
                   <p className="text-slate-600 text-xs sm:text-sm font-sans">
-                    Recommended baseline values, biological bounds, and literature sources for all seven simulation inputs.
+                    Recommended baseline values, biological bounds, and literature sources for all
+                    seven simulation inputs.
                   </p>
                 </div>
               </div>
@@ -636,8 +816,12 @@ export const ScientificGuidePage: React.FC = () => {
                     <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-mono">
                       <th className="p-3 font-semibold">Parameter / Symbol</th>
                       <th className="p-3 font-semibold">Unit</th>
-                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">Minimum bound</th>
-                      <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">Baseline / Average</th>
+                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">
+                        Minimum bound
+                      </th>
+                      <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">
+                        Baseline / Average
+                      </th>
                       <th className="p-3 font-semibold text-rose-800 bg-rose-50/40">Upper bound</th>
                       <th className="p-3 font-semibold">Recommended distribution</th>
                       <th className="p-3 font-semibold">Literature source</th>
@@ -648,15 +832,29 @@ export const ScientificGuidePage: React.FC = () => {
                       <tr key={row.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="p-3">
                           <div className="font-bold text-slate-900">{row.name}</div>
-                          <div className="text-[10px] text-slate-500 font-mono">Symbol: <MathView math={row.symbol} /></div>
-                          <p className="text-[10px] text-slate-600 mt-1 max-w-xs leading-relaxed">{row.description}</p>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            Symbol: <MathView math={row.symbol} />
+                          </div>
+                          <p className="text-[10px] text-slate-600 mt-1 max-w-xs leading-relaxed">
+                            {row.description}
+                          </p>
                         </td>
                         <td className="p-3 font-mono font-medium text-slate-600">{row.unit}</td>
-                        <td className="p-3 font-mono text-emerald-700 font-medium bg-emerald-50/20">{row.min}</td>
-                        <td className="p-3 font-mono text-blue-900 font-bold bg-blue-50/30">{row.average}</td>
-                        <td className="p-3 font-mono text-red-700 font-medium bg-rose-50/20">{row.max}</td>
-                        <td className="p-3 font-mono text-slate-700 text-[10px]">{row.recommendedDist}</td>
-                        <td className="p-3 text-slate-500 text-[10px] leading-relaxed max-w-xs">{row.source}</td>
+                        <td className="p-3 font-mono text-emerald-700 font-medium bg-emerald-50/20">
+                          {row.min}
+                        </td>
+                        <td className="p-3 font-mono text-blue-900 font-bold bg-blue-50/30">
+                          {row.average}
+                        </td>
+                        <td className="p-3 font-mono text-red-700 font-medium bg-rose-50/20">
+                          {row.max}
+                        </td>
+                        <td className="p-3 font-mono text-slate-700 text-[10px]">
+                          {row.recommendedDist}
+                        </td>
+                        <td className="p-3 text-slate-500 text-[10px] leading-relaxed max-w-xs">
+                          {row.source}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -669,28 +867,41 @@ export const ScientificGuidePage: React.FC = () => {
                   <h3 className="font-bold text-slate-900 font-heading text-sm">
                     Target PFAS compounds and regulatory benchmarks
                   </h3>
-                  <span className="text-[10px] font-mono text-slate-500">US EPA NPDWR (2024) standards</span>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    US EPA NPDWR (2024) standards
+                  </span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-[11px]">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-600 bg-white font-mono">
                         <th className="p-2.5 font-semibold">Compound</th>
-                        <th className="p-2.5 font-semibold">Biological half-life (<MathView math="T_{1/2}" />)</th>
-                        <th className="p-2.5 font-semibold">Volume of distribution (<MathView math="V_d" />)</th>
+                        <th className="p-2.5 font-semibold">
+                          Biological half-life (<MathView math="T_{1/2}" />)
+                        </th>
+                        <th className="p-2.5 font-semibold">
+                          Volume of distribution (<MathView math="V_d" />)
+                        </th>
                         <th className="p-2.5 font-semibold">EPA MCL (ng/L)</th>
-                        <th className="p-2.5 font-semibold">Reference dose (<MathView math="\text{RfD}" />)</th>
+                        <th className="p-2.5 font-semibold">
+                          Reference dose (<MathView math="\text{RfD}" />)
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {PFAS_COMPOUNDS.map((c) => (
                         <tr key={c.id} className="hover:bg-slate-100/50">
                           <td className="p-2.5 font-medium text-slate-900">
-                            {c.name} <span className="text-slate-500 font-mono text-[10px]">(CAS {c.casNumber})</span>
+                            {c.name}{' '}
+                            <span className="text-slate-500 font-mono text-[10px]">
+                              (CAS {c.casNumber})
+                            </span>
                           </td>
                           <td className="p-2.5 font-mono">{c.halfLifeYears} years</td>
                           <td className="p-2.5 font-mono">{c.volumeOfDistribution} L/kg</td>
-                          <td className="p-2.5 font-mono font-bold text-blue-700">{c.epaMCL} ng/L</td>
+                          <td className="p-2.5 font-mono font-bold text-blue-700">
+                            {c.epaMCL} ng/L
+                          </td>
                           <td className="p-2.5 font-mono text-slate-700">{c.rfdDose} µg/kg/day</td>
                         </tr>
                       ))}
@@ -710,7 +921,8 @@ export const ScientificGuidePage: React.FC = () => {
             Ready to test these models in the simulation?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed max-w-xl">
-            Configure parameter distributions, run Monte Carlo or Latin hypercube sampling, and inspect the resulting distributions.
+            Configure parameter distributions, run Monte Carlo or Latin hypercube sampling, and
+            inspect the resulting distributions.
           </p>
         </div>
 

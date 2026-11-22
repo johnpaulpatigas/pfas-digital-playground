@@ -1,25 +1,24 @@
 import type {
-  IterationResult,
-  CriticalThresholds,
-  ExceedanceRangeStats,
-  DistributionParams,
-  SimulationParameters,
-  DetailedCriticalAnalysis,
-  ParameterCriticalThreshold,
-  CompoundSummary,
   CompoundIterationOutput,
+  CompoundSummary,
+  CriticalThresholds,
+  DetailedCriticalAnalysis,
+  DistributionParams,
+  ExceedanceRangeStats,
+  IterationResult,
+  ParameterCriticalThreshold,
+  SimulationParameters,
 } from '../types';
 import { PFAS_COMPOUNDS, type PFASCompound } from './pfasCompounds';
 
-
 export interface ToxicokineticInput {
-  dailyIntake: number;        // µg/day
-  bodyWeight: number;         // kg
-  age: number;                // years
-  waterConsumption: number;   // L/day
-  bioavailability: number;    // fraction (0 to 1)
+  dailyIntake: number; // µg/day
+  bodyWeight: number; // kg
+  age: number; // years
+  waterConsumption: number; // L/day
+  bioavailability: number; // fraction (0 to 1)
   eliminationHalfLife: number; // years
-  exposureDuration: number;   // years
+  exposureDuration: number; // years
   compoundId?: string;
 }
 
@@ -39,7 +38,7 @@ export interface MultiCompoundTimeCoursePoint {
  */
 export function calculateToxicokinetics(
   input: ToxicokineticInput,
-  iterationIndex: number
+  iterationIndex: number,
 ): IterationResult {
   const {
     dailyIntake,
@@ -71,7 +70,8 @@ export function calculateToxicokinetics(
 
   // Cumulative Body Burden B(t) after exposureDuration (µg)
   const exposureDays = exposureDuration * 365.25;
-  const peakBodyBurden = (absorbedDose / eliminationRate) * (1 - Math.exp(-eliminationRate * exposureDays));
+  const peakBodyBurden =
+    (absorbedDose / eliminationRate) * (1 - Math.exp(-eliminationRate * exposureDays));
 
   // Whole Body Clearance Rate CL (L/kg/day)
   const clearanceRate = eliminationRate * compound.volumeOfDistribution;
@@ -92,7 +92,8 @@ export function calculateToxicokinetics(
     const cEliminationRate = Math.LN2 / Math.max(1, cHalfLifeDays);
     const cVdTotal = Math.max(1, bodyWeight * c.volumeOfDistribution);
     const cCss = absorbedDose / (cVdTotal * cEliminationRate);
-    const cBodyBurden = (absorbedDose / cEliminationRate) * (1 - Math.exp(-cEliminationRate * exposureDays));
+    const cBodyBurden =
+      (absorbedDose / cEliminationRate) * (1 - Math.exp(-cEliminationRate * exposureDays));
     const cClearance = cEliminationRate * c.volumeOfDistribution;
     const cHQ = c.rfdDose > 0 ? dailyDosePerKg / c.rfdDose : 0;
     hazardIndex += cHQ;
@@ -131,7 +132,7 @@ export function calculateToxicokinetics(
  */
 export function calculateMultiCompoundTimeCourse(
   results: IterationResult[],
-  maxYears: number = 40
+  maxYears: number = 40,
 ): MultiCompoundTimeCoursePoint[] {
   if (!results || results.length === 0) return [];
 
@@ -180,10 +181,7 @@ export function calculateMultiCompoundTimeCourse(
 /**
  * Generate Time-Course Serum Concentration Trajectory C(t) from year 0 to 50
  */
-export function calculateTimeCourseTrajectory(
-  results: IterationResult[],
-  maxYears: number = 40
-) {
+export function calculateTimeCourseTrajectory(results: IterationResult[], maxYears: number = 40) {
   if (!results || results.length === 0) return [];
 
   const pointsCount = 41;
@@ -281,7 +279,7 @@ export function calculateCriticalThresholds(
   compound: PFASCompound,
   bodyWeight: number = 55,
   bioavailability: number = 0.9,
-  halfLifeYears?: number
+  halfLifeYears?: number,
 ): CriticalThresholds {
   const halfLife = halfLifeYears && halfLifeYears > 0 ? halfLifeYears : compound.halfLifeYears;
   const halfLifeDays = halfLife * 365.25;
@@ -297,7 +295,8 @@ export function calculateCriticalThresholds(
   const volumeOfDistributionTotal = Math.max(1, bodyWeight * compound.volumeOfDistribution);
 
   // Steady-state serum concentration at critical intake (ug/L)
-  const criticalSerumConcentration = criticalAbsorbedDose / (volumeOfDistributionTotal * eliminationRate);
+  const criticalSerumConcentration =
+    criticalAbsorbedDose / (volumeOfDistributionTotal * eliminationRate);
 
   // Critical steady-state body burden (ug)
   const criticalBodyBurden = criticalAbsorbedDose / eliminationRate;
@@ -306,9 +305,8 @@ export function calculateCriticalThresholds(
   const epaMCLConcentration = compound.epaMCL / 1000;
 
   // Critical drinking water consumption volume (L/day) to reach RfD when water is at EPA MCL
-  const criticalWaterConsumption = epaMCLConcentration > 0
-    ? criticalDailyIntake / epaMCLConcentration
-    : 2.0;
+  const criticalWaterConsumption =
+    epaMCLConcentration > 0 ? criticalDailyIntake / epaMCLConcentration : 2.0;
 
   return {
     criticalDailyIntake,
@@ -316,7 +314,10 @@ export function calculateCriticalThresholds(
     criticalSerumConcentration,
     criticalBodyBurden,
     criticalWaterConsumption,
-    criticalBioavailability: Math.min(1.0, (bodyWeight * compound.rfdDose) / Math.max(0.00001, criticalDailyIntake)),
+    criticalBioavailability: Math.min(
+      1.0,
+      (bodyWeight * compound.rfdDose) / Math.max(0.00001, criticalDailyIntake),
+    ),
     criticalHalfLife: halfLife,
     criticalExposureDurationMin: 25,
     criticalExposureDurationMax: 30,
@@ -330,13 +331,15 @@ export function calculateCriticalThresholds(
  */
 export function calculateDetailedCriticalAnalysis(
   compound: PFASCompound,
-  parameters: SimulationParameters
+  parameters: SimulationParameters,
 ): DetailedCriticalAnalysis {
   const bwStats = extractDistributionCentralValue(parameters.bodyWeight.distribution);
   const intakeStats = extractDistributionCentralValue(parameters.dailyIntake.distribution);
   const waterStats = extractDistributionCentralValue(parameters.waterConsumption.distribution);
   const bioStats = extractDistributionCentralValue(parameters.bioavailability.distribution);
-  const halfLifeStats = extractDistributionCentralValue(parameters.eliminationHalfLife.distribution);
+  const halfLifeStats = extractDistributionCentralValue(
+    parameters.eliminationHalfLife.distribution,
+  );
   const durationStats = extractDistributionCentralValue(parameters.exposureDuration.distribution);
 
   const meanBW = bwStats.mean;
@@ -356,7 +359,7 @@ export function calculateDetailedCriticalAnalysis(
   const currentAbsorbedDose = meanIntake * meanBio;
   const criticalAbsorbedDose = thresholds.criticalDailyIntake * meanBio;
 
-  const steadyStateFraction = (1 - Math.exp(-eliminationRate * exposureDays));
+  const steadyStateFraction = 1 - Math.exp(-eliminationRate * exposureDays);
   const steadyStateFractionPercent = steadyStateFraction * 100;
 
   // Dynamic body burden at current exposure duration
@@ -376,7 +379,8 @@ export function calculateDetailedCriticalAnalysis(
   const dailyDosePerKg = meanIntake / Math.max(1, meanBW);
   const hazardQuotient = compound.rfdDose > 0 ? dailyDosePerKg / compound.rfdDose : 0;
 
-  const burdenExceedanceRatio = criticalBodyBurden > 0 ? currentBodyBurden / criticalBodyBurden : hazardQuotient;
+  const burdenExceedanceRatio =
+    criticalBodyBurden > 0 ? currentBodyBurden / criticalBodyBurden : hazardQuotient;
   const isBurdenExceeded = currentBodyBurden > criticalBodyBurden || hazardQuotient > 1.0;
 
   // Time to reach critical body burden threshold (years)
@@ -396,8 +400,8 @@ export function calculateDetailedCriticalAnalysis(
     meanIntake > criticalIntakeVal * 1.05
       ? 'exceeded'
       : meanIntake >= criticalIntakeVal * 0.9
-      ? 'borderline'
-      : 'safe';
+        ? 'borderline'
+        : 'safe';
 
   // --- Parameter 2: Body Weight ---
   const criticalBWVal = compound.rfdDose > 0 ? meanIntake / compound.rfdDose : meanBW;
@@ -406,8 +410,8 @@ export function calculateDetailedCriticalAnalysis(
     meanBW < criticalBWVal * 0.95
       ? 'exceeded'
       : meanBW <= criticalBWVal * 1.1
-      ? 'borderline'
-      : 'safe';
+        ? 'borderline'
+        : 'safe';
 
   // --- Parameter 3: Daily Drinking Water Intake ---
   const epaMCLugL = compound.epaMCL / 1000;
@@ -417,39 +421,44 @@ export function calculateDetailedCriticalAnalysis(
     meanWater > criticalWaterVal * 1.05
       ? 'exceeded'
       : meanWater >= criticalWaterVal * 0.9
-      ? 'borderline'
-      : 'safe';
+        ? 'borderline'
+        : 'safe';
 
   // --- Parameter 4: Gastrointestinal Bioavailability ---
-  const criticalBioVal = Math.min(1.0, meanIntake > 0 ? (meanBW * compound.rfdDose) / meanIntake : 1.0);
+  const criticalBioVal = Math.min(
+    1.0,
+    meanIntake > 0 ? (meanBW * compound.rfdDose) / meanIntake : 1.0,
+  );
   const bioExceeded = meanBio >= criticalBioVal;
   const bioStatus: 'safe' | 'borderline' | 'exceeded' =
     meanBio >= criticalBioVal * 1.02
       ? 'exceeded'
       : meanBio >= criticalBioVal * 0.92
-      ? 'borderline'
-      : 'safe';
+        ? 'borderline'
+        : 'safe';
 
   // --- Parameter 5: Elimination Half-Life ---
-  const criticalHalfLifeVal = meanIntake > 0
-    ? (meanBW * compound.rfdDose / meanIntake) * compound.halfLifeYears
-    : compound.halfLifeYears;
+  const criticalHalfLifeVal =
+    meanIntake > 0
+      ? ((meanBW * compound.rfdDose) / meanIntake) * compound.halfLifeYears
+      : compound.halfLifeYears;
   const halfLifeExceeded = meanHalfLife > criticalHalfLifeVal;
   const halfLifeStatus: 'safe' | 'borderline' | 'exceeded' =
     meanHalfLife > criticalHalfLifeVal * 1.05
       ? 'exceeded'
       : meanHalfLife >= criticalHalfLifeVal * 0.9
-      ? 'borderline'
-      : 'safe';
+        ? 'borderline'
+        : 'safe';
 
   // --- Parameter 6: Exposure Duration ---
   // 25-30 years represents chronic steady-state equilibrium plateau (>99% accumulation)
   const isDurationInChronicRange = meanDuration >= 25;
-  const durationExceeded = (isBurdenExceeded && isDurationInChronicRange) || (timeToExceedanceYears !== null && meanDuration >= timeToExceedanceYears);
-  const durationStatus: 'safe' | 'borderline' | 'exceeded' =
-    durationExceeded
-      ? 'exceeded'
-      : meanDuration >= 20
+  const durationExceeded =
+    (isBurdenExceeded && isDurationInChronicRange) ||
+    (timeToExceedanceYears !== null && meanDuration >= timeToExceedanceYears);
+  const durationStatus: 'safe' | 'borderline' | 'exceeded' = durationExceeded
+    ? 'exceeded'
+    : meanDuration >= 20
       ? 'borderline'
       : 'safe';
 
@@ -459,15 +468,17 @@ export function calculateDetailedCriticalAnalysis(
       name: 'Estimated PFAS Intake',
       unit: 'µg/day',
       criticalValue: criticalIntakeVal,
-      criticalRangeDisplay: criticalIntakeVal < 0.001
-        ? `> ${(criticalIntakeVal * 1000).toFixed(3)} ng/d`
-        : `> ${criticalIntakeVal.toFixed(4)} µg/d`,
+      criticalRangeDisplay:
+        criticalIntakeVal < 0.001
+          ? `> ${(criticalIntakeVal * 1000).toFixed(3)} ng/d`
+          : `> ${criticalIntakeVal.toFixed(4)} µg/d`,
       currentValue: meanIntake,
       currentRangeDisplay: intakeStats.displayRange,
       isExceeded: intakeExceeded,
       status: intakeStatus,
       direction: 'greater_than',
-      explanation: 'Daily ingestion intake above which dose per kg body weight exceeds Reference Dose (RfD), causing body burden to exceed safe capacity.',
+      explanation:
+        'Daily ingestion intake above which dose per kg body weight exceeds Reference Dose (RfD), causing body burden to exceed safe capacity.',
       formula: 'I_{\\text{crit}} = BW \\times \\text{RfD}',
     },
     {
@@ -481,7 +492,8 @@ export function calculateDetailedCriticalAnalysis(
       isExceeded: bwExceeded,
       status: bwStatus,
       direction: 'less_than',
-      explanation: 'Body weight below which internal dose concentration is concentrated, shrinking distribution volume and driving HQ > 1.0.',
+      explanation:
+        'Body weight below which internal dose concentration is concentrated, shrinking distribution volume and driving HQ > 1.0.',
       formula: 'BW_{\\text{crit}} = \\frac{I}{\\text{RfD}}',
     },
     {
@@ -509,7 +521,8 @@ export function calculateDetailedCriticalAnalysis(
       isExceeded: bioExceeded,
       status: bioStatus,
       direction: 'greater_than',
-      explanation: 'Fraction of GI absorption required for systemic absorbed dose to breach the toxicological reference threshold.',
+      explanation:
+        'Fraction of GI absorption required for systemic absorbed dose to breach the toxicological reference threshold.',
       formula: 'f_{\\text{abs, crit}} = \\min\\left(1.0, \\frac{BW \\times \\text{RfD}}{I}\\right)',
     },
     {
@@ -523,7 +536,8 @@ export function calculateDetailedCriticalAnalysis(
       isExceeded: halfLifeExceeded,
       status: halfLifeStatus,
       direction: 'greater_than',
-      explanation: 'Serum elimination half-life threshold above which slower clearance retains chemical mass, elevating equilibrium body burden above safe limits.',
+      explanation:
+        'Serum elimination half-life threshold above which slower clearance retains chemical mass, elevating equilibrium body burden above safe limits.',
       formula: 'T_{1/2, \\text{crit}} = \\frac{BW \\times \\text{RfD}}{I} \\times T_{1/2}',
     },
     {
@@ -531,23 +545,25 @@ export function calculateDetailedCriticalAnalysis(
       name: 'Exposure Duration',
       unit: 'years',
       criticalValue: timeToExceedanceYears !== null ? timeToExceedanceYears : 25,
-      criticalRangeDisplay: timeToExceedanceYears !== null
-        ? `≥ ${timeToExceedanceYears.toFixed(1)} yrs (25 to 30 yr Chronic Range)`
-        : '25 to 30 years (Equilibrium Plateau)',
+      criticalRangeDisplay:
+        timeToExceedanceYears !== null
+          ? `≥ ${timeToExceedanceYears.toFixed(1)} yrs (25 to 30 yr Chronic Range)`
+          : '25 to 30 years (Equilibrium Plateau)',
       currentValue: meanDuration,
       currentRangeDisplay: durationStats.displayRange,
       isExceeded: durationExceeded,
       status: durationStatus,
       direction: 'range',
-      explanation: 'Chronic exposure duration (25 to 30 years) achieving 99%+ of steady-state equilibrium capacity for PFOA/PFNA (5 to 8 biological half-lives), and 87% to 91% for longer-lived PFHxS.',
-      formula: 't_{\\text{crit}} = -\\frac{T_{1/2}}{\\ln(2)} \\ln\\left(1 - \\frac{BW \\times \\text{RfD}}{I}\\right)',
+      explanation:
+        'Chronic exposure duration (25 to 30 years) achieving 99%+ of steady-state equilibrium capacity for PFOA/PFNA (5 to 8 biological half-lives), and 87% to 91% for longer-lived PFHxS.',
+      formula:
+        't_{\\text{crit}} = -\\frac{T_{1/2}}{\\ln(2)} \\ln\\left(1 - \\frac{BW \\times \\text{RfD}}{I}\\right)',
     },
   ];
 
-  const overallStatus: 'safe' | 'borderline' | 'exceeded' =
-    isBurdenExceeded
-      ? 'exceeded'
-      : parameterThresholds.some((p) => p.status === 'borderline')
+  const overallStatus: 'safe' | 'borderline' | 'exceeded' = isBurdenExceeded
+    ? 'exceeded'
+    : parameterThresholds.some((p) => p.status === 'borderline')
       ? 'borderline'
       : 'safe';
 
@@ -590,11 +606,18 @@ export function calculateExceedanceRangeStats(
   meanBodyWeight: number = 55,
   meanBioavailability: number = 0.9,
   meanHalfLife?: number,
-  parameters?: SimulationParameters
+  parameters?: SimulationParameters,
 ): ExceedanceRangeStats {
   const totalCount = results.length;
-  const thresholds = calculateCriticalThresholds(compound, meanBodyWeight, meanBioavailability, meanHalfLife);
-  const detailedAnalysis = parameters ? calculateDetailedCriticalAnalysis(compound, parameters) : undefined;
+  const thresholds = calculateCriticalThresholds(
+    compound,
+    meanBodyWeight,
+    meanBioavailability,
+    meanHalfLife,
+  );
+  const detailedAnalysis = parameters
+    ? calculateDetailedCriticalAnalysis(compound, parameters)
+    : undefined;
 
   if (totalCount === 0) {
     return {
@@ -670,7 +693,7 @@ export function calculateExceedanceRangeStats(
  */
 export function calculateCompoundSummaries(
   results: IterationResult[],
-  parameters: SimulationParameters
+  parameters: SimulationParameters,
 ): CompoundSummary[] {
   if (!results || results.length === 0) return [];
 
@@ -720,7 +743,12 @@ export function calculateCompoundSummaries(
     const meanHazardQuotient = sumHq / totalCount;
     const riskExceedancePercent = (exceedingCss.length / totalCount) * 100;
 
-    const thresholds = calculateCriticalThresholds(compound, meanBW, meanBio, compound.halfLifeYears);
+    const thresholds = calculateCriticalThresholds(
+      compound,
+      meanBW,
+      meanBio,
+      compound.halfLifeYears,
+    );
 
     let exceedingSerumMin = 0;
     let exceedingSerumMax = 0;
@@ -738,11 +766,11 @@ export function calculateCompoundSummaries(
       exceedingBodyBurdenMax = exceedingBb[exceedingBb.length - 1];
     }
 
-    const isBurdenExceeded = meanBodyBurden > thresholds.criticalBodyBurden || meanHazardQuotient > 1.0;
-    const status: 'safe' | 'borderline' | 'exceeded' =
-      isBurdenExceeded
-        ? 'exceeded'
-        : meanHazardQuotient >= 0.85
+    const isBurdenExceeded =
+      meanBodyBurden > thresholds.criticalBodyBurden || meanHazardQuotient > 1.0;
+    const status: 'safe' | 'borderline' | 'exceeded' = isBurdenExceeded
+      ? 'exceeded'
+      : meanHazardQuotient >= 0.85
         ? 'borderline'
         : 'safe';
 
@@ -804,12 +832,13 @@ export interface DerivedParametersResult {
  * - Bioavailability = 0.92 (EFSA/EPA consensus)
  */
 export function deriveAutomatedParameters(
-  profile: DerivedExposureProfile
+  profile: DerivedExposureProfile,
 ): DerivedParametersResult {
   const bw = Math.max(20, Math.min(150, profile.bodyWeight || 55.4));
   const age = Math.max(1, Math.min(100, profile.age || 30));
   const waterL = Math.max(0.2, Math.min(8.0, profile.waterConsumption || 2.0));
-  const waterConcUgL = (profile.waterConcentrationNgL !== undefined ? profile.waterConcentrationNgL : 20) / 1000; // 20 ng/L = 0.020 µg/L
+  const waterConcUgL =
+    (profile.waterConcentrationNgL !== undefined ? profile.waterConcentrationNgL : 20) / 1000; // 20 ng/L = 0.020 µg/L
 
   // 1. Water-based PFAS intake: L/day * µg/L
   const derivedIntakeWaterUg = waterL * waterConcUgL;
@@ -834,7 +863,8 @@ export function deriveAutomatedParameters(
       name: 'Estimated PFAS Daily Intake',
       unit: 'µg/day',
       description: 'Aggregate ingested PFAS from drinking water and background dietary sources.',
-      scientificContext: 'Calculated from daily water intake and body mass background dietary factors (US EPA/EFSA).',
+      scientificContext:
+        'Calculated from daily water intake and body mass background dietary factors (US EPA/EFSA).',
       distribution: {
         type: 'lognormal',
         mean: parseFloat(derivedTotalIntakeUg.toFixed(5)),
@@ -892,7 +922,8 @@ export function deriveAutomatedParameters(
       name: 'Serum Elimination Half-Life',
       unit: 'years',
       description: 'Time required for blood serum PFAS concentration to decrease by half.',
-      scientificContext: 'Empirically derived from human cohort occupational and community exposure kinetics.',
+      scientificContext:
+        'Empirically derived from human cohort occupational and community exposure kinetics.',
       distribution: {
         type: 'fixed',
         value: defaultHalfLife,
@@ -903,7 +934,8 @@ export function deriveAutomatedParameters(
       name: 'Chronic Exposure Duration',
       unit: 'years',
       description: 'Cumulative duration of exposure to the contaminated environment.',
-      scientificContext: 'Estimated chronic adult residential exposure duration derived from chronological age.',
+      scientificContext:
+        'Estimated chronic adult residential exposure duration derived from chronological age.',
       distribution: {
         type: 'fixed',
         value: derivedExposureYears,
@@ -920,7 +952,3 @@ export function deriveAutomatedParameters(
     derivedBioavailability,
   };
 }
-
-
-
-

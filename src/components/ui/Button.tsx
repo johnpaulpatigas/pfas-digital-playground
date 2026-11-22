@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -27,16 +27,12 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantStyles = {
-    primary:
-      'bg-slate-900 hover:bg-slate-800 text-white shadow-xs active:scale-[0.99]',
+    primary: 'bg-slate-900 hover:bg-slate-800 text-white shadow-xs active:scale-[0.99]',
     secondary:
       'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 active:scale-[0.99]',
-    outline:
-      'border border-slate-300 text-slate-700 hover:bg-slate-50 active:scale-[0.99]',
-    ghost:
-      'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-    danger:
-      'bg-red-600 hover:bg-red-700 text-white shadow-xs active:scale-[0.99]',
+    outline: 'border border-slate-300 text-slate-700 hover:bg-slate-50 active:scale-[0.99]',
+    ghost: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+    danger: 'bg-red-600 hover:bg-red-700 text-white shadow-xs active:scale-[0.99]',
   };
 
   return (

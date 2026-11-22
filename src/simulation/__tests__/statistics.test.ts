@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { calculateSummaryStatistics, calculateSensitivityRanks } from '../statistics';
-import type { IterationResult, SimulationParameters, DistributionParams, ExposureParameterConfig } from '../../types';
+import { describe, expect, it } from 'vitest';
+import type {
+  DistributionParams,
+  ExposureParameterConfig,
+  IterationResult,
+  SimulationParameters,
+} from '../../types';
+import { calculateSensitivityRanks, calculateSummaryStatistics } from '../statistics';
 
 const mockResults: IterationResult[] = Array.from({ length: 100 }, (_, i) => ({
   iteration: i + 1,
@@ -15,10 +20,14 @@ const mockResults: IterationResult[] = Array.from({ length: 100 }, (_, i) => ({
   steadyStateConcentration: 1.0 + i * 0.05,
   peakBodyBurden: 20 + i,
   clearanceRate: 0.001,
-  hazardQuotient: (1.0 + i * 0.05) > 4.0 ? 1.2 : 0.5,
+  hazardQuotient: 1.0 + i * 0.05 > 4.0 ? 1.2 : 0.5,
 }));
 
-const createMockConfig = (id: string, name: string, dist: DistributionParams): ExposureParameterConfig => ({
+const createMockConfig = (
+  id: string,
+  name: string,
+  dist: DistributionParams,
+): ExposureParameterConfig => ({
   id,
   name,
   unit: 'unit',
@@ -28,13 +37,33 @@ const createMockConfig = (id: string, name: string, dist: DistributionParams): E
 });
 
 const mockParameters: SimulationParameters = {
-  dailyIntake: createMockConfig('dailyIntake', 'Daily Intake', { type: 'normal', mean: 0.1, sd: 0.02 }),
+  dailyIntake: createMockConfig('dailyIntake', 'Daily Intake', {
+    type: 'normal',
+    mean: 0.1,
+    sd: 0.02,
+  }),
   bodyWeight: createMockConfig('bodyWeight', 'Body Weight', { type: 'normal', mean: 55, sd: 8 }),
   age: createMockConfig('age', 'Age', { type: 'fixed', value: 30 }),
-  waterConsumption: createMockConfig('waterConsumption', 'Water Consumption', { type: 'lognormal', mean: 1.5, sd: 0.3 }),
-  bioavailability: createMockConfig('bioavailability', 'Bioavailability', { type: 'fixed', value: 0.95 }),
-  eliminationHalfLife: createMockConfig('eliminationHalfLife', 'Half-Life', { type: 'uniform', min: 2.0, max: 4.5 }),
-  exposureDuration: createMockConfig('exposureDuration', 'Exposure Duration', { type: 'triangular', min: 5, mode: 20, max: 40 }),
+  waterConsumption: createMockConfig('waterConsumption', 'Water Consumption', {
+    type: 'lognormal',
+    mean: 1.5,
+    sd: 0.3,
+  }),
+  bioavailability: createMockConfig('bioavailability', 'Bioavailability', {
+    type: 'fixed',
+    value: 0.95,
+  }),
+  eliminationHalfLife: createMockConfig('eliminationHalfLife', 'Half-Life', {
+    type: 'uniform',
+    min: 2.0,
+    max: 4.5,
+  }),
+  exposureDuration: createMockConfig('exposureDuration', 'Exposure Duration', {
+    type: 'triangular',
+    min: 5,
+    mode: 20,
+    max: 40,
+  }),
 };
 
 describe('Statistics Engine', () => {

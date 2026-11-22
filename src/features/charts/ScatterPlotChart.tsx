@@ -1,17 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import type React from 'react';
+import { useMemo, useState } from 'react';
 import {
-  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
   ScatterChart as RechartsScatterChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   Scatter,
   XAxis,
   YAxis,
-  Tooltip as RechartsTooltip,
-  CartesianGrid,
-  Legend,
 } from 'recharts';
-import type { IterationResult } from '../../types';
-import { useSimulationStore } from '../../stores/useSimulationStore';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import { useSimulationStore } from '../../stores/useSimulationStore';
+import type { IterationResult } from '../../types';
 
 interface ScatterPlotChartProps {
   results: IterationResult[];
@@ -25,7 +26,8 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
   const activeCompoundId = selectedCompoundId ?? samplingConfig.compoundId ?? 'pfoa';
 
   const { safePoints, exceedingPoints, activeCompound } = useMemo(() => {
-    if (!results || results.length === 0) return { safePoints: [], exceedingPoints: [], activeCompound: PFAS_COMPOUNDS[0] };
+    if (!results || results.length === 0)
+      return { safePoints: [], exceedingPoints: [], activeCompound: PFAS_COMPOUNDS[0] };
 
     const compound = PFAS_COMPOUNDS.find((c) => c.id === activeCompoundId) || PFAS_COMPOUNDS[0];
     const step = Math.max(1, Math.floor(results.length / 500));
@@ -62,7 +64,9 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
     <div className="w-full space-y-2 font-mono select-none">
       {(isSimpleMode || results?.[0]?.compoundOutputs) && (
         <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[10px]">
-          <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">PFAS View:</span>
+          <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">
+            PFAS View:
+          </span>
           {PFAS_COMPOUNDS.map((c) => (
             <button
               key={c.id}
@@ -93,7 +97,13 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
               tick={{ fill: '#475569', fontSize: 10 }}
               interval="preserveStartEnd"
               minTickGap={25}
-              label={{ value: 'Daily PFAS Intake (µg/day)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
+              label={{
+                value: 'Daily PFAS Intake (µg/day)',
+                position: 'bottom',
+                offset: 10,
+                fill: '#0f172a',
+                fontSize: 10,
+              }}
             />
             <YAxis
               type="number"
@@ -103,38 +113,79 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
               width={45}
               stroke="#64748b"
               tick={{ fill: '#475569', fontSize: 10 }}
-              label={{ value: `${activeCompound.name.split(' ')[0]} Css (µg/L)`, angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
+              label={{
+                value: `${activeCompound.name.split(' ')[0]} Css (µg/L)`,
+                angle: -90,
+                position: 'insideLeft',
+                offset: 10,
+                fill: '#0f172a',
+                fontSize: 10,
+              }}
             />
             <RechartsTooltip
-              formatter={(value: unknown, name: unknown) => [`${String(value ?? '')}`, String(name ?? '')]}
+              formatter={(value: unknown, name: unknown) => [
+                `${String(value ?? '')}`,
+                String(name ?? ''),
+              ]}
               content={({ active, payload }) => {
-                if (active && payload && payload.length) {
+                if (active && payload?.length) {
                   const data = payload[0].payload;
                   const isExceeding = data.hq > 1.0;
                   return (
                     <div className="bg-slate-900 text-white p-2.5 rounded-lg text-[11px] font-mono space-y-1 shadow-lg border border-slate-700">
-                      <div className={`font-bold flex items-center justify-between gap-2 border-b pb-1 ${isExceeding ? 'text-red-400 border-red-800' : 'text-teal-400 border-teal-800'}`}>
-                        <span>{activeCompound.name.split(' ')[0]}: {isExceeding ? 'Exceeding (HQ > 1.0)' : 'Safe (HQ ≤ 1.0)'}</span>
-                        <span className="text-[10px] px-1.5 py-0.2 bg-white/10 rounded">HQ = {data.hq}</span>
+                      <div
+                        className={`font-bold flex items-center justify-between gap-2 border-b pb-1 ${isExceeding ? 'text-red-400 border-red-800' : 'text-teal-400 border-teal-800'}`}
+                      >
+                        <span>
+                          {activeCompound.name.split(' ')[0]}:{' '}
+                          {isExceeding ? 'Exceeding (HQ > 1.0)' : 'Safe (HQ ≤ 1.0)'}
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.2 bg-white/10 rounded">
+                          HQ = {data.hq}
+                        </span>
                       </div>
-                      <div>Intake: <span className="font-semibold text-blue-300">{data.x} µg/day</span></div>
-                      <div>Serum <span className="text-slate-400">Css</span>: <span className="font-semibold text-purple-300">{data.y} µg/L</span></div>
-                      <div>Body Burden: <span className="font-semibold text-amber-300">{data.bb} µg</span></div>
-                      <div>Body Weight: <span className="text-slate-300">{data.bw} kg</span></div>
+                      <div>
+                        Intake: <span className="font-semibold text-blue-300">{data.x} µg/day</span>
+                      </div>
+                      <div>
+                        Serum <span className="text-slate-400">Css</span>:{' '}
+                        <span className="font-semibold text-purple-300">{data.y} µg/L</span>
+                      </div>
+                      <div>
+                        Body Burden:{' '}
+                        <span className="font-semibold text-amber-300">{data.bb} µg</span>
+                      </div>
+                      <div>
+                        Body Weight: <span className="text-slate-300">{data.bw} kg</span>
+                      </div>
                     </div>
                   );
                 }
                 return null;
               }}
             />
-            <Legend verticalAlign="top" height={24} wrapperStyle={{ fontSize: '10px', paddingTop: '-6px' }} />
-            <Scatter name="Safe Cohort (HQ ≤ 1.0)" data={safePoints} fill="#0d9488" opacity={0.65} r={3} />
-            <Scatter name="Exceedance Cohort (HQ > 1.0)" data={exceedingPoints} fill="#dc2626" opacity={0.75} r={3.5} />
+            <Legend
+              verticalAlign="top"
+              height={24}
+              wrapperStyle={{ fontSize: '10px', paddingTop: '-6px' }}
+            />
+            <Scatter
+              name="Safe Cohort (HQ ≤ 1.0)"
+              data={safePoints}
+              fill="#0d9488"
+              opacity={0.65}
+              r={3}
+            />
+            <Scatter
+              name="Exceedance Cohort (HQ > 1.0)"
+              data={exceedingPoints}
+              fill="#dc2626"
+              opacity={0.75}
+              r={3.5}
+            />
           </RechartsScatterChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 };
-
-

@@ -5,7 +5,8 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     id: 'average-filipino-woman',
     name: 'Average Filipino Woman',
     targetGroup: 'General Adult Female Cohort',
-    description: 'Baseline physiological and exposure values for adult women in the Philippines, derived from national health and nutrition surveys.',
+    description:
+      'Baseline physiological and exposure values for adult women in the Philippines, derived from national health and nutrition surveys.',
     simpleProfile: {
       bodyWeight: 55.4,
       age: 30,
@@ -75,7 +76,8 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     id: 'pregnant-woman',
     name: 'Pregnant Female Profile',
     targetGroup: 'Maternal Physiology Cohort',
-    description: 'Adjusted for plasma volume expansion and maternal physiological changes during pregnancy.',
+    description:
+      'Adjusted for plasma volume expansion and maternal physiological changes during pregnancy.',
     simpleProfile: {
       bodyWeight: 65.2,
       age: 29,
@@ -128,7 +130,8 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         name: 'Elimination Half-Life',
         unit: 'years',
         description: 'Apparent serum clearance half-life.',
-        scientificContext: 'Transplacental transfer and plasma expansion increase maternal clearance rate.',
+        scientificContext:
+          'Transplacental transfer and plasma expansion increase maternal clearance rate.',
         distribution: { type: 'lognormal', mean: 2.4, sd: 0.6 },
       },
       exposureDuration: {
@@ -145,7 +148,8 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     id: 'critical-chronic-threshold',
     name: 'Critical Baseline Threshold (25 to 30 yr Chronic)',
     targetGroup: 'Toxicological Benchmark Cohort',
-    description: 'Configures a 25 to 30 year exposure period with baseline threshold parameters to evaluate steady-state PFAS body burden and exceedance.',
+    description:
+      'Configures a 25 to 30 year exposure period with baseline threshold parameters to evaluate steady-state PFAS body burden and exceedance.',
     simpleProfile: {
       bodyWeight: 55.4,
       age: 40,
@@ -157,8 +161,10 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         id: 'dailyIntake',
         name: 'Daily PFAS Intake',
         unit: 'µg/day',
-        description: 'Critical daily intake exceeding the toxicological Reference Dose (RfD) threshold.',
-        scientificContext: 'Intake at or above the reference dose threshold for a 55.4 kg individual (0.0831 µg/day for PFOA).',
+        description:
+          'Critical daily intake exceeding the toxicological Reference Dose (RfD) threshold.',
+        scientificContext:
+          'Intake at or above the reference dose threshold for a 55.4 kg individual (0.0831 µg/day for PFOA).',
         distribution: { type: 'uniform', min: 0.085, max: 0.12 },
       },
       bodyWeight: {
@@ -191,7 +197,7 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         unit: 'fraction',
         description: 'Gastrointestinal absorption fraction.',
         scientificContext: 'Near-complete absorption typical of perfluorinated carboxylic acids.',
-        distribution: { type: 'uniform', min: 0.90, max: 0.98 },
+        distribution: { type: 'uniform', min: 0.9, max: 0.98 },
       },
       eliminationHalfLife: {
         id: 'eliminationHalfLife',
@@ -206,10 +212,10 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         name: 'Exposure Duration',
         unit: 'years',
         description: 'Exposure duration reaching over 99% of steady-state capacity.',
-        scientificContext: '25 to 30 years corresponds to 6.5 to 8.0 half-lives, reaching steady-state accumulation.',
+        scientificContext:
+          '25 to 30 years corresponds to 6.5 to 8.0 half-lives, reaching steady-state accumulation.',
         distribution: { type: 'uniform', min: 25, max: 30 },
       },
     },
   },
 ];
-

@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
-import { useSimulationStore } from '../stores/useSimulationStore';
+import { Cpu, GitMerge, Layers, Play } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import { Button } from '../components/ui/Button';
+import { MathView } from '../components/ui/MathView';
 import { executeComparisonAsync } from '../simulation/runSimulationAsync';
 import { calculateSummaryStatistics } from '../simulation/statistics';
+import { useSimulationStore } from '../stores/useSimulationStore';
 import type { ComparisonResult } from '../types';
-import { Button } from '../components/ui/Button';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, Legend } from 'recharts';
-import { Layers, Cpu, Play, GitMerge } from 'lucide-react';
-import { MathView } from '../components/ui/MathView';
 
 export const ComparePage: React.FC = () => {
   const { parameters } = useSimulationStore();
@@ -18,58 +28,60 @@ export const ComparePage: React.FC = () => {
     setIsBenchmarking(true);
 
     executeComparisonAsync(parameters, iterations)
-      .then(({ mcResults, lhsResults, mcLhsResults, mcRuntimeMs, lhsRuntimeMs, mcLhsRuntimeMs }) => {
-        const mcStats = calculateSummaryStatistics(mcResults);
-        const lhsStats = calculateSummaryStatistics(lhsResults);
-        const mcLhsStats = calculateSummaryStatistics(mcLhsResults);
+      .then(
+        ({ mcResults, lhsResults, mcLhsResults, mcRuntimeMs, lhsRuntimeMs, mcLhsRuntimeMs }) => {
+          const mcStats = calculateSummaryStatistics(mcResults);
+          const lhsStats = calculateSummaryStatistics(lhsResults);
+          const mcLhsStats = calculateSummaryStatistics(mcLhsResults);
 
-        // Compute Convergence data over iterations
-        const step = Math.max(1, Math.floor(iterations / 100));
-        let mcSum = 0;
-        let lhsSum = 0;
-        let mcLhsSum = 0;
-        const mcConvergence = [];
-        const lhsConvergence = [];
-        const mcLhsConvergence = [];
+          // Compute Convergence data over iterations
+          const step = Math.max(1, Math.floor(iterations / 100));
+          let mcSum = 0;
+          let lhsSum = 0;
+          let mcLhsSum = 0;
+          const mcConvergence = [];
+          const lhsConvergence = [];
+          const mcLhsConvergence = [];
 
-        for (let i = 0; i < iterations; i++) {
-          mcSum += mcResults[i].steadyStateConcentration;
-          lhsSum += lhsResults[i].steadyStateConcentration;
-          mcLhsSum += mcLhsResults[i].steadyStateConcentration;
+          for (let i = 0; i < iterations; i++) {
+            mcSum += mcResults[i].steadyStateConcentration;
+            lhsSum += lhsResults[i].steadyStateConcentration;
+            mcLhsSum += mcLhsResults[i].steadyStateConcentration;
 
-          if (i % step === 0 || i === iterations - 1) {
-            mcConvergence.push({
-              iteration: i + 1,
-              runningMean: parseFloat((mcSum / (i + 1)).toFixed(4)),
-              runningStd: 0,
-            });
-            lhsConvergence.push({
-              iteration: i + 1,
-              runningMean: parseFloat((lhsSum / (i + 1)).toFixed(4)),
-              runningStd: 0,
-            });
-            mcLhsConvergence.push({
-              iteration: i + 1,
-              runningMean: parseFloat((mcLhsSum / (i + 1)).toFixed(4)),
-              runningStd: 0,
-            });
+            if (i % step === 0 || i === iterations - 1) {
+              mcConvergence.push({
+                iteration: i + 1,
+                runningMean: parseFloat((mcSum / (i + 1)).toFixed(4)),
+                runningStd: 0,
+              });
+              lhsConvergence.push({
+                iteration: i + 1,
+                runningMean: parseFloat((lhsSum / (i + 1)).toFixed(4)),
+                runningStd: 0,
+              });
+              mcLhsConvergence.push({
+                iteration: i + 1,
+                runningMean: parseFloat((mcLhsSum / (i + 1)).toFixed(4)),
+                runningStd: 0,
+              });
+            }
           }
-        }
 
-        setComparison({
-          mcStats,
-          lhsStats,
-          mcLhsStats,
-          mcRuntimeMs,
-          lhsRuntimeMs,
-          mcLhsRuntimeMs,
-          mcConvergence,
-          lhsConvergence,
-          mcLhsConvergence,
-        });
+          setComparison({
+            mcStats,
+            lhsStats,
+            mcLhsStats,
+            mcRuntimeMs,
+            lhsRuntimeMs,
+            mcLhsRuntimeMs,
+            mcConvergence,
+            lhsConvergence,
+            mcLhsConvergence,
+          });
 
-        setIsBenchmarking(false);
-      })
+          setIsBenchmarking(false);
+        },
+      )
       .catch((err) => {
         console.error('Benchmark execution error:', err);
         setIsBenchmarking(false);
@@ -99,15 +111,21 @@ export const ComparePage: React.FC = () => {
         </h1>
 
         <p className="text-slate-600 text-sm max-w-3xl leading-relaxed">
-          <strong>Monte Carlo (MC)</strong> sampling draws random samples directly from parameter distributions.
-          <strong> Latin hypercube sampling (LHS)</strong> divides each distribution into <MathView math="N" /> equal-probability intervals to guarantee even coverage.
-          The <strong>hybrid (MC + LHS)</strong> combines random and stratified draws to evaluate tail percentiles while preserving random spread.
+          <strong>Monte Carlo (MC)</strong> sampling draws random samples directly from parameter
+          distributions.
+          <strong> Latin hypercube sampling (LHS)</strong> divides each distribution into{' '}
+          <MathView math="N" /> equal-probability intervals to guarantee even coverage. The{' '}
+          <strong>hybrid (MC + LHS)</strong> combines random and stratified draws to evaluate tail
+          percentiles while preserving random spread.
         </p>
 
         {/* Controls */}
         <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-200">
           <div className="flex items-center gap-3 font-mono text-xs">
-            <span className="text-slate-600">Sample Iterations (<MathView math="N" />):</span>
+            <span className="text-slate-600">
+              Sample Iterations (<MathView math="N" />
+              ):
+            </span>
             <select
               value={iterations}
               onChange={(e) => setIterations(parseInt(e.target.value, 10))}
@@ -150,24 +168,43 @@ export const ComparePage: React.FC = () => {
 
               <div className="space-y-2 text-slate-700">
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Mean Serum <MathView math="C_{ss}" /></span>
-                  <span className="text-teal-800 font-bold">{comparison.mcStats.mean.toFixed(4)} µg/L</span>
+                  <span>
+                    Mean Serum <MathView math="C_{ss}" />
+                  </span>
+                  <span className="text-teal-800 font-bold">
+                    {comparison.mcStats.mean.toFixed(4)} µg/L
+                  </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Std Dev (<MathView math="\sigma" />)</span>
-                  <span className="text-slate-900 font-bold">{comparison.mcStats.stdDev.toFixed(4)}</span>
+                  <span>
+                    Std Dev (<MathView math="\sigma" />)
+                  </span>
+                  <span className="text-slate-900 font-bold">
+                    {comparison.mcStats.stdDev.toFixed(4)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Variance (<MathView math="\sigma^2" />)</span>
-                  <span className="text-slate-900 font-bold">{comparison.mcStats.variance.toFixed(4)}</span>
+                  <span>
+                    Variance (<MathView math="\sigma^2" />)
+                  </span>
+                  <span className="text-slate-900 font-bold">
+                    {comparison.mcStats.variance.toFixed(4)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
                   <span>95% CI</span>
-                  <span className="text-slate-900 font-bold">[{comparison.mcStats.ci95Lower.toFixed(3)}, {comparison.mcStats.ci95Upper.toFixed(3)}]</span>
+                  <span className="text-slate-900 font-bold">
+                    [{comparison.mcStats.ci95Lower.toFixed(3)},{' '}
+                    {comparison.mcStats.ci95Upper.toFixed(3)}]
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span>High Risk (<MathView math="P_{95}" />)</span>
-                  <span className="text-red-700 font-bold">{comparison.mcStats.p95.toFixed(4)} µg/L</span>
+                  <span>
+                    High Risk (<MathView math="P_{95}" />)
+                  </span>
+                  <span className="text-red-700 font-bold">
+                    {comparison.mcStats.p95.toFixed(4)} µg/L
+                  </span>
                 </div>
               </div>
             </div>
@@ -186,24 +223,43 @@ export const ComparePage: React.FC = () => {
 
               <div className="space-y-2 text-slate-700">
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Mean Serum <MathView math="C_{ss}" /></span>
-                  <span className="text-purple-800 font-bold">{comparison.lhsStats.mean.toFixed(4)} µg/L</span>
+                  <span>
+                    Mean Serum <MathView math="C_{ss}" />
+                  </span>
+                  <span className="text-purple-800 font-bold">
+                    {comparison.lhsStats.mean.toFixed(4)} µg/L
+                  </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Std Dev (<MathView math="\sigma" />)</span>
-                  <span className="text-slate-900 font-bold">{comparison.lhsStats.stdDev.toFixed(4)}</span>
+                  <span>
+                    Std Dev (<MathView math="\sigma" />)
+                  </span>
+                  <span className="text-slate-900 font-bold">
+                    {comparison.lhsStats.stdDev.toFixed(4)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>Variance (<MathView math="\sigma^2" />)</span>
-                  <span className="text-slate-900 font-bold">{comparison.lhsStats.variance.toFixed(4)}</span>
+                  <span>
+                    Variance (<MathView math="\sigma^2" />)
+                  </span>
+                  <span className="text-slate-900 font-bold">
+                    {comparison.lhsStats.variance.toFixed(4)}
+                  </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
                   <span>95% CI</span>
-                  <span className="text-slate-900 font-bold">[{comparison.lhsStats.ci95Lower.toFixed(3)}, {comparison.lhsStats.ci95Upper.toFixed(3)}]</span>
+                  <span className="text-slate-900 font-bold">
+                    [{comparison.lhsStats.ci95Lower.toFixed(3)},{' '}
+                    {comparison.lhsStats.ci95Upper.toFixed(3)}]
+                  </span>
                 </div>
                 <div className="flex justify-between py-1">
-                  <span>High Risk (<MathView math="P_{95}" />)</span>
-                  <span className="text-red-700 font-bold">{comparison.lhsStats.p95.toFixed(4)} µg/L</span>
+                  <span>
+                    High Risk (<MathView math="P_{95}" />)
+                  </span>
+                  <span className="text-red-700 font-bold">
+                    {comparison.lhsStats.p95.toFixed(4)} µg/L
+                  </span>
                 </div>
               </div>
             </div>
@@ -213,7 +269,9 @@ export const ComparePage: React.FC = () => {
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
                   <GitMerge className="w-4 h-4 text-blue-700" />
-                  <h2 className="text-sm font-bold text-slate-900 font-heading">Monte Carlo + LHS</h2>
+                  <h2 className="text-sm font-bold text-slate-900 font-heading">
+                    Monte Carlo + LHS
+                  </h2>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 text-[10px] font-semibold border border-blue-200">
                   {comparison.mcLhsRuntimeMs || 0} ms
@@ -223,24 +281,43 @@ export const ComparePage: React.FC = () => {
               {comparison.mcLhsStats && (
                 <div className="space-y-2 text-slate-700">
                   <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>Mean Serum <MathView math="C_{ss}" /></span>
-                    <span className="text-blue-800 font-bold">{comparison.mcLhsStats.mean.toFixed(4)} µg/L</span>
+                    <span>
+                      Mean Serum <MathView math="C_{ss}" />
+                    </span>
+                    <span className="text-blue-800 font-bold">
+                      {comparison.mcLhsStats.mean.toFixed(4)} µg/L
+                    </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>Std Dev (<MathView math="\sigma" />)</span>
-                    <span className="text-slate-900 font-bold">{comparison.mcLhsStats.stdDev.toFixed(4)}</span>
+                    <span>
+                      Std Dev (<MathView math="\sigma" />)
+                    </span>
+                    <span className="text-slate-900 font-bold">
+                      {comparison.mcLhsStats.stdDev.toFixed(4)}
+                    </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>Variance (<MathView math="\sigma^2" />)</span>
-                    <span className="text-slate-900 font-bold">{comparison.mcLhsStats.variance.toFixed(4)}</span>
+                    <span>
+                      Variance (<MathView math="\sigma^2" />)
+                    </span>
+                    <span className="text-slate-900 font-bold">
+                      {comparison.mcLhsStats.variance.toFixed(4)}
+                    </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">
                     <span>95% CI</span>
-                    <span className="text-slate-900 font-bold">[{comparison.mcLhsStats.ci95Lower.toFixed(3)}, {comparison.mcLhsStats.ci95Upper.toFixed(3)}]</span>
+                    <span className="text-slate-900 font-bold">
+                      [{comparison.mcLhsStats.ci95Lower.toFixed(3)},{' '}
+                      {comparison.mcLhsStats.ci95Upper.toFixed(3)}]
+                    </span>
                   </div>
                   <div className="flex justify-between py-1">
-                    <span>High Risk (<MathView math="P_{95}" />)</span>
-                    <span className="text-red-700 font-bold">{comparison.mcLhsStats.p95.toFixed(4)} µg/L</span>
+                    <span>
+                      High Risk (<MathView math="P_{95}" />)
+                    </span>
+                    <span className="text-red-700 font-bold">
+                      {comparison.mcLhsStats.p95.toFixed(4)} µg/L
+                    </span>
                   </div>
                 </div>
               )}
@@ -251,7 +328,9 @@ export const ComparePage: React.FC = () => {
           <div className="card-panel p-6 rounded-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">Mean convergence comparison</h3>
+                <h3 className="text-base font-bold text-slate-900 font-heading">
+                  Mean convergence comparison
+                </h3>
                 <p className="text-xs text-slate-500 font-mono">
                   Stability of running mean across Monte Carlo, Latin hypercube, and hybrid sampling
                 </p>
@@ -260,7 +339,10 @@ export const ComparePage: React.FC = () => {
 
             <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={combinedConvergenceData} margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
+                <LineChart
+                  data={combinedConvergenceData}
+                  margin={{ top: 12, right: 15, left: 0, bottom: 25 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis
                     dataKey="iteration"
@@ -268,19 +350,56 @@ export const ComparePage: React.FC = () => {
                     tick={{ fill: '#475569', fontSize: 10 }}
                     interval="preserveStartEnd"
                     minTickGap={25}
-                    label={{ value: 'Iterations (N)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
+                    label={{
+                      value: 'Iterations (N)',
+                      position: 'bottom',
+                      offset: 10,
+                      fill: '#0f172a',
+                      fontSize: 10,
+                    }}
                   />
                   <YAxis
                     width={45}
                     stroke="#64748b"
                     tick={{ fill: '#475569', fontSize: 10 }}
-                    label={{ value: 'Running Mean Css (µg/L)', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
+                    label={{
+                      value: 'Running Mean Css (µg/L)',
+                      angle: -90,
+                      position: 'insideLeft',
+                      offset: 10,
+                      fill: '#0f172a',
+                      fontSize: 10,
+                    }}
                   />
                   <RechartsTooltip />
-                  <Legend verticalAlign="top" wrapperStyle={{ paddingBottom: '10px', fontSize: '11px' }} />
-                  <Line type="monotone" dataKey="MonteCarlo" stroke="#0d9488" strokeWidth={2} dot={false} name="Monte Carlo" />
-                  <Line type="monotone" dataKey="LatinHypercube" stroke="#7c3aed" strokeWidth={2} dot={false} name="Latin Hypercube (LHS)" />
-                  <Line type="monotone" dataKey="MonteCarloLHS" stroke="#2563eb" strokeWidth={2} dot={false} name="Monte Carlo + LHS" />
+                  <Legend
+                    verticalAlign="top"
+                    wrapperStyle={{ paddingBottom: '10px', fontSize: '11px' }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="MonteCarlo"
+                    stroke="#0d9488"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Monte Carlo"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="LatinHypercube"
+                    stroke="#7c3aed"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Latin Hypercube (LHS)"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="MonteCarloLHS"
+                    stroke="#2563eb"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Monte Carlo + LHS"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -290,4 +409,3 @@ export const ComparePage: React.FC = () => {
     </div>
   );
 };
-

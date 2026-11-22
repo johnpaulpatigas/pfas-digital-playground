@@ -16,7 +16,8 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFOA (Perfluorooctanoic Acid)',
     chemicalFormula: 'C_8HF_{15}O_2',
     casNumber: '335-67-1',
-    description: 'Legacy long-chain PFAS widely used in non-stick coatings, aqueous film-forming foams (AFFF), and textiles.',
+    description:
+      'Legacy long-chain PFAS widely used in non-stick coatings, aqueous film-forming foams (AFFF), and textiles.',
     halfLifeYears: 3.8,
     volumeOfDistribution: 0.17,
     epaMCL: 4.0, // 4 ng/L
@@ -27,7 +28,8 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFOS (Perfluorooctane Sulfonate)',
     chemicalFormula: 'C_8F_{17}SO_3^-',
     casNumber: '1763-23-1',
-    description: 'Surfactant compound exhibiting strong biological accumulation in human serum, liver, and kidneys.',
+    description:
+      'Surfactant compound exhibiting strong biological accumulation in human serum, liver, and kidneys.',
     halfLifeYears: 5.4,
     volumeOfDistribution: 0.23,
     epaMCL: 4.0, // 4 ng/L
@@ -49,9 +51,10 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFNA (Perfluorononanoic Acid)',
     chemicalFormula: 'C_9HF_{17}O_2',
     casNumber: '375-95-1',
-    description: '9-carbon perfluorinated carboxylic acid found in industrial applications and dietary sources.',
+    description:
+      '9-carbon perfluorinated carboxylic acid found in industrial applications and dietary sources.',
     halfLifeYears: 3.2,
-    volumeOfDistribution: 0.20,
+    volumeOfDistribution: 0.2,
     epaMCL: 10.0, // 10 ng/L
     rfdDose: 0.003, // 0.003 ug/kg/day = 3.0 ng/kg/day (US EPA toxicological benchmark)
   },
@@ -60,9 +63,10 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'GenX (HFPO-DA)',
     chemicalFormula: 'C_6HF_{11}O_3',
     casNumber: '62037-80-3',
-    description: 'Short-chain replacement compound with shorter serum half-life and high mobility in groundwater.',
+    description:
+      'Short-chain replacement compound with shorter serum half-life and high mobility in groundwater.',
     halfLifeYears: 0.2,
-    volumeOfDistribution: 0.40,
+    volumeOfDistribution: 0.4,
     epaMCL: 10.0, // 10 ng/L
     rfdDose: 0.03, // 0.03 ug/kg/day = 30.0 ng/kg/day (US EPA toxicological benchmark)
   },

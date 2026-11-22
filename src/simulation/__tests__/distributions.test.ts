@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   createPRNG,
-  sampleStandardNormal,
-  normalInverseCDF,
-  sampleDistribution,
-  quantileDistribution,
   getDistributionMean,
+  normalInverseCDF,
+  quantileDistribution,
+  sampleDistribution,
+  sampleStandardNormal,
 } from '../distributions';
 
 describe('Distributions Engine', () => {
@@ -75,7 +75,10 @@ describe('Distributions Engine', () => {
     const normalVal = quantileDistribution({ type: 'normal', mean: 100, sd: 15 }, 0.5);
     expect(normalVal).toBeCloseTo(100, 4);
 
-    const triangularVal = quantileDistribution({ type: 'triangular', min: 0, mode: 5, max: 10 }, 0.5);
+    const triangularVal = quantileDistribution(
+      { type: 'triangular', min: 0, mode: 5, max: 10 },
+      0.5,
+    );
     expect(triangularVal).toBeGreaterThan(0);
     expect(triangularVal).toBeLessThan(10);
 

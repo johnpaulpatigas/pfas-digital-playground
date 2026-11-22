@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
+import { ArrowRight, BookOpen, Sliders, Sparkles, Table as TableIcon, X } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MathView } from '../../components/ui/MathView';
 import { Button } from '../../components/ui/Button';
+import { MathView } from '../../components/ui/MathView';
+import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
-import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
-import {
-  X,
-  BookOpen,
-  Sliders,
-  Table as TableIcon,
-  Sparkles,
-  ArrowRight,
-} from 'lucide-react';
 
 interface ParameterGuideModalProps {
   isOpen: boolean;
@@ -33,7 +27,6 @@ export interface ParameterReferenceRow {
   criticalCutoff: string;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
   {
     id: 'dailyIntake',
@@ -45,7 +38,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '0.250 to 0.500 µg/day',
     recommendedDist: 'Lognormal (µ: 0.05, σ: 0.40) or Triangular',
     source: 'US EPA Exposure Factors Handbook (2019), EFSA Contam Panel (2020)',
-    description: 'Total daily ingested mass of target PFAS from drinking water, food (such as seafood and dairy), consumer products, and dust.',
+    description:
+      'Total daily ingested mass of target PFAS from drinking water, food (such as seafood and dairy), consumer products, and dust.',
     criticalCutoff: 'I_{crit} = BW × RfD (e.g. 0.0831 µg/day for 55.4 kg with PFOA)',
   },
   {
@@ -58,8 +52,10 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '85.0 to 100.0 kg',
     recommendedDist: 'Normal (µ: 55.4, σ: 8.5) or Triangular (45, 55, 75)',
     source: 'DOST-FNRI Philippine Dietary Reference Intakes (PDRI), CDC NHANES',
-    description: 'Body mass in kilograms. Lower body weight results in a higher dose per kilogram for a given intake rate.',
-    criticalCutoff: 'BW_{crit} = I / RfD (Exceedance occurs when body mass falls below critical cutoff)',
+    description:
+      'Body mass in kilograms. Lower body weight results in a higher dose per kilogram for a given intake rate.',
+    criticalCutoff:
+      'BW_{crit} = I / RfD (Exceedance occurs when body mass falls below critical cutoff)',
   },
   {
     id: 'age',
@@ -84,7 +80,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '3.5 to 5.0 L/day',
     recommendedDist: 'Normal (µ: 2.0, σ: 0.4) or Lognormal (µ: 1.9, σ: 0.3)',
     source: 'WHO Guidelines for Drinking-Water Quality, EPA Exposure Factors Handbook',
-    description: 'Direct drinking water intake per day. Higher water intake increases total chemical ingestion when water contains detectable PFAS.',
+    description:
+      'Direct drinking water intake per day. Higher water intake increases total chemical ingestion when water contains detectable PFAS.',
     criticalCutoff: 'W_{crit} = (BW × RfD) / EPA_MCL (e.g. 20.8 L/day at 4 ng/L for PFOA)',
   },
   {
@@ -97,7 +94,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '0.99 (99%)',
     recommendedDist: 'Uniform (0.85 to 0.98) or Triangular (0.80, 0.95, 0.99)',
     source: 'ATSDR Toxicological Profile for Perfluoroalkyls (2021)',
-    description: 'Fraction of ingested PFAS absorbed through the gastrointestinal tract into systemic circulation. Perfluoroalkyl carboxylic and sulfonic acids exhibit high oral bioavailability (>90%).',
+    description:
+      'Fraction of ingested PFAS absorbed through the gastrointestinal tract into systemic circulation. Perfluoroalkyl carboxylic and sulfonic acids exhibit high oral bioavailability (>90%).',
     criticalCutoff: 'f_{abs, crit} = (BW × RfD) / I (Fraction required to reach reference dose)',
   },
   {
@@ -110,8 +108,10 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '12.0 yr (PFHxS)',
     recommendedDist: 'Fixed or Normal around target compound empirical mean',
     source: 'Olsen et al. (2007), Li et al. (2018), US EPA Health Advisory Reviews',
-    description: 'Biological half-life for elimination from human blood serum. Long-chain PFAS undergo renal tubular reabsorption via organic anion transporters (such as OAT4 and URAT1).',
-    criticalCutoff: 'T_{1/2, crit} = (BW × RfD / I) × T_{1/2} (Slower clearance elevates steady-state mass)',
+    description:
+      'Biological half-life for elimination from human blood serum. Long-chain PFAS undergo renal tubular reabsorption via organic anion transporters (such as OAT4 and URAT1).',
+    criticalCutoff:
+      'T_{1/2, crit} = (BW × RfD / I) × T_{1/2} (Slower clearance elevates steady-state mass)',
   },
   {
     id: 'exposureDuration',
@@ -123,8 +123,10 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     max: '40 to 50 years',
     recommendedDist: 'Uniform (25 to 30) for baseline average, or Fixed (30)',
     source: 'US EPA Superfund Standard Default Exposure Factors (30-yr residential)',
-    description: 'Duration of chronic exposure. For PFOA and PFNA (half-lives approximately 3.2 to 3.8 years), 25 to 30 years represents 6.5 to 9 half-lives, reaching over 99% of steady-state accumulation (and 87% to 91% for longer-lived PFHxS).',
-    criticalCutoff: 't \\ge 25\\text{ to }30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
+    description:
+      'Duration of chronic exposure. For PFOA and PFNA (half-lives approximately 3.2 to 3.8 years), 25 to 30 years represents 6.5 to 9 half-lives, reaching over 99% of steady-state accumulation (and 87% to 91% for longer-lived PFHxS).',
+    criticalCutoff:
+      't \\ge 25\\text{ to }30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
   },
 ];
 
@@ -239,8 +241,12 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                     <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-mono">
                       <th className="p-3 font-semibold">Parameter / Symbol</th>
                       <th className="p-3 font-semibold">Unit</th>
-                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">Minimum bound</th>
-                      <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">Baseline / Average</th>
+                      <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">
+                        Minimum bound
+                      </th>
+                      <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">
+                        Baseline / Average
+                      </th>
                       <th className="p-3 font-semibold text-rose-800 bg-rose-50/40">Upper bound</th>
                       <th className="p-3 font-semibold">Recommended distribution</th>
                       <th className="p-3 font-semibold">Literature source</th>
@@ -251,15 +257,29 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                       <tr key={row.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="p-3">
                           <div className="font-bold text-slate-900">{row.name}</div>
-                          <div className="text-[10px] text-slate-500 font-mono">Symbol: <MathView math={row.symbol} /></div>
-                          <p className="text-[10px] text-slate-600 mt-1 max-w-xs leading-relaxed">{row.description}</p>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            Symbol: <MathView math={row.symbol} />
+                          </div>
+                          <p className="text-[10px] text-slate-600 mt-1 max-w-xs leading-relaxed">
+                            {row.description}
+                          </p>
                         </td>
                         <td className="p-3 font-mono font-medium text-slate-600">{row.unit}</td>
-                        <td className="p-3 font-mono text-emerald-700 font-medium bg-emerald-50/20">{row.min}</td>
-                        <td className="p-3 font-mono text-blue-900 font-bold bg-blue-50/30">{row.average}</td>
-                        <td className="p-3 font-mono text-red-700 font-medium bg-rose-50/20">{row.max}</td>
-                        <td className="p-3 font-mono text-slate-700 text-[10px]">{row.recommendedDist}</td>
-                        <td className="p-3 text-slate-500 text-[10px] leading-relaxed max-w-xs">{row.source}</td>
+                        <td className="p-3 font-mono text-emerald-700 font-medium bg-emerald-50/20">
+                          {row.min}
+                        </td>
+                        <td className="p-3 font-mono text-blue-900 font-bold bg-blue-50/30">
+                          {row.average}
+                        </td>
+                        <td className="p-3 font-mono text-red-700 font-medium bg-rose-50/20">
+                          {row.max}
+                        </td>
+                        <td className="p-3 font-mono text-slate-700 text-[10px]">
+                          {row.recommendedDist}
+                        </td>
+                        <td className="p-3 text-slate-500 text-[10px] leading-relaxed max-w-xs">
+                          {row.source}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -272,24 +292,35 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                   <h3 className="font-bold text-slate-900 text-xs font-heading">
                     Target PFAS compounds and regulatory benchmarks
                   </h3>
-                  <span className="text-[10px] font-mono text-slate-500">US EPA NPDWR (2024) Benchmarks</span>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    US EPA NPDWR (2024) Benchmarks
+                  </span>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-[11px]">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-600 bg-white font-mono">
                         <th className="p-2 font-semibold">Compound</th>
-                        <th className="p-2 font-semibold">Half-Life (<MathView math="T_{1/2}" />)</th>
-                        <th className="p-2 font-semibold">Volume of Distribution (<MathView math="V_d" />)</th>
+                        <th className="p-2 font-semibold">
+                          Half-Life (<MathView math="T_{1/2}" />)
+                        </th>
+                        <th className="p-2 font-semibold">
+                          Volume of Distribution (<MathView math="V_d" />)
+                        </th>
                         <th className="p-2 font-semibold">EPA MCL (ng/L)</th>
-                        <th className="p-2 font-semibold">Reference Dose (<MathView math="\text{RfD}" />)</th>
+                        <th className="p-2 font-semibold">
+                          Reference Dose (<MathView math="\text{RfD}" />)
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {PFAS_COMPOUNDS.map((c) => (
                         <tr key={c.id} className="hover:bg-slate-100/50">
                           <td className="p-2 font-medium text-slate-900">
-                            {c.name} <span className="text-slate-500 font-mono text-[10px]">(CAS {c.casNumber})</span>
+                            {c.name}{' '}
+                            <span className="text-slate-500 font-mono text-[10px]">
+                              (CAS {c.casNumber})
+                            </span>
                           </td>
                           <td className="p-2 font-mono">{c.halfLifeYears} years</td>
                           <td className="p-2 font-mono">{c.volumeOfDistribution} L/kg</td>
@@ -320,63 +351,120 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                 {/* Step 1 */}
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">1</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Select chemical and cohort</span>
+                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">
+                      1
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">
+                      Select chemical and cohort
+                    </span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Choose a target chemical from the top sidebar dropdown (such as <strong>PFOA</strong>, <strong>PFOS</strong>, <strong>PFHxS</strong>, <strong>PFNA</strong>, or <strong>GenX</strong>). Each compound loads its biological half-life, volume of distribution, and US EPA Maximum Contaminant Level (MCL).
+                    Choose a target chemical from the top sidebar dropdown (such as{' '}
+                    <strong>PFOA</strong>, <strong>PFOS</strong>, <strong>PFHxS</strong>,{' '}
+                    <strong>PFNA</strong>, or <strong>GenX</strong>). Each compound loads its
+                    biological half-life, volume of distribution, and US EPA Maximum Contaminant
+                    Level (MCL).
                   </p>
                 </div>
 
                 {/* Step 2 */}
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">2</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Configure parameter distributions</span>
+                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">
+                      2
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">
+                      Configure parameter distributions
+                    </span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
                     Choose from five statistical distribution types for each physiological variable:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside font-mono">
-                    <li><strong>Fixed:</strong> Deterministic single-value point estimate.</li>
-                    <li><strong>Uniform [min, max]:</strong> Equal probability across a bounded range.</li>
-                    <li><strong>Normal (µ, σ):</strong> Symmetric bell-curve distribution.</li>
-                    <li><strong>Lognormal (µ, σ):</strong> Right-skewed distribution (standard for daily intake).</li>
-                    <li><strong>Triangular (min, mode, max):</strong> Three-point distribution based on expert bounds.</li>
+                    <li>
+                      <strong>Fixed:</strong> Deterministic single-value point estimate.
+                    </li>
+                    <li>
+                      <strong>Uniform [min, max]:</strong> Equal probability across a bounded range.
+                    </li>
+                    <li>
+                      <strong>Normal (µ, σ):</strong> Symmetric bell-curve distribution.
+                    </li>
+                    <li>
+                      <strong>Lognormal (µ, σ):</strong> Right-skewed distribution (standard for
+                      daily intake).
+                    </li>
+                    <li>
+                      <strong>Triangular (min, mode, max):</strong> Three-point distribution based
+                      on expert bounds.
+                    </li>
                   </ul>
                 </div>
 
                 {/* Step 3 */}
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">3</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Select sampling method and sample size</span>
+                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">
+                      3
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">
+                      Select sampling method and sample size
+                    </span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
                     Select a sampling engine:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
-                    <li><strong>Monte Carlo:</strong> Pseudo-random sampling across parameter ranges.</li>
-                    <li><strong>Latin Hypercube (LHS):</strong> Stratified sampling with uniform distribution coverage.</li>
-                    <li><strong>MC + LHS Hybrid:</strong> Blended execution for variance reduction and sample stability.</li>
+                    <li>
+                      <strong>Monte Carlo:</strong> Pseudo-random sampling across parameter ranges.
+                    </li>
+                    <li>
+                      <strong>Latin Hypercube (LHS):</strong> Stratified sampling with uniform
+                      distribution coverage.
+                    </li>
+                    <li>
+                      <strong>MC + LHS Hybrid:</strong> Blended execution for variance reduction and
+                      sample stability.
+                    </li>
                   </ul>
-                  <p className="text-[10px] text-slate-500">Recommended sample size: <strong>N = 2,000 to 10,000 iterations</strong>.</p>
+                  <p className="text-[10px] text-slate-500">
+                    Recommended sample size: <strong>N = 2,000 to 10,000 iterations</strong>.
+                  </p>
                 </div>
 
                 {/* Step 4 */}
                 <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">4</span>
-                    <span className="font-bold text-slate-900 text-xs font-heading">Execute and inspect output tabs</span>
+                    <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-xs flex items-center justify-center">
+                      4
+                    </span>
+                    <span className="font-bold text-slate-900 text-xs font-heading">
+                      Execute and inspect output tabs
+                    </span>
                   </div>
                   <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Click <strong>&quot;Execute Simulation&quot;</strong> and view the analytical tabs:
+                    Click <strong>&quot;Execute Simulation&quot;</strong> and view the analytical
+                    tabs:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
-                    <li><strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient <MathView math="HQ = 1.0" /> and cumulative mixture Hazard Index <MathView math="HI = 1.0" />.</li>
-                    <li><strong>Histogram and CDF:</strong> Population serum concentration density and tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />).</li>
-                    <li><strong>Time-Course Kinetics:</strong> Dynamic multi-year bioaccumulation curves up to 40 years.</li>
-                    <li><strong>Tornado Sensitivity:</strong> Spearman rank correlation (<MathView math="\rho" />) identifying primary exposure drivers.</li>
+                    <li>
+                      <strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient{' '}
+                      <MathView math="HQ = 1.0" /> and cumulative mixture Hazard Index{' '}
+                      <MathView math="HI = 1.0" />.
+                    </li>
+                    <li>
+                      <strong>Histogram and CDF:</strong> Population serum concentration density and
+                      tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />
+                      ).
+                    </li>
+                    <li>
+                      <strong>Time-Course Kinetics:</strong> Dynamic multi-year bioaccumulation
+                      curves up to 40 years.
+                    </li>
+                    <li>
+                      <strong>Tornado Sensitivity:</strong> Spearman rank correlation (
+                      <MathView math="\rho" />) identifying primary exposure drivers.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -388,7 +476,8 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-slate-600 text-[11px]">
-                  Select any pre-configured population scenario to inspect its parameter distributions and quickly load it into the playground:
+                  Select any pre-configured population scenario to inspect its parameter
+                  distributions and quickly load it into the playground:
                 </p>
               </div>
 
@@ -400,17 +489,22 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                   >
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900 text-xs font-heading">{preset.name}</span>
+                        <span className="font-bold text-slate-900 text-xs font-heading">
+                          {preset.name}
+                        </span>
                         <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-mono font-semibold">
                           {preset.targetGroup}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">{preset.description}</p>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        {preset.description}
+                      </p>
                     </div>
 
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
                       <div className="text-[10px] font-mono text-slate-500">
-                        Intake: {preset.parameters.dailyIntake.distribution.type} • BW: {preset.parameters.bodyWeight.distribution.type}
+                        Intake: {preset.parameters.dailyIntake.distribution.type} • BW:{' '}
+                        {preset.parameters.bodyWeight.distribution.type}
                       </div>
                       <Button
                         variant="secondary"

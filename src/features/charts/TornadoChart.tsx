@@ -1,14 +1,14 @@
-import React from 'react';
+import type React from 'react';
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
-  XAxis,
-  YAxis,
-  Tooltip as RechartsTooltip,
+  BarChart,
   CartesianGrid,
   Cell,
+  Tooltip as RechartsTooltip,
   ReferenceLine,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import type { SensitivityRank } from '../../types';
 
@@ -42,7 +42,11 @@ export const TornadoChart: React.FC<TornadoChartProps> = ({ sensitivityRanks }) 
   return (
     <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart layout="vertical" data={chartData} margin={{ top: 12, right: 15, left: 0, bottom: 25 }}>
+        <BarChart
+          layout="vertical"
+          data={chartData}
+          margin={{ top: 12, right: 15, left: 0, bottom: 25 }}
+        >
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
             type="number"
@@ -51,7 +55,13 @@ export const TornadoChart: React.FC<TornadoChartProps> = ({ sensitivityRanks }) 
             tick={{ fill: '#475569', fontSize: 10 }}
             interval="preserveStartEnd"
             minTickGap={20}
-            label={{ value: 'Spearman Rank Correlation Coefficient (ρ)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
+            label={{
+              value: 'Spearman Rank Correlation Coefficient (ρ)',
+              position: 'bottom',
+              offset: 10,
+              fill: '#0f172a',
+              fontSize: 10,
+            }}
           />
           <YAxis
             type="category"

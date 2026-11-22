@@ -1,6 +1,6 @@
-import type { SimulationParameters, IterationResult } from '../types';
-import { runMonteCarloSimulation } from './monteCarlo';
+import type { IterationResult, SimulationParameters } from '../types';
 import { runLatinHypercubeSimulation } from './latinHypercube';
+import { runMonteCarloSimulation } from './monteCarlo';
 
 /**
  * Monte Carlo + Latin Hypercube Hybrid Simulation Engine
@@ -11,7 +11,7 @@ export function runMonteCarloLhsSimulation(
   parameters: SimulationParameters,
   iterations: number = 25000,
   seed: number = 42,
-  compoundId: string = 'pfoa'
+  compoundId: string = 'pfoa',
 ): IterationResult[] {
   const mcCount = Math.floor(iterations / 2);
   const lhsCount = iterations - mcCount;

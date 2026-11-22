@@ -65,7 +65,7 @@ export function exportToCSV(results: IterationResult[], filename = 'pfas_simulat
 export function exportToJSON(
   results: IterationResult[],
   summaryStats: SummaryStatistics | null,
-  filename = 'pfas_simulation_export.json'
+  filename = 'pfas_simulation_export.json',
 ) {
   const payload = {
     exportedAt: new Date().toISOString(),

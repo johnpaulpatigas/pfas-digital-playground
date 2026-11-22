@@ -1,10 +1,17 @@
-import type { SimulationParameters, SamplingConfig, IterationResult, SummaryStatistics, SensitivityRank, CompoundSummary } from '../types';
-import type { SimulationWorkerResponse } from './workers/simulationWorker';
-import { runMonteCarloSimulation } from './monteCarlo';
+import type {
+  CompoundSummary,
+  IterationResult,
+  SamplingConfig,
+  SensitivityRank,
+  SimulationParameters,
+  SummaryStatistics,
+} from '../types';
 import { runLatinHypercubeSimulation } from './latinHypercube';
+import { runMonteCarloSimulation } from './monteCarlo';
 import { runMonteCarloLhsSimulation } from './monteCarloLhs';
-import { calculateSummaryStatistics, calculateSensitivityRanks } from './statistics';
+import { calculateSensitivityRanks, calculateSummaryStatistics } from './statistics';
 import { calculateCompoundSummaries } from './toxicokinetics';
+import type { SimulationWorkerResponse } from './workers/simulationWorker';
 
 export interface SimulationAsyncResult {
   simResults: IterationResult[];
@@ -27,7 +34,7 @@ export interface ComparisonAsyncResult {
  */
 export function executeSimulationAsync(
   parameters: SimulationParameters,
-  samplingConfig: SamplingConfig
+  samplingConfig: SamplingConfig,
 ): Promise<SimulationAsyncResult> {
   return new Promise((resolve, reject) => {
     if (typeof Worker !== 'undefined') {
@@ -43,12 +50,18 @@ export function executeSimulationAsync(
             worker.terminate();
             if (event.data.error) {
               reject(new Error(event.data.error));
-            } else if (event.data.data?.simResults && event.data.data.summaryStats && event.data.data.sensitivityRanks) {
+            } else if (
+              event.data.data?.simResults &&
+              event.data.data.summaryStats &&
+              event.data.data.sensitivityRanks
+            ) {
               resolve({
                 simResults: event.data.data.simResults,
                 summaryStats: event.data.data.summaryStats,
                 sensitivityRanks: event.data.data.sensitivityRanks,
-                compoundSummaries: event.data.data.compoundSummaries || calculateCompoundSummaries(event.data.data.simResults, parameters),
+                compoundSummaries:
+                  event.data.data.compoundSummaries ||
+                  calculateCompoundSummaries(event.data.data.simResults, parameters),
               });
             } else {
               reject(new Error('Invalid worker response payload'));
@@ -77,15 +90,34 @@ export function executeSimulationAsync(
     let simResults: IterationResult[];
     const activeCompoundId = samplingConfig.compoundId || 'pfoa';
     if (samplingConfig.method === 'monte-carlo') {
-      simResults = runMonteCarloSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
+      simResults = runMonteCarloSimulation(
+        parameters,
+        samplingConfig.iterations,
+        samplingConfig.seed,
+        activeCompoundId,
+      );
     } else if (samplingConfig.method === 'latin-hypercube') {
-      simResults = runLatinHypercubeSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
+      simResults = runLatinHypercubeSimulation(
+        parameters,
+        samplingConfig.iterations,
+        samplingConfig.seed,
+        activeCompoundId,
+      );
     } else {
-      simResults = runMonteCarloLhsSimulation(parameters, samplingConfig.iterations, samplingConfig.seed, activeCompoundId);
+      simResults = runMonteCarloLhsSimulation(
+        parameters,
+        samplingConfig.iterations,
+        samplingConfig.seed,
+        activeCompoundId,
+      );
     }
 
     const summaryStats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
-    const sensitivityRanks = calculateSensitivityRanks(simResults, parameters, 'steadyStateConcentration');
+    const sensitivityRanks = calculateSensitivityRanks(
+      simResults,
+      parameters,
+      'steadyStateConcentration',
+    );
     const compoundSummaries = calculateCompoundSummaries(simResults, parameters);
 
     resolve({ simResults, summaryStats, sensitivityRanks, compoundSummaries });
@@ -97,7 +129,7 @@ export function executeSimulationAsync(
  */
 export function executeComparisonAsync(
   parameters: SimulationParameters,
-  iterations: number
+  iterations: number,
 ): Promise<ComparisonAsyncResult> {
   return new Promise((resolve, reject) => {
     if (typeof Worker !== 'undefined') {

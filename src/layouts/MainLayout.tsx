@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { Activity, BookOpen, Compass, Dna, GraduationCap, Layers, Menu, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Compass, BookOpen, Layers, Dna, Menu, X, GraduationCap } from 'lucide-react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -65,7 +66,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
-                <Icon className={`relative z-10 w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-400'}`} />
+                <Icon
+                  className={`relative z-10 w-3.5 h-3.5 ${isActive ? 'text-blue-400' : 'text-slate-400'}`}
+                />
                 <span className="relative z-10">{item.label}</span>
               </Link>
             );
@@ -121,7 +124,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                           : 'text-slate-700 hover:bg-slate-100'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                      <Icon
+                        className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-500'}`}
+                      />
                       <span>{item.label}</span>
                     </Link>
                   );
@@ -133,9 +138,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main View Area */}
-      <main className="flex-1 flex flex-col">
-        {children}
-      </main>
+      <main className="flex-1 flex flex-col">{children}</main>
     </div>
   );
 };

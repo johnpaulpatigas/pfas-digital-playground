@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useSimulationStore } from '../useSimulationStore';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { DEMOGRAPHIC_PRESETS } from '../../features/scenarios/presets';
+import { useSimulationStore } from '../useSimulationStore';
 
 describe('useSimulationStore demographic scenario and simple mode synchronization', () => {
   beforeEach(() => {

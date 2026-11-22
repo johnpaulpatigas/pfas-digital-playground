@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
 import { HelpCircle } from 'lucide-react';
+import type React from 'react';
+import { useState } from 'react';
 
 interface TooltipProps {
   content: React.ReactNode;
@@ -7,11 +8,7 @@ interface TooltipProps {
   position?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({
-  content,
-  children,
-  position = 'top',
-}) => {
+export const Tooltip: React.FC<TooltipProps> = ({ content, children, position = 'top' }) => {
   const [visible, setVisible] = useState(false);
 
   const positionClasses = {
@@ -29,7 +26,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
         onClick={() => setVisible(!visible)}
         className="cursor-pointer"
       >
-        {children || <HelpCircle className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700 transition-colors" />}
+        {children || (
+          <HelpCircle className="w-3.5 h-3.5 text-slate-400 hover:text-slate-700 transition-colors" />
+        )}
       </div>
 
       {visible && (

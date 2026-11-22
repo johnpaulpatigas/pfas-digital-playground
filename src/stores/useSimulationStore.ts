@@ -1,20 +1,19 @@
 import { create } from 'zustand';
-import type {
-  SimulationParameters,
-  SamplingConfig,
-  IterationResult,
-  SummaryStatistics,
-  SensitivityRank,
-  ComparisonResult,
-  DistributionParams,
-  PlaygroundMode,
-  CompoundSummary,
-  SimpleProfile,
-} from '../types';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 import { deriveAutomatedParameters } from '../simulation/toxicokinetics';
-
+import type {
+  ComparisonResult,
+  CompoundSummary,
+  DistributionParams,
+  IterationResult,
+  PlaygroundMode,
+  SamplingConfig,
+  SensitivityRank,
+  SimpleProfile,
+  SimulationParameters,
+  SummaryStatistics,
+} from '../types';
 
 interface SimulationState {
   // Config state
@@ -38,7 +37,10 @@ interface SimulationState {
   // Actions
   setPlaygroundMode: (mode: PlaygroundMode) => void;
   updateSimpleProfile: (profile: Partial<SimpleProfile>) => void;
-  setParameterDistribution: (paramId: keyof SimulationParameters, distribution: DistributionParams) => void;
+  setParameterDistribution: (
+    paramId: keyof SimulationParameters,
+    distribution: DistributionParams,
+  ) => void;
   updateParameterValue: (paramId: keyof SimulationParameters, key: string, value: number) => void;
   setSamplingConfig: (config: Partial<SamplingConfig>) => void;
   setCompoundId: (compoundId: string) => void;
@@ -47,7 +49,7 @@ interface SimulationState {
     results: IterationResult[],
     summaryStats: SummaryStatistics,
     sensitivityRanks: SensitivityRank[],
-    compoundSummaries?: CompoundSummary[]
+    compoundSummaries?: CompoundSummary[],
   ) => void;
   setComparisonResults: (comparison: ComparisonResult) => void;
   setIsSimulating: (isSimulating: boolean) => void;
@@ -85,7 +87,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   compoundSummaries: null,
   comparison: null,
 
-  logs: [`[System] Initialized PFAS Toxicokinetic Playground in Simple Mode with automated exposure parameters.`],
+  logs: [
+    `[System] Initialized PFAS Toxicokinetic Playground in Simple Mode with automated exposure parameters.`,
+  ],
 
   setPlaygroundMode: (mode) => {
     set((state) => {
@@ -107,7 +111,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
             : state.samplingConfig,
       };
     });
-    get().addLog(`[Mode] Switched to ${mode === 'simple' ? 'Simple Mode (3-Input Auto-Parameters & MC+LHS)' : 'Advanced Mode (Granular Parameters)'}.`);
+    get().addLog(
+      `[Mode] Switched to ${mode === 'simple' ? 'Simple Mode (3-Input Auto-Parameters & MC+LHS)' : 'Advanced Mode (Granular Parameters)'}.`,
+    );
   },
 
   updateSimpleProfile: (profileUpdate) => {
@@ -118,7 +124,8 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       const isStillPreset = activeScenario?.simpleProfile
         ? Math.abs(newProfile.bodyWeight - activeScenario.simpleProfile.bodyWeight) < 0.01 &&
           newProfile.age === activeScenario.simpleProfile.age &&
-          Math.abs(newProfile.waterConsumption - activeScenario.simpleProfile.waterConsumption) < 0.01
+          Math.abs(newProfile.waterConsumption - activeScenario.simpleProfile.waterConsumption) <
+            0.01
         : false;
 
       return {
@@ -128,7 +135,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       };
     });
     const current = get().simpleProfile;
-    get().addLog(`[Simple Profile] Updated: BW=${current.bodyWeight}kg, Age=${current.age}y, Water=${current.waterConsumption}L/d -> Auto-calculated Daily Intake.`);
+    get().addLog(
+      `[Simple Profile] Updated: BW=${current.bodyWeight}kg, Age=${current.age}y, Water=${current.waterConsumption}L/d -> Auto-calculated Daily Intake.`,
+    );
   },
 
   setParameterDistribution: (paramId, distribution) => {
@@ -141,7 +150,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
         },
       },
     }));
-    get().addLog(`[Config] Changed parameter '${paramId}' distribution type to '${distribution.type}'.`);
+    get().addLog(
+      `[Config] Changed parameter '${paramId}' distribution type to '${distribution.type}'.`,
+    );
   },
 
   updateParameterValue: (paramId, key, value) => {
@@ -166,7 +177,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     set((state) => ({
       samplingConfig: { ...state.samplingConfig, ...config },
     }));
-    get().addLog(`[Config] Updated sampling settings (${config.method ? `Method: ${config.method}` : ''} ${config.iterations ? `Iterations: ${config.iterations}` : ''}).`);
+    get().addLog(
+      `[Config] Updated sampling settings (${config.method ? `Method: ${config.method}` : ''} ${config.iterations ? `Iterations: ${config.iterations}` : ''}).`,
+    );
   },
 
   setCompoundId: (compoundId) => {
@@ -185,7 +198,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
             updatedDist = {
               type: 'normal',
               mean: compound.halfLifeYears,
-              sd: parseFloat((compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2)),
+              sd: parseFloat(
+                (compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2),
+              ),
             };
             break;
           }
@@ -194,7 +209,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
             updatedDist = {
               type: 'lognormal',
               mean: compound.halfLifeYears,
-              sd: parseFloat((compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2)),
+              sd: parseFloat(
+                (compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2),
+              ),
             };
             break;
           }
@@ -228,7 +245,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
           },
         };
       });
-      get().addLog(`[Compound] Selected chemical compound '${compound.name}' (Half-Life T1/2 = ${compound.halfLifeYears} yrs).`);
+      get().addLog(
+        `[Compound] Selected chemical compound '${compound.name}' (Half-Life T1/2 = ${compound.halfLifeYears} yrs).`,
+      );
     }
   },
 
@@ -264,7 +283,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       compoundSummaries: compoundSummaries || null,
       isSimulating: false,
     });
-    get().addLog(`[Simulation] Completed ${results.length.toLocaleString()} iterations. Mean Serum Css: ${summaryStats.mean.toFixed(4)} µg/L. Risk Exceedance (HQ > 1.0): ${summaryStats.riskExceedancePercent.toFixed(1)}%.`);
+    get().addLog(
+      `[Simulation] Completed ${results.length.toLocaleString()} iterations. Mean Serum Css: ${summaryStats.mean.toFixed(4)} µg/L. Risk Exceedance (HQ > 1.0): ${summaryStats.riskExceedancePercent.toFixed(1)}%.`,
+    );
   },
 
   setComparisonResults: (comparison) => {

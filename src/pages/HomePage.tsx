@@ -1,6 +1,16 @@
-import React from 'react';
+import {
+  Activity,
+  ArrowRight,
+  CheckCircle2,
+  Cpu,
+  FlaskConical,
+  GraduationCap,
+  Layers,
+  Network,
+  ShieldAlert,
+} from 'lucide-react';
+import type React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ShieldAlert, Cpu, Network, ArrowRight, Layers, CheckCircle2, FlaskConical, GraduationCap } from 'lucide-react';
 import { MathView } from '../components/ui/MathView';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 
@@ -21,8 +31,9 @@ export const HomePage: React.FC = () => {
           </h1>
 
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
-            Simulate chemical exposure uncertainty and bioaccumulation of per- and polyfluoroalkyl substances (PFAS)
-            among <strong>Filipino women</strong> using 1-compartment toxicokinetics, 
+            Simulate chemical exposure uncertainty and bioaccumulation of per- and polyfluoroalkyl
+            substances (PFAS) among <strong>Filipino women</strong> using 1-compartment
+            toxicokinetics,
             <strong> Monte Carlo simulation</strong>, and <strong>Latin hypercube sampling</strong>.
           </p>
 
@@ -61,7 +72,9 @@ export const HomePage: React.FC = () => {
             <FlaskConical className="w-4 h-4 text-blue-600" />
             <h2 className="text-lg font-bold text-slate-900 font-heading">Target PFAS chemicals</h2>
           </div>
-          <span className="text-xs font-mono text-slate-500">US EPA and EFSA guidance baselines</span>
+          <span className="text-xs font-mono text-slate-500">
+            US EPA and EFSA guidance baselines
+          </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 font-mono text-xs">
@@ -116,10 +129,7 @@ export const HomePage: React.FC = () => {
         ].map((item, index) => {
           const Icon = item.icon;
           return (
-            <div
-              key={index}
-              className="p-5 rounded-xl card-panel space-y-2.5"
-            >
+            <div key={index} className="p-5 rounded-xl card-panel space-y-2.5">
               <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center">
                 <Icon className={`w-4 h-4 ${item.color}`} />
               </div>
@@ -140,45 +150,65 @@ export const HomePage: React.FC = () => {
             Why probabilistic modeling matters for Filipino women
           </h2>
           <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-            Deterministic safety assessments use single fixed values, such as average body weight or mean intake.
-            That hides biological variation. In practice, exposure differs based on local drinking water levels,
-            dietary habits (such as coastal seafood intake), and physiological changes during pregnancy.
+            Deterministic safety assessments use single fixed values, such as average body weight or
+            mean intake. That hides biological variation. In practice, exposure differs based on
+            local drinking water levels, dietary habits (such as coastal seafood intake), and
+            physiological changes during pregnancy.
           </p>
           <ul className="space-y-2 text-xs text-slate-700 font-sans">
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0" />
-              <span>Accounts for physiological differences, such as lower median body weight and specific half-lives.</span>
+              <span>
+                Accounts for physiological differences, such as lower median body weight and
+                specific half-lives.
+              </span>
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0" />
-              <span>Evaluates high-risk percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />) for upper-tail exposures.</span>
+              <span>
+                Evaluates high-risk percentiles (<MathView math="P_{95}" />,{' '}
+                <MathView math="P_{99}" />) for upper-tail exposures.
+              </span>
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-teal-600 flex-shrink-0" />
-              <span>Ranks exposure drivers using Spearman rank correlation (<MathView math="\rho" />).</span>
+              <span>
+                Ranks exposure drivers using Spearman rank correlation (<MathView math="\rho" />
+                ).
+              </span>
             </li>
           </ul>
         </div>
-        
+
         <div className="bg-slate-50 rounded-xl p-5 border border-slate-200 space-y-3 font-mono text-xs text-slate-800">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <span className="text-slate-500 font-bold">Parameter</span>
             <span className="text-slate-500 font-bold">Distribution Type</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Daily Intake (<MathView math="I" />)</span>
-            <span className="text-amber-800 font-semibold">Lognormal (<MathView math="\mu, \sigma" />)</span>
+            <span>
+              Daily Intake (<MathView math="I" />)
+            </span>
+            <span className="text-amber-800 font-semibold">
+              Lognormal (<MathView math="\mu, \sigma" />)
+            </span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Body Weight (<MathView math="BW" />)</span>
+            <span>
+              Body Weight (<MathView math="BW" />)
+            </span>
             <span className="text-teal-800 font-semibold">Normal (55.4 kg, 8.2)</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Water Consumption (<MathView math="V_w" />)</span>
+            <span>
+              Water Consumption (<MathView math="V_w" />)
+            </span>
             <span className="text-blue-800 font-semibold">Triangular (1.2, 2.0, 3.5 L)</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>Half-life (<MathView math="T_{1/2}" />)</span>
+            <span>
+              Half-life (<MathView math="T_{1/2}" />)
+            </span>
             <span className="text-purple-800 font-semibold">Lognormal (3.8 yrs)</span>
           </div>
         </div>

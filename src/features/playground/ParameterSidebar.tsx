@@ -1,35 +1,47 @@
-import React, { useMemo } from 'react';
-import { useSimulationStore } from '../../stores/useSimulationStore';
-import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
-import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
-import { calculateDetailedCriticalAnalysis, deriveAutomatedParameters } from '../../simulation/toxicokinetics';
-import { DistributionSelector } from './DistributionSelector';
-import { Tooltip } from '../../components/ui/Tooltip';
-import { Button } from '../../components/ui/Button';
-import type { DistributionType, DistributionParams, SimulationParameters, ParameterCriticalThreshold } from '../../types';
 import {
-  Play,
-  Sliders,
-  RefreshCw,
-  Cpu,
-  Layers,
-  GitMerge,
   BookOpen,
-  Sparkles,
-  Scale,
-  Calendar,
-  Droplets,
   Calculator,
+  Calendar,
+  Cpu,
+  Droplets,
+  GitMerge,
+  Layers,
+  Play,
+  RefreshCw,
+  Scale,
+  Sliders,
+  Sparkles,
   Users,
 } from 'lucide-react';
+import type React from 'react';
+import { useMemo } from 'react';
+import { Button } from '../../components/ui/Button';
 import { MathView } from '../../components/ui/MathView';
+import { Tooltip } from '../../components/ui/Tooltip';
+import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import {
+  calculateDetailedCriticalAnalysis,
+  deriveAutomatedParameters,
+} from '../../simulation/toxicokinetics';
+import { useSimulationStore } from '../../stores/useSimulationStore';
+import type {
+  DistributionParams,
+  DistributionType,
+  ParameterCriticalThreshold,
+  SimulationParameters,
+} from '../../types';
+import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
+import { DistributionSelector } from './DistributionSelector';
 
 interface ParameterSidebarProps {
   onRunSimulation: () => void;
   onOpenGuide?: () => void;
 }
 
-export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulation, onOpenGuide }) => {
+export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
+  onRunSimulation,
+  onOpenGuide,
+}) => {
   const {
     mode,
     simpleProfile,
@@ -57,7 +69,8 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
     'exposureDuration',
   ];
 
-  const activeCompound = PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
+  const activeCompound =
+    PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
 
   const criticalAnalysis = useMemo(() => {
     return calculateDetailedCriticalAnalysis(activeCompound, parameters);
@@ -230,7 +243,8 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
             </span>
           </div>
           <p className="text-[11px] text-slate-600 leading-relaxed">
-            PFOA, PFOS, PFHxS, PFNA, and GenX are evaluated in parallel with chemical-specific half-lives ($T_{1/2}$) and RfD reference thresholds.
+            PFOA, PFOS, PFHxS, PFNA, and GenX are evaluated in parallel with chemical-specific
+            half-lives ($T_{1 / 2}$) and RfD reference thresholds.
           </p>
         </div>
       )}
@@ -295,15 +309,19 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
         <div className="space-y-2 font-mono">
           <div className="flex items-center justify-between text-slate-700">
-            <span>Iterations (<MathView math="N" />)</span>
-            <span className="text-slate-900 font-bold">{samplingConfig.iterations.toLocaleString()}</span>
+            <span>
+              Iterations (<MathView math="N" />)
+            </span>
+            <span className="text-slate-900 font-bold">
+              {samplingConfig.iterations.toLocaleString()}
+            </span>
           </div>
 
           <input
             type="range"
-            min={isSimpleMode ? "5000" : "1000"}
+            min={isSimpleMode ? '5000' : '1000'}
             max="50000"
-            step={isSimpleMode ? "2500" : "1000"}
+            step={isSimpleMode ? '2500' : '1000'}
             value={samplingConfig.iterations}
             onChange={(e) => setSamplingConfig({ iterations: parseInt(e.target.value, 10) })}
             className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
@@ -322,7 +340,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
-                  {(presetVal / 1000)}k
+                  {presetVal / 1000}k
                 </button>
               ))}
             </div>
@@ -353,8 +371,8 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
           {isSimulating
             ? 'Simulating...'
             : isSimpleMode
-            ? `Execute Simulation (${(samplingConfig.iterations / 1000)}k Samples)`
-            : `Execute ${getMethodName()}`}
+              ? `Execute Simulation (${samplingConfig.iterations / 1000}k Samples)`
+              : `Execute ${getMethodName()}`}
         </Button>
       </div>
 
@@ -403,7 +421,9 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
                   max="140"
                   step="0.5"
                   value={simpleProfile.bodyWeight}
-                  onChange={(e) => updateSimpleProfile({ bodyWeight: parseFloat(e.target.value) || 55.4 })}
+                  onChange={(e) =>
+                    updateSimpleProfile({ bodyWeight: parseFloat(e.target.value) || 55.4 })
+                  }
                   className="w-16 bg-white border border-slate-300 text-slate-900 rounded-md px-1.5 py-0.5 text-right font-mono text-xs font-bold focus:outline-none focus:border-slate-900"
                 />
                 <span className="text-[10px] text-slate-500 font-mono">kg</span>
@@ -512,7 +532,9 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
                   max="6.0"
                   step="0.1"
                   value={simpleProfile.waterConsumption}
-                  onChange={(e) => updateSimpleProfile({ waterConsumption: parseFloat(e.target.value) || 2.0 })}
+                  onChange={(e) =>
+                    updateSimpleProfile({ waterConsumption: parseFloat(e.target.value) || 2.0 })
+                  }
                   className="w-16 bg-white border border-slate-300 text-slate-900 rounded-md px-1.5 py-0.5 text-right font-mono text-xs font-bold focus:outline-none focus:border-slate-900"
                 />
                 <span className="text-[10px] text-slate-500 font-mono">L/d</span>
@@ -525,7 +547,9 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
               max="5.0"
               step="0.1"
               value={simpleProfile.waterConsumption}
-              onChange={(e) => updateSimpleProfile({ waterConsumption: parseFloat(e.target.value) })}
+              onChange={(e) =>
+                updateSimpleProfile({ waterConsumption: parseFloat(e.target.value) })
+              }
               className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
             />
 
@@ -569,10 +593,12 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
               <div className="bg-white p-2 rounded-lg border border-slate-200 space-y-0.5">
                 <span className="text-slate-500 text-[10px]">Est. Daily Intake</span>
                 <p className="font-bold text-slate-900 text-xs">
-                  {derivedStats.derivedTotalIntakeUg.toFixed(4)} <span className="text-[10px] text-slate-500">µg/d</span>
+                  {derivedStats.derivedTotalIntakeUg.toFixed(4)}{' '}
+                  <span className="text-[10px] text-slate-500">µg/d</span>
                 </p>
                 <p className="text-[9px] text-slate-400">
-                  Water: {derivedStats.derivedIntakeWaterUg.toFixed(4)} + Diet: {derivedStats.derivedIntakeDietaryUg.toFixed(4)}
+                  Water: {derivedStats.derivedIntakeWaterUg.toFixed(4)} + Diet:{' '}
+                  {derivedStats.derivedIntakeDietaryUg.toFixed(4)}
                 </p>
               </div>
 
@@ -580,11 +606,10 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
               <div className="bg-white p-2 rounded-lg border border-slate-200 space-y-0.5">
                 <span className="text-slate-500 text-[10px]">Exposure Horizon</span>
                 <p className="font-bold text-slate-900 text-xs">
-                  {derivedStats.derivedExposureYears} <span className="text-[10px] text-slate-500">years</span>
+                  {derivedStats.derivedExposureYears}{' '}
+                  <span className="text-[10px] text-slate-500">years</span>
                 </p>
-                <p className="text-[9px] text-slate-400">
-                  Estimated from age {simpleProfile.age}
-                </p>
+                <p className="text-[9px] text-slate-400">Estimated from age {simpleProfile.age}</p>
               </div>
 
               {/* Bioavailability */}
@@ -593,20 +618,14 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
                 <p className="font-bold text-slate-900 text-xs">
                   92% <span className="text-[10px] text-emerald-600 font-semibold">(0.92)</span>
                 </p>
-                <p className="text-[9px] text-slate-400">
-                  EFSA Contam standard
-                </p>
+                <p className="text-[9px] text-slate-400">EFSA Contam standard</p>
               </div>
 
               {/* Compound Half-Lives */}
               <div className="bg-white p-2 rounded-lg border border-slate-200 space-y-0.5">
                 <span className="text-slate-500 text-[10px]">Compound T1/2</span>
-                <p className="font-bold text-slate-900 text-xs">
-                  0.2y to 8.5y
-                </p>
-                <p className="text-[9px] text-slate-400">
-                  5 PFAS types evaluated
-                </p>
+                <p className="font-bold text-slate-900 text-xs">0.2y to 8.5y</p>
+                <p className="text-[9px] text-slate-400">5 PFAS types evaluated</p>
               </div>
             </div>
           </div>
@@ -635,13 +654,15 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
           {parameterKeys.map((key) => {
             const param = parameters[key];
-            const thresholdInfo = criticalAnalysis.parameterThresholds.find((p: ParameterCriticalThreshold) => p.id === key);
+            const thresholdInfo = criticalAnalysis.parameterThresholds.find(
+              (p: ParameterCriticalThreshold) => p.id === key,
+            );
 
             return (
               <div
                 key={key}
                 className={`card-panel p-3 rounded-xl space-y-2 hover:border-slate-300 transition-colors ${
-                  thresholdInfo && thresholdInfo.isExceeded ? 'border-red-200/80' : ''
+                  thresholdInfo?.isExceeded ? 'border-red-200/80' : ''
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -658,18 +679,25 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
                 {thresholdInfo && (
                   <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
                     <span className="text-slate-500">
-                      Critical cutoff: <span className="font-semibold text-slate-700">{thresholdInfo.criticalRangeDisplay}</span>
+                      Critical cutoff:{' '}
+                      <span className="font-semibold text-slate-700">
+                        {thresholdInfo.criticalRangeDisplay}
+                      </span>
                     </span>
                     <span
                       className={`px-1.5 py-0.2 rounded text-[9px] font-semibold border ${
                         thresholdInfo.isExceeded
                           ? 'bg-red-50 text-red-700 border-red-200'
                           : thresholdInfo.status === 'borderline'
-                          ? 'bg-amber-50 text-amber-700 border-amber-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       }`}
                     >
-                      {thresholdInfo.isExceeded ? 'Exceeds cutoff' : thresholdInfo.status === 'borderline' ? 'Elevated' : 'Within cutoff'}
+                      {thresholdInfo.isExceeded
+                        ? 'Exceeds cutoff'
+                        : thresholdInfo.status === 'borderline'
+                          ? 'Elevated'
+                          : 'Within cutoff'}
                     </span>
                   </div>
                 )}
@@ -678,7 +706,9 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({ onRunSimulat
 
                 <DistributionSelector
                   distribution={param.distribution}
-                  onChangeDistributionType={(type) => setParameterDistribution(key, createDefaultDistribution(type))}
+                  onChangeDistributionType={(type) =>
+                    setParameterDistribution(key, createDefaultDistribution(type))
+                  }
                   onChangeValue={(valKey, val) => updateParameterValue(key, valKey, val)}
                   unit={param.unit}
                 />

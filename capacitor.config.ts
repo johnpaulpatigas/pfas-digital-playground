@@ -6,13 +6,13 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   plugins: {
     EdgeToEdge: {
-      backgroundColor: "#ffffff",
-      navigationBarColor: "#ffffff",
-      statusBarColor: "#ffffff",
+      backgroundColor: '#ffffff',
+      navigationBarColor: '#ffffff',
+      statusBarColor: '#ffffff',
     },
     SystemBars: {
-      insetsHandling: "disable",
-      style: "LIGHT",
+      insetsHandling: 'disable',
+      style: 'LIGHT',
     },
   },
 };

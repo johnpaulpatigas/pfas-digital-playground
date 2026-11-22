@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
 import katex from 'katex';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
 
 interface MathViewProps {
   math: string;

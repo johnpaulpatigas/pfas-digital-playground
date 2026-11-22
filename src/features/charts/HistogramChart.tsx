@@ -1,17 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import type React from 'react';
+import { useMemo, useState } from 'react';
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  ReferenceLine,
+  ResponsiveContainer,
   XAxis,
   YAxis,
-  Tooltip as RechartsTooltip,
-  CartesianGrid,
-  ReferenceLine,
 } from 'recharts';
-import type { IterationResult, SummaryStatistics } from '../../types';
-import { useSimulationStore } from '../../stores/useSimulationStore';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import { useSimulationStore } from '../../stores/useSimulationStore';
+import type { IterationResult, SummaryStatistics } from '../../types';
 
 interface HistogramChartProps {
   results: IterationResult[];
@@ -43,7 +44,9 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({ results }) => {
 
     const values = results.map((r) => {
       if (r.compoundOutputs) {
-        return r.compoundOutputs[compound.id]?.steadyStateConcentration ?? r.steadyStateConcentration;
+        return (
+          r.compoundOutputs[compound.id]?.steadyStateConcentration ?? r.steadyStateConcentration
+        );
       }
       return r.steadyStateConcentration;
     });
@@ -89,7 +92,9 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({ results }) => {
     <div className="w-full space-y-2 font-mono select-none">
       {(isSimpleMode || results?.[0]?.compoundOutputs) && (
         <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[10px]">
-          <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">PFAS View:</span>
+          <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">
+            PFAS View:
+          </span>
           {PFAS_COMPOUNDS.map((c) => (
             <button
               key={c.id}
@@ -117,25 +122,56 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({ results }) => {
               tick={{ fill: '#475569', fontSize: 10 }}
               interval="preserveStartEnd"
               minTickGap={20}
-              label={{ value: 'Blood Serum Concentration Css (µg/L)', position: 'bottom', offset: 10, fill: '#0f172a', fontSize: 10 }}
+              label={{
+                value: 'Blood Serum Concentration Css (µg/L)',
+                position: 'bottom',
+                offset: 10,
+                fill: '#0f172a',
+                fontSize: 10,
+              }}
             />
             <YAxis
               width={40}
               stroke="#64748b"
               tick={{ fill: '#475569', fontSize: 10 }}
-              label={{ value: 'Frequency (%)', angle: -90, position: 'insideLeft', offset: 10, fill: '#0f172a', fontSize: 10 }}
+              label={{
+                value: 'Frequency (%)',
+                angle: -90,
+                position: 'insideLeft',
+                offset: 10,
+                fill: '#0f172a',
+                fontSize: 10,
+              }}
             />
             <RechartsTooltip
-              formatter={(value: unknown) => [`${parseFloat(String(value ?? 0)).toFixed(2)}%`, 'Frequency']}
+              formatter={(value: unknown) => [
+                `${parseFloat(String(value ?? 0)).toFixed(2)}%`,
+                'Frequency',
+              ]}
               labelFormatter={(label: unknown) => `Conc: ${String(label ?? '')} µg/L`}
             />
-            <Bar dataKey="frequencyPercent" fill={activeColor} radius={[2, 2, 0, 0]} opacity={0.85} />
-            <ReferenceLine x={activeMean.toFixed(3)} stroke="#0d9488" strokeWidth={2} strokeDasharray="4 4" label={{ value: 'Mean', fill: '#0d9488', fontSize: 9, position: 'insideTopLeft' }} />
-            <ReferenceLine x={activeP95.toFixed(3)} stroke="#dc2626" strokeWidth={2} label={{ value: 'P95', fill: '#dc2626', fontSize: 9, position: 'insideTopLeft' }} />
+            <Bar
+              dataKey="frequencyPercent"
+              fill={activeColor}
+              radius={[2, 2, 0, 0]}
+              opacity={0.85}
+            />
+            <ReferenceLine
+              x={activeMean.toFixed(3)}
+              stroke="#0d9488"
+              strokeWidth={2}
+              strokeDasharray="4 4"
+              label={{ value: 'Mean', fill: '#0d9488', fontSize: 9, position: 'insideTopLeft' }}
+            />
+            <ReferenceLine
+              x={activeP95.toFixed(3)}
+              stroke="#dc2626"
+              strokeWidth={2}
+              label={{ value: 'P95', fill: '#dc2626', fontSize: 9, position: 'insideTopLeft' }}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
   );
 };
-

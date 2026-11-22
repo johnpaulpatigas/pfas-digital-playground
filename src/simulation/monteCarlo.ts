@@ -1,4 +1,4 @@
-import type { SimulationParameters, IterationResult } from '../types';
+import type { IterationResult, SimulationParameters } from '../types';
 import { createPRNG, sampleDistribution } from './distributions';
 import { calculateToxicokinetics } from './toxicokinetics';
 
@@ -10,7 +10,7 @@ export function runMonteCarloSimulation(
   parameters: SimulationParameters,
   iterations: number = 5000,
   seed: number = 42,
-  compoundId: string = 'pfoa'
+  compoundId: string = 'pfoa',
 ): IterationResult[] {
   const prng = createPRNG(seed);
   const results: IterationResult[] = new Array(iterations);
@@ -21,7 +21,10 @@ export function runMonteCarloSimulation(
     const age = sampleDistribution(parameters.age.distribution, prng);
     const waterConsumption = sampleDistribution(parameters.waterConsumption.distribution, prng);
     const bioavailability = sampleDistribution(parameters.bioavailability.distribution, prng);
-    const eliminationHalfLife = sampleDistribution(parameters.eliminationHalfLife.distribution, prng);
+    const eliminationHalfLife = sampleDistribution(
+      parameters.eliminationHalfLife.distribution,
+      prng,
+    );
     const exposureDuration = sampleDistribution(parameters.exposureDuration.distribution, prng);
 
     results[i] = calculateToxicokinetics(
@@ -35,7 +38,7 @@ export function runMonteCarloSimulation(
         exposureDuration: Math.max(0.1, exposureDuration),
         compoundId,
       },
-      i + 1
+      i + 1,
     );
   }
 

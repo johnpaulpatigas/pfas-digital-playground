@@ -1,27 +1,31 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type {
+  IterationResult,
+  ParameterCriticalThreshold,
+  SimulationParameters,
+} from '../../types';
+import { PFAS_COMPOUNDS } from '../pfasCompounds';
 import {
-  calculateToxicokinetics,
-  calculateTimeCourseTrajectory,
-  calculateMultiCompoundTimeCourse,
+  calculateCompoundSummaries,
   calculateCriticalThresholds,
   calculateDetailedCriticalAnalysis,
   calculateExceedanceRangeStats,
-  calculateCompoundSummaries,
+  calculateMultiCompoundTimeCourse,
+  calculateTimeCourseTrajectory,
+  calculateToxicokinetics,
   deriveAutomatedParameters,
 } from '../toxicokinetics';
-import { PFAS_COMPOUNDS } from '../pfasCompounds';
-import type { IterationResult, SimulationParameters, ParameterCriticalThreshold } from '../../types';
 
 describe('Toxicokinetics Engine', () => {
   it('calculateToxicokinetics computes valid 1-compartment pharmacokinetic parameters', () => {
     const input = {
-      dailyIntake: 0.1,        // ug/day
-      bodyWeight: 55,          // kg
-      age: 30,                 // years
-      waterConsumption: 1.5,   // L/day
-      bioavailability: 0.95,   // 95%
+      dailyIntake: 0.1, // ug/day
+      bodyWeight: 55, // kg
+      age: 30, // years
+      waterConsumption: 1.5, // L/day
+      bioavailability: 0.95, // 95%
       eliminationHalfLife: 3.8, // years (PFOA half-life)
-      exposureDuration: 20,    // years
+      exposureDuration: 20, // years
       compoundId: 'pfoa',
     };
 
@@ -149,13 +153,62 @@ describe('Toxicokinetics Engine', () => {
 
     // Scenario 1: Safe baseline below critical thresholds (0.05 ug/d for 55.4kg => HQ ~ 0.60)
     const safeParams: SimulationParameters = {
-      dailyIntake: { id: 'dailyIntake', name: 'Daily Intake', unit: 'µg/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.05 } },
-      bodyWeight: { id: 'bodyWeight', name: 'Body Weight', unit: 'kg', description: '', scientificContext: '', distribution: { type: 'fixed', value: 55.4 } },
-      age: { id: 'age', name: 'Age', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 30 } },
-      waterConsumption: { id: 'waterConsumption', name: 'Water', unit: 'L/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 2.0 } },
-      bioavailability: { id: 'bioavailability', name: 'Bioavailability', unit: 'fraction', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.95 } },
-      eliminationHalfLife: { id: 'eliminationHalfLife', name: 'Half-Life', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 3.8 } },
-      exposureDuration: { id: 'exposureDuration', name: 'Duration', unit: 'years', description: '', scientificContext: '', distribution: { type: 'uniform', min: 25, max: 30 } },
+      dailyIntake: {
+        id: 'dailyIntake',
+        name: 'Daily Intake',
+        unit: 'µg/d',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 0.05 },
+      },
+      bodyWeight: {
+        id: 'bodyWeight',
+        name: 'Body Weight',
+        unit: 'kg',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 55.4 },
+      },
+      age: {
+        id: 'age',
+        name: 'Age',
+        unit: 'years',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 30 },
+      },
+      waterConsumption: {
+        id: 'waterConsumption',
+        name: 'Water',
+        unit: 'L/d',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 2.0 },
+      },
+      bioavailability: {
+        id: 'bioavailability',
+        name: 'Bioavailability',
+        unit: 'fraction',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 0.95 },
+      },
+      eliminationHalfLife: {
+        id: 'eliminationHalfLife',
+        name: 'Half-Life',
+        unit: 'years',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 3.8 },
+      },
+      exposureDuration: {
+        id: 'exposureDuration',
+        name: 'Duration',
+        unit: 'years',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'uniform', min: 25, max: 30 },
+      },
     };
 
     const safeAnalysis = calculateDetailedCriticalAnalysis(pfoa, safeParams);
@@ -176,7 +229,11 @@ describe('Toxicokinetics Engine', () => {
     expect(exceedAnalysis.isBurdenExceeded).toBe(true);
     expect(exceedAnalysis.hazardQuotient).toBeGreaterThan(1.0);
     expect(exceedAnalysis.burdenExceedanceRatio).toBeGreaterThan(1.0);
-    expect(exceedAnalysis.parameterThresholds.find((p: ParameterCriticalThreshold) => p.id === 'dailyIntake')?.isExceeded).toBe(true);
+    expect(
+      exceedAnalysis.parameterThresholds.find(
+        (p: ParameterCriticalThreshold) => p.id === 'dailyIntake',
+      )?.isExceeded,
+    ).toBe(true);
   });
 
   it('calculateToxicokinetics populates compoundOutputs for all 5 PFAS chemicals', () => {
@@ -209,16 +266,19 @@ describe('Toxicokinetics Engine', () => {
 
   it('calculateMultiCompoundTimeCourse generates trajectories for all 5 PFAS compounds', () => {
     const mockResults: IterationResult[] = Array.from({ length: 20 }, (_, i) => {
-      return calculateToxicokinetics({
-        dailyIntake: 0.0001 * (i + 1),
-        bodyWeight: 60,
-        age: 30,
-        waterConsumption: 2.0,
-        bioavailability: 0.9,
-        eliminationHalfLife: 3.8,
-        exposureDuration: 20,
-        compoundId: 'pfoa',
-      }, i + 1);
+      return calculateToxicokinetics(
+        {
+          dailyIntake: 0.0001 * (i + 1),
+          bodyWeight: 60,
+          age: 30,
+          waterConsumption: 2.0,
+          bioavailability: 0.9,
+          eliminationHalfLife: 3.8,
+          exposureDuration: 20,
+          compoundId: 'pfoa',
+        },
+        i + 1,
+      );
     });
 
     const trajectory = calculateMultiCompoundTimeCourse(mockResults, 40);
@@ -241,26 +301,78 @@ describe('Toxicokinetics Engine', () => {
 
   it('calculateCompoundSummaries calculates statistics for all 5 PFAS compounds', () => {
     const safeParams: SimulationParameters = {
-      dailyIntake: { id: 'dailyIntake', name: 'Daily Intake', unit: 'µg/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.0001 } },
-      bodyWeight: { id: 'bodyWeight', name: 'Body Weight', unit: 'kg', description: '', scientificContext: '', distribution: { type: 'fixed', value: 60 } },
-      age: { id: 'age', name: 'Age', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 30 } },
-      waterConsumption: { id: 'waterConsumption', name: 'Water', unit: 'L/d', description: '', scientificContext: '', distribution: { type: 'fixed', value: 2.0 } },
-      bioavailability: { id: 'bioavailability', name: 'Bioavailability', unit: 'fraction', description: '', scientificContext: '', distribution: { type: 'fixed', value: 0.9 } },
-      eliminationHalfLife: { id: 'eliminationHalfLife', name: 'Half-Life', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 3.8 } },
-      exposureDuration: { id: 'exposureDuration', name: 'Duration', unit: 'years', description: '', scientificContext: '', distribution: { type: 'fixed', value: 20 } },
+      dailyIntake: {
+        id: 'dailyIntake',
+        name: 'Daily Intake',
+        unit: 'µg/d',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 0.0001 },
+      },
+      bodyWeight: {
+        id: 'bodyWeight',
+        name: 'Body Weight',
+        unit: 'kg',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 60 },
+      },
+      age: {
+        id: 'age',
+        name: 'Age',
+        unit: 'years',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 30 },
+      },
+      waterConsumption: {
+        id: 'waterConsumption',
+        name: 'Water',
+        unit: 'L/d',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 2.0 },
+      },
+      bioavailability: {
+        id: 'bioavailability',
+        name: 'Bioavailability',
+        unit: 'fraction',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 0.9 },
+      },
+      eliminationHalfLife: {
+        id: 'eliminationHalfLife',
+        name: 'Half-Life',
+        unit: 'years',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 3.8 },
+      },
+      exposureDuration: {
+        id: 'exposureDuration',
+        name: 'Duration',
+        unit: 'years',
+        description: '',
+        scientificContext: '',
+        distribution: { type: 'fixed', value: 20 },
+      },
     };
 
     const mockResults: IterationResult[] = Array.from({ length: 20 }, (_, i) => {
-      return calculateToxicokinetics({
-        dailyIntake: 0.0001 * (i + 1),
-        bodyWeight: 60,
-        age: 30,
-        waterConsumption: 2.0,
-        bioavailability: 0.9,
-        eliminationHalfLife: 3.8,
-        exposureDuration: 20,
-        compoundId: 'pfoa',
-      }, i + 1);
+      return calculateToxicokinetics(
+        {
+          dailyIntake: 0.0001 * (i + 1),
+          bodyWeight: 60,
+          age: 30,
+          waterConsumption: 2.0,
+          bioavailability: 0.9,
+          eliminationHalfLife: 3.8,
+          exposureDuration: 20,
+          compoundId: 'pfoa',
+        },
+        i + 1,
+      );
     });
 
     const summaries = calculateCompoundSummaries(mockResults, safeParams);
@@ -281,7 +393,9 @@ describe('Toxicokinetics Engine', () => {
       return current.meanCss > highest.meanCss ? current : highest;
     }, summaries[0]);
     expect(highestCompound.compoundId).toBe('pfhxs');
-    expect(highestCompound.meanCss).toBeGreaterThan(summaries.find((s) => s.compoundId === 'pfoa')!.meanCss);
+    expect(highestCompound.meanCss).toBeGreaterThan(
+      summaries.find((s) => s.compoundId === 'pfoa')!.meanCss,
+    );
   });
 
   it('deriveAutomatedParameters accurately computes aggregate daily intake, exposure duration, and physiological distributions from 3 user inputs', () => {
@@ -295,7 +409,7 @@ describe('Toxicokinetics Engine', () => {
     const derived = deriveAutomatedParameters(profile);
 
     // Water intake = 2.0 L * 0.020 µg/L = 0.040 µg/day
-    expect(derived.derivedIntakeWaterUg).toBeCloseTo(0.040, 4);
+    expect(derived.derivedIntakeWaterUg).toBeCloseTo(0.04, 4);
     // Dietary intake = 55.4 kg * 0.0005 µg/kg/d = 0.0277 µg/day
     expect(derived.derivedIntakeDietaryUg).toBeCloseTo(0.0277, 4);
     // Total intake = 0.040 + 0.0277 = 0.0677 µg/day
@@ -311,5 +425,3 @@ describe('Toxicokinetics Engine', () => {
     expect(derived.parameters.bioavailability.distribution.type).toBe('fixed');
   });
 });
-
-

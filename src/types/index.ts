@@ -58,13 +58,13 @@ export interface ExposureParameterConfig {
 
 // Complete Input Parameters Set
 export interface SimulationParameters {
-  dailyIntake: ExposureParameterConfig;        // ug/day
-  bodyWeight: ExposureParameterConfig;         // kg
-  age: ExposureParameterConfig;                // years
-  waterConsumption: ExposureParameterConfig;   // L/day
-  bioavailability: ExposureParameterConfig;    // fraction (0 - 1)
+  dailyIntake: ExposureParameterConfig; // ug/day
+  bodyWeight: ExposureParameterConfig; // kg
+  age: ExposureParameterConfig; // years
+  waterConsumption: ExposureParameterConfig; // L/day
+  bioavailability: ExposureParameterConfig; // fraction (0 - 1)
   eliminationHalfLife: ExposureParameterConfig; // years
-  exposureDuration: ExposureParameterConfig;   // years
+  exposureDuration: ExposureParameterConfig; // years
 }
 
 // Playground Interaction Modes
@@ -83,11 +83,11 @@ export interface SamplingConfig {
 // Single Compound Output within an Iteration
 export interface CompoundIterationOutput {
   compoundId: string;
-  eliminationRate: number;          // day^-1
+  eliminationRate: number; // day^-1
   steadyStateConcentration: number; // ug/L (ng/mL) in blood serum
-  peakBodyBurden: number;           // ug
-  clearanceRate: number;            // L/kg/day
-  hazardQuotient: number;           // HQ = Dose / RfD
+  peakBodyBurden: number; // ug
+  clearanceRate: number; // L/kg/day
+  hazardQuotient: number; // HQ = Dose / RfD
 }
 
 // Single Sample Iteration Output
@@ -100,14 +100,14 @@ export interface IterationResult {
   bioavailability: number;
   eliminationHalfLife: number;
   exposureDuration: number;
-  
+
   // Calculated Toxicokinetic Outputs (Primary / Active Compound)
-  eliminationRate: number;          // day^-1
+  eliminationRate: number; // day^-1
   steadyStateConcentration: number; // ug/L (ng/mL) in blood serum
-  peakBodyBurden: number;           // ug
-  clearanceRate: number;            // L/kg/day
-  hazardQuotient: number;           // HQ = Dose / RfD
-  hazardIndex?: number;             // Cumulative mixture Hazard Index HI = sum(HQ_j)
+  peakBodyBurden: number; // ug
+  clearanceRate: number; // L/kg/day
+  hazardQuotient: number; // HQ = Dose / RfD
+  hazardIndex?: number; // Cumulative mixture Hazard Index HI = sum(HQ_j)
 
   // Multi-Compound Results (PFOA, PFOS, PFHxS, PFNA, GenX)
   compoundOutputs?: Record<string, CompoundIterationOutput>;
@@ -125,24 +125,24 @@ export interface CompoundSummary {
   rfdDose: number;
 
   // Mean & Central Metrics
-  meanCss: number;             // Average Css (ug/L)
-  medianCss: number;           // Median Css (ug/L)
-  p95Css: number;              // 95th Percentile Css (ug/L)
-  meanBodyBurden: number;      // Average Peak Body Burden (ug)
-  medianBodyBurden: number;    // Median Body Burden (ug)
-  p95BodyBurden: number;       // 95th Percentile Body Burden (ug)
+  meanCss: number; // Average Css (ug/L)
+  medianCss: number; // Median Css (ug/L)
+  p95Css: number; // 95th Percentile Css (ug/L)
+  meanBodyBurden: number; // Average Peak Body Burden (ug)
+  medianBodyBurden: number; // Median Body Burden (ug)
+  p95BodyBurden: number; // 95th Percentile Body Burden (ug)
 
   // Critical Limits & Exceedances
-  criticalBodyBurden: number;  // Critical Threshold Body Burden (ug)
-  criticalSerumCss: number;    // Critical Threshold Css (ug/L)
+  criticalBodyBurden: number; // Critical Threshold Body Burden (ug)
+  criticalSerumCss: number; // Critical Threshold Css (ug/L)
   criticalDailyIntake: number; // Critical Daily Intake (ug/day)
-  exceedingSerumMin: number;   // Min Css in exceeding cohort (ug/L)
-  exceedingSerumMax: number;   // Max Css in exceeding cohort (ug/L)
+  exceedingSerumMin: number; // Min Css in exceeding cohort (ug/L)
+  exceedingSerumMax: number; // Max Css in exceeding cohort (ug/L)
   exceedingBodyBurdenMin: number; // Min Body Burden in exceeding cohort (ug)
   exceedingBodyBurdenMax: number; // Max Body Burden in exceeding cohort (ug)
 
   // Risk Metrics
-  meanHazardQuotient: number;  // Mean HQ
+  meanHazardQuotient: number; // Mean HQ
   riskExceedancePercent: number; // % of cohort exceeding HQ > 1.0
   isBurdenExceeded: boolean;
   status: 'safe' | 'borderline' | 'exceeded';
@@ -174,7 +174,7 @@ export interface SummaryStatistics {
   ci95Upper: number;
   meanHazardQuotient: number;
   riskExceedancePercent: number; // Percentage of population exceeding HQ > 1.0
-  meanHazardIndex?: number;      // Mean Cumulative Mixture Hazard Index HI = sum(HQ_j)
+  meanHazardIndex?: number; // Mean Cumulative Mixture Hazard Index HI = sum(HQ_j)
   mixtureExceedancePercent?: number; // Percentage of population exceeding HI > 1.0
 }
 
@@ -201,16 +201,16 @@ export interface ComparisonResult {
 
 // Analytical Critical Exceedance Thresholds
 export interface CriticalThresholds {
-  criticalDailyIntake: number;        // ug/day (intake where HQ = 1.0 for given body weight)
-  criticalDailyDosePerKg: number;     // ug/kg/day (= compound RfD)
+  criticalDailyIntake: number; // ug/day (intake where HQ = 1.0 for given body weight)
+  criticalDailyDosePerKg: number; // ug/kg/day (= compound RfD)
   criticalSerumConcentration: number; // ug/L (Css where HQ = 1.0)
-  criticalBodyBurden: number;         // ug (Steady-state peak body burden where HQ = 1.0)
-  criticalWaterConsumption: number;   // L/day (Water consumption to reach RfD at EPA MCL)
-  criticalBioavailability: number;    // fraction (0 - 1)
-  criticalHalfLife: number;           // years
+  criticalBodyBurden: number; // ug (Steady-state peak body burden where HQ = 1.0)
+  criticalWaterConsumption: number; // L/day (Water consumption to reach RfD at EPA MCL)
+  criticalBioavailability: number; // fraction (0 - 1)
+  criticalHalfLife: number; // years
   criticalExposureDurationMin: number; // 25 years (chronic steady-state plateau)
   criticalExposureDurationMax: number; // 30 years (chronic steady-state plateau)
-  epaMCLConcentration: number;        // ug/L (MCL in ug/L)
+  epaMCLConcentration: number; // ug/L (MCL in ug/L)
 }
 
 // Parameter-Level Critical Threshold Breakdown
@@ -233,14 +233,14 @@ export interface ParameterCriticalThreshold {
 export interface DetailedCriticalAnalysis {
   thresholds: CriticalThresholds;
   parameterThresholds: ParameterCriticalThreshold[];
-  baselineBodyBurden: number;            // ug (at current duration)
-  steadyStateBodyBurden: number;         // ug (at steady-state)
-  criticalBodyBurden: number;            // ug (critical threshold body burden at current duration)
+  baselineBodyBurden: number; // ug (at current duration)
+  steadyStateBodyBurden: number; // ug (at steady-state)
+  criticalBodyBurden: number; // ug (critical threshold body burden at current duration)
   criticalSteadyStateBodyBurden: number; // ug (critical threshold body burden at steady-state)
-  currentSerumCss: number;               // ug/L
-  criticalSerumCss: number;              // ug/L
-  hazardQuotient: number;                // HQ = Dose / RfD
-  burdenExceedanceRatio: number;         // currentBodyBurden / criticalBodyBurden
+  currentSerumCss: number; // ug/L
+  criticalSerumCss: number; // ug/L
+  hazardQuotient: number; // HQ = Dose / RfD
+  burdenExceedanceRatio: number; // currentBodyBurden / criticalBodyBurden
   isBurdenExceeded: boolean;
   steadyStateFractionAtExposureDuration: number; // % (e.g. 99.2% for 25-30 years)
   timeToExceedanceYears: number | null; // years required to cross critical threshold
@@ -274,7 +274,6 @@ export interface ExceedanceRangeStats {
   detailedAnalysis?: DetailedCriticalAnalysis;
 }
 
-
 // Simple Profile for 3-Input Mode
 export interface SimpleProfile {
   bodyWeight: number; // kg
@@ -292,5 +291,3 @@ export interface DemographicScenario {
   parameters: SimulationParameters;
   simpleProfile?: SimpleProfile;
 }
-
-

@@ -1,6 +1,6 @@
-import React from 'react';
-import { useSimulationStore } from '../../stores/useSimulationStore';
 import { Terminal, Trash2 } from 'lucide-react';
+import type React from 'react';
+import { useSimulationStore } from '../../stores/useSimulationStore';
 
 export const SimulationConsole: React.FC = () => {
   const { logs, clearLogs } = useSimulationStore();

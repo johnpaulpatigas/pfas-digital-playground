@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import type { DistributionParams, DistributionType } from '../../types';
 
 interface DistributionSelectorProps {
@@ -21,7 +21,7 @@ export const DistributionSelector: React.FC<DistributionSelectorProps> = ({
 
   const handleInputChange = (key: string, rawVal: string) => {
     const val = parseFloat(rawVal);
-    if (!isNaN(val)) {
+    if (!Number.isNaN(val)) {
       onChangeValue(key, val);
     }
   };

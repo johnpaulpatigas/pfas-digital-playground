@@ -1,12 +1,32 @@
-import React, { useMemo } from 'react';
+import {
+  Activity,
+  AlertTriangle,
+  Award,
+  ChevronRight,
+  Cpu,
+  Info,
+  Scale,
+  ShieldAlert,
+  ShieldCheck,
+  TrendingUp,
+} from 'lucide-react';
+import type React from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import type { SummaryStatistics, SensitivityRank, IterationResult, SimulationParameters } from '../../types';
-import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
-import { calculateExceedanceRangeStats, calculateCompoundSummaries } from '../../simulation/toxicokinetics';
-import { getDistributionMean } from '../../simulation/distributions';
-import { useSimulationStore } from '../../stores/useSimulationStore';
-import { Activity, ShieldAlert, TrendingUp, Cpu, Award, AlertTriangle, ShieldCheck, Info, Scale, ChevronRight } from 'lucide-react';
 import { MathView } from '../../components/ui/MathView';
+import { getDistributionMean } from '../../simulation/distributions';
+import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import {
+  calculateCompoundSummaries,
+  calculateExceedanceRangeStats,
+} from '../../simulation/toxicokinetics';
+import { useSimulationStore } from '../../stores/useSimulationStore';
+import type {
+  IterationResult,
+  SensitivityRank,
+  SimulationParameters,
+  SummaryStatistics,
+} from '../../types';
 
 interface SummaryPanelProps {
   summaryStats: SummaryStatistics | null;
@@ -47,8 +67,18 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
     if (!results || results.length === 0 || !parameters) return null;
     const meanBW = getDistributionMean(parameters.bodyWeight.distribution, 55);
     const meanBio = getDistributionMean(parameters.bioavailability.distribution, 0.9);
-    const meanHalfLife = getDistributionMean(parameters.eliminationHalfLife.distribution, activeCompound.halfLifeYears);
-    return calculateExceedanceRangeStats(results, activeCompound, meanBW, meanBio, meanHalfLife, parameters);
+    const meanHalfLife = getDistributionMean(
+      parameters.eliminationHalfLife.distribution,
+      activeCompound.halfLifeYears,
+    );
+    return calculateExceedanceRangeStats(
+      results,
+      activeCompound,
+      meanBW,
+      meanBio,
+      meanHalfLife,
+      parameters,
+    );
   }, [results, activeCompound, parameters]);
 
   if (!summaryStats) {
@@ -97,7 +127,10 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 {/* Compound Header */}
                 <div className="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-slate-900 font-sans" title={summary.compoundName}>
+                    <span
+                      className="font-bold text-slate-900 font-sans"
+                      title={summary.compoundName}
+                    >
                       {summary.compoundName.split(' ')[0]}
                     </span>
                     <span className="text-[10px] text-slate-500 font-mono">
@@ -110,14 +143,21 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 <div className="grid grid-cols-2 gap-2 pt-0.5">
                   {/* Left Column: Average Css */}
                   <div className="space-y-1 bg-white/70 p-2 rounded border border-slate-200/70">
-                    <div className="text-[10px] text-slate-500">Average Serum <MathView math="C_{ss}" />:</div>
+                    <div className="text-[10px] text-slate-500">
+                      Average Serum <MathView math="C_{ss}" />:
+                    </div>
                     <div className="font-bold text-blue-900 font-mono text-xs">
-                      {summary.meanCss.toFixed(4)} <span className="text-[10px] text-slate-500 font-normal">µg/L</span>
+                      {summary.meanCss.toFixed(4)}{' '}
+                      <span className="text-[10px] text-slate-500 font-normal">µg/L</span>
                     </div>
                     {!isSimpleMode && (
                       <div className="pt-1 border-t border-slate-100 text-[10px]">
-                        <span className="text-slate-500 block">Exceeding Serum <MathView math="C_{ss}" />:</span>
-                        <span className={`font-semibold font-mono break-words leading-tight block ${summary.exceedingSerumMax > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                        <span className="text-slate-500 block">
+                          Exceeding Serum <MathView math="C_{ss}" />:
+                        </span>
+                        <span
+                          className={`font-semibold font-mono break-words leading-tight block ${summary.exceedingSerumMax > 0 ? 'text-red-700' : 'text-emerald-700'}`}
+                        >
                           {summary.exceedingSerumMax > 0
                             ? `[${summary.exceedingSerumMin.toFixed(4)} to ${summary.exceedingSerumMax.toFixed(4)}] µg/L`
                             : 'None'}
@@ -128,9 +168,12 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
                   {/* Right Column: Average Body Burden */}
                   <div className="space-y-1 bg-white/70 p-2 rounded border border-slate-200/70">
-                    <div className="text-[10px] text-slate-500">Average Body Burden <MathView math="B(t)" />:</div>
+                    <div className="text-[10px] text-slate-500">
+                      Average Body Burden <MathView math="B(t)" />:
+                    </div>
                     <div className="font-bold font-mono text-xs text-slate-900">
-                      {summary.meanBodyBurden.toFixed(3)} <span className="text-[10px] text-slate-500 font-normal">µg</span>
+                      {summary.meanBodyBurden.toFixed(3)}{' '}
+                      <span className="text-[10px] text-slate-500 font-normal">µg</span>
                     </div>
                     {!isSimpleMode && (
                       <div className="pt-1 border-t border-slate-100 text-[10px]">
@@ -149,7 +192,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       )}
 
       {/* Health Risk & Hazard Quotient Card */}
-      <div className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}>
+      <div
+        className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}
+      >
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div className="flex items-center gap-1.5">
             {isHighRisk ? (
@@ -191,7 +236,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <span className="text-slate-600">PFAS Mixture Hazard Index (HI):</span>
             <span className="font-mono font-bold text-slate-800">
               Mean HI = {summaryStats.meanHazardIndex.toFixed(2)}{' '}
-              <span className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}>
+              <span
+                className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}
+              >
                 ({(summaryStats.mixtureExceedancePercent || 0).toFixed(1)}% &gt; 1.0)
               </span>
             </span>
@@ -223,8 +270,13 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           <div className="space-y-1.5 text-[11px]">
             {exceedanceStats.detailedAnalysis && (
               <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
-                <span className="text-slate-600">Avg Body Burden (<MathView math="B(t)" />):</span>
-                <span className={`font-bold font-mono ${exceedanceStats.detailedAnalysis.isBurdenExceeded ? 'text-red-700' : 'text-slate-900'}`}>
+                <span className="text-slate-600">
+                  Avg Body Burden (<MathView math="B(t)" />
+                  ):
+                </span>
+                <span
+                  className={`font-bold font-mono ${exceedanceStats.detailedAnalysis.isBurdenExceeded ? 'text-red-700' : 'text-slate-900'}`}
+                >
                   {exceedanceStats.detailedAnalysis.baselineBodyBurden.toFixed(3)} µg
                 </span>
               </div>
@@ -249,13 +301,17 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
                   <span className="text-slate-600">Exceeding Intake Span:</span>
                   <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} to {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
+                    [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} to{' '}
+                    {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
                   </span>
                 </div>
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
-                  <span className="text-slate-600">Exceeding Serum <MathView math="C_{ss}" />:</span>
+                  <span className="text-slate-600">
+                    Exceeding Serum <MathView math="C_{ss}" />:
+                  </span>
                   <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingSerumCss.min.toFixed(4)} to {exceedanceStats.exceedingSerumCss.max.toFixed(4)}] µg/L
+                    [{exceedanceStats.exceedingSerumCss.min.toFixed(4)} to{' '}
+                    {exceedanceStats.exceedingSerumCss.max.toFixed(4)}] µg/L
                   </span>
                 </div>
               </>
@@ -278,7 +334,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 Population quantiles
               </span>
             </div>
-            <span className="text-[10px] text-slate-500">N = {summaryStats.count.toLocaleString()}</span>
+            <span className="text-[10px] text-slate-500">
+              N = {summaryStats.count.toLocaleString()}
+            </span>
           </div>
 
           <div className="space-y-1.5 text-[11px]">
@@ -324,11 +382,15 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className="bg-slate-50 p-2 rounded border border-slate-200">
-              <div className="text-slate-500 text-[10px]">Std Dev (<MathView math="\sigma" />)</div>
+              <div className="text-slate-500 text-[10px]">
+                Std Dev (<MathView math="\sigma" />)
+              </div>
               <div className="text-slate-900 font-bold">{summaryStats.stdDev.toFixed(4)}</div>
             </div>
             <div className="bg-slate-50 p-2 rounded border border-slate-200">
-              <div className="text-slate-500 text-[10px]">Variance (<MathView math="\sigma^2" />)</div>
+              <div className="text-slate-500 text-[10px]">
+                Variance (<MathView math="\sigma^2" />)
+              </div>
               <div className="text-slate-900 font-bold">{summaryStats.variance.toFixed(4)}</div>
             </div>
           </div>
@@ -357,7 +419,11 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             {sensitivityRanks[0].parameterName}
           </div>
           <div className="text-slate-600 text-[10px]">
-            Spearman Rank (<MathView math="\rho" />): <span className="text-amber-800 font-bold">{sensitivityRanks[0].correlationCoefficient.toFixed(3)}</span>
+            Spearman Rank (<MathView math="\rho" />
+            ):{' '}
+            <span className="text-amber-800 font-bold">
+              {sensitivityRanks[0].correlationCoefficient.toFixed(3)}
+            </span>
           </div>
         </div>
       )}

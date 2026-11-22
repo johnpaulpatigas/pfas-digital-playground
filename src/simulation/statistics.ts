@@ -1,4 +1,9 @@
-import type { IterationResult, SummaryStatistics, SensitivityRank, SimulationParameters } from '../types';
+import type {
+  IterationResult,
+  SensitivityRank,
+  SimulationParameters,
+  SummaryStatistics,
+} from '../types';
 
 function quantileSorted(sortedValues: number[], q: number): number {
   if (sortedValues.length === 0) return 0;
@@ -13,7 +18,7 @@ function quantileSorted(sortedValues: number[], q: number): number {
 
 export function calculateSummaryStatistics(
   results: IterationResult[],
-  targetKey: keyof IterationResult = 'steadyStateConcentration'
+  targetKey: keyof IterationResult = 'steadyStateConcentration',
 ): SummaryStatistics {
   const count = results.length;
   if (count === 0) {
@@ -51,7 +56,7 @@ export function calculateSummaryStatistics(
   const p95 = quantileSorted(sortedValues, 0.95);
   const p99 = quantileSorted(sortedValues, 0.99);
 
-  const varianceSum = values.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0);
+  const varianceSum = values.reduce((acc, v) => acc + (v - mean) ** 2, 0);
   const variance = count > 1 ? varianceSum / (count - 1) : 0;
   const stdDev = Math.sqrt(variance);
 
@@ -66,7 +71,9 @@ export function calculateSummaryStatistics(
   const riskExceedancePercent = (exceedanceCount / count) * 100;
 
   // Cumulative Mixture Hazard Index (HI = sum(HQ_j))
-  const hiValues = results.map((r) => (r.hazardIndex !== undefined ? r.hazardIndex : r.hazardQuotient));
+  const hiValues = results.map((r) =>
+    r.hazardIndex !== undefined ? r.hazardIndex : r.hazardQuotient,
+  );
   const meanHazardIndex = hiValues.reduce((acc, v) => acc + v, 0) / count;
   const mixtureExceedanceCount = hiValues.filter((hi) => hi > 1.0).length;
   const mixtureExceedancePercent = (mixtureExceedanceCount / count) * 100;
@@ -121,7 +128,7 @@ export function calculateSpearmanRank(x: number[], y: number[]): number {
 export function calculateSensitivityRanks(
   results: IterationResult[],
   parameters: SimulationParameters,
-  targetKey: keyof IterationResult = 'steadyStateConcentration'
+  targetKey: keyof IterationResult = 'steadyStateConcentration',
 ): SensitivityRank[] {
   const targetValues = results.map((r) => r[targetKey] as number);
   const paramKeys: Array<keyof SimulationParameters> = [
@@ -140,7 +147,7 @@ export function calculateSensitivityRanks(
     return {
       parameterId: paramId,
       parameterName: parameters[paramId].name,
-      correlationCoefficient: isNaN(corr) ? 0 : corr,
+      correlationCoefficient: Number.isNaN(corr) ? 0 : corr,
       rank: 0,
     };
   });

@@ -3,9 +3,11 @@
 An interactive simulation tool for probabilistic toxicokinetic modeling of per- and polyfluoroalkyl substances (PFAS) exposure among Filipino women, using Monte Carlo simulation and Latin hypercube sampling.
 
 ## Overview
+
 This application lets users simulate chemical exposure, compare Monte Carlo and Latin hypercube sampling, model body burden and serum concentration over time, and evaluate population-level risk distributions.
 
 ### Key objectives
+
 - 1-compartment toxicokinetic modeling: Model clearance and accumulation for target PFAS compounds (PFOA, PFOS, PFHxS, PFNA, and GenX/HFPO-DA).
 - Probabilistic risk assessment: Account for parameter uncertainty across physiological and exposure variables.
 - Sampling comparison: Compare variance, runtime, and convergence rates between standard Monte Carlo (MC), stratified Latin hypercube sampling (LHS), and hybrid MC+LHS.
@@ -14,6 +16,7 @@ This application lets users simulate chemical exposure, compare Monte Carlo and 
 ---
 
 ## Features
+
 - Dual simulation modes: Simple mode provides demographic presets, an automated 100,000-iteration blended run, and flags the highest accumulated compound. Advanced mode offers granular parameter controls across five distribution types.
 - Interactive parameter distributions: Configure fixed, uniform, normal, lognormal, and triangular distributions for daily intake, body weight, water intake, bioavailability, elimination half-life, and exposure duration.
 - PFAS compound database: Chemical profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, formulas, half-lives, volumes of distribution, and US EPA Maximum Contaminant Levels (MCL).
@@ -26,24 +29,26 @@ This application lets users simulate chemical exposure, compare Monte Carlo and 
 ---
 
 ## Tech stack
-| Technology | Purpose |
-| :--- | :--- |
-| **React 19** | Component UI and state rendering |
-| **TypeScript** | Static typing and domain schemas |
-| **Vite** | Build tool and local development server |
-| **TailwindCSS** | Layout styling |
-| **KaTeX** | Formula rendering |
-| **Zustand** | Client-side state store |
-| **React Router** | Client-side routing |
-| **Recharts** | Chart visualizations |
-| **Motion** | UI transitions |
-| **Lucide React** | Icons |
-| **Vitest** | Unit test runner and coverage tracking |
-| **Capacitor** | Android mobile runtime support |
+
+| Technology       | Purpose                                 |
+| :--------------- | :-------------------------------------- |
+| **React 19**     | Component UI and state rendering        |
+| **TypeScript**   | Static typing and domain schemas        |
+| **Vite**         | Build tool and local development server |
+| **TailwindCSS**  | Layout styling                          |
+| **KaTeX**        | Formula rendering                       |
+| **Zustand**      | Client-side state store                 |
+| **React Router** | Client-side routing                     |
+| **Recharts**     | Chart visualizations                    |
+| **Motion**       | UI transitions                          |
+| **Lucide React** | Icons                                   |
+| **Vitest**       | Unit test runner and coverage tracking  |
+| **Capacitor**    | Android mobile runtime support          |
 
 ---
 
 ## Folder structure
+
 ```
 src/
 ├── components/   # Reusable UI primitives (Card, Button, Tooltip, MathView)
@@ -65,35 +70,42 @@ src/
 ## Installation and setup
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 
 ### Installation
+
 ```bash
 npm install
 ```
 
 ### Running locally
+
 ```bash
 npm run dev
 ```
 
 ### Running tests
+
 ```bash
 npm test
 ```
 
 ### Running tests with coverage
+
 ```bash
 npm run test:coverage
 ```
 
 ### Linting
+
 ```bash
 npm run lint
 ```
 
 ### Building for production
+
 ```bash
 npm run build
 ```
@@ -103,6 +115,7 @@ npm run build
 ## Mathematical and sampling models
 
 ### 1-compartment toxicokinetic model
+
 The first-order elimination rate constant ($k_e$), steady-state serum concentration ($C_{ss}$), dynamic serum concentration over time ($C(t)$), and accumulated body burden ($B(t)$) are modeled as follows:
 
 $$k_e = \frac{\ln(2)}{T_{1/2} \times 365.25}$$
@@ -116,6 +129,7 @@ $$B(t) = \frac{I \times f_{\text{abs}}}{k_e} \left(1 - e^{-k_e \cdot t}\right)$$
 $$CL = k_e \times V_d$$
 
 where:
+
 - $I$: Daily PFAS intake ($\mu\text{g/day}$)
 - $f_{\text{abs}}$: Bioavailability or gastrointestinal absorption fraction (unitless)
 - $BW$: Body weight ($\text{kg}$)
@@ -126,6 +140,7 @@ where:
 - $CL$: Whole-body clearance rate ($\text{L/kg/day}$)
 
 ### Risk assessment metrics
+
 Individual and mixture health risks are evaluated using oral Reference Doses (RfD):
 
 $$HQ = \frac{\text{Daily Dose}}{\text{RfD}} = \frac{I / BW}{\text{RfD}}$$
