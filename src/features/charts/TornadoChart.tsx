@@ -51,9 +51,11 @@ export const TornadoChart: React.FC<TornadoChartProps> = ({ sensitivityRanks }) 
 
   return (
     <div className="w-full space-y-2 font-mono select-none">
-      <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
-        <span>Global Sensitivity Analysis: Partial Rank Correlation Coefficient (PRCC)</span>
-        <span className="text-[10px] text-slate-400">Significance threshold: |PRCC| ≥ 0.10 (dashed lines)</span>
+      <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 px-1 gap-1">
+        <span>Global Sensitivity Analysis: PRCC on Serum Concentration (Css) (Hypothesis 3)</span>
+        <span className="text-[10px] text-slate-400">
+          Significance threshold: |PRCC| ≥ 0.10, p &lt; 0.05 (dashed lines)
+        </span>
       </div>
 
       <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono">
@@ -88,22 +90,36 @@ export const TornadoChart: React.FC<TornadoChartProps> = ({ sensitivityRanks }) 
             />
             <RechartsTooltip
               content={({ active, payload }) => {
-                if (active && payload && payload.length) {
+                if (active && payload?.length) {
                   const data = payload[0].payload;
                   return (
                     <div className="bg-slate-900 text-white text-[11px] p-2.5 rounded shadow-lg space-y-1">
                       <div className="font-bold border-b border-slate-700 pb-1">{data.name}</div>
-                      <div>PRCC: <span className="font-bold text-teal-300">{data.prcc}</span></div>
-                      <div>Spearman ρ: <span className="text-slate-300">{data.spearman}</span></div>
+                      <div>
+                        PRCC: <span className="font-bold text-teal-300">{data.prcc}</span>
+                      </div>
+                      <div>
+                        Spearman ρ: <span className="text-slate-300">{data.spearman}</span>
+                      </div>
                       {data.tStat !== undefined && (
-                        <div>t-statistic: <span className="text-slate-300">{data.tStat}</span></div>
+                        <div>
+                          t-statistic: <span className="text-slate-300">{data.tStat}</span>
+                        </div>
                       )}
                       {data.pValue !== undefined && (
-                        <div>p-value: <span className="text-slate-300">{data.pValue < 0.001 ? '< 0.001' : data.pValue.toFixed(4)}</span></div>
+                        <div>
+                          p-value:{' '}
+                          <span className="text-slate-300">
+                            {data.pValue < 0.001 ? '< 0.001' : data.pValue.toFixed(4)}
+                          </span>
+                        </div>
                       )}
                       <div className="pt-1 text-[10px] border-t border-slate-700">
-                        Status: {data.isSignificant ? (
-                          <span className="text-emerald-400 font-semibold">Significant Effect (|PRCC| ≥ 0.10, p &lt; 0.05)</span>
+                        Status:{' '}
+                        {data.isSignificant ? (
+                          <span className="text-emerald-400 font-semibold">
+                            Significant Effect (|PRCC| ≥ 0.10, p &lt; 0.05)
+                          </span>
                         ) : (
                           <span className="text-slate-400">Non-Significant</span>
                         )}
@@ -121,13 +137,7 @@ export const TornadoChart: React.FC<TornadoChartProps> = ({ sensitivityRanks }) 
               {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={
-                    entry.isSignificant
-                      ? entry.prcc >= 0
-                        ? '#0d9488'
-                        : '#dc2626'
-                      : '#94a3b8'
-                  }
+                  fill={entry.isSignificant ? (entry.prcc >= 0 ? '#0d9488' : '#dc2626') : '#94a3b8'}
                   opacity={entry.isSignificant ? 0.9 : 0.5}
                 />
               ))}

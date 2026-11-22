@@ -211,6 +211,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 'Hazard Quotient (HQ): Ratio of daily intake to the compound Reference Dose (RfD). HQ ≤ 1.0 is within benchmark limits; HQ > 1.0 indicates the RfD is exceeded.',
                 'Target HQ > 1.0 %: Percentage of simulated iterations where daily intake per kg body weight exceeds the RfD for this compound.',
                 'Mixture Hazard Index (HI): Sum of Hazard Quotients across all 5 PFAS compounds (∑ HQ_i). HI > 1.0 indicates combined exposure exceeds the cumulative threshold even if individual compounds are below 1.0.',
+                'Hypothesis 4 (H₀ 4): One-sided one-sample Wilcoxon signed-rank test evaluates whether the population median HQ or median HI exceeds 1.0 based on the EPA oral RfD (tested at α = 0.05).',
               ]}
               align="right"
             />
@@ -223,7 +224,8 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                   : 'bg-blue-50 text-blue-700 border-blue-200'
               }`}
             >
-              Median HQ = {(summaryStats.medianHazardQuotient ?? summaryStats.meanHazardQuotient).toFixed(2)}
+              Median HQ ={' '}
+              {(summaryStats.medianHazardQuotient ?? summaryStats.meanHazardQuotient).toFixed(2)}
             </span>
             <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap shrink-0">
               (Mean {summaryStats.meanHazardQuotient.toFixed(2)})
@@ -233,7 +235,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
         <div className="flex items-center justify-between gap-2 text-[11px] text-slate-700">
           <span>Target ({compoundId.toUpperCase()}) HQ &gt; 1.0:</span>
-          <span className={`font-bold font-mono shrink-0 whitespace-nowrap ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
+          <span
+            className={`font-bold font-mono shrink-0 whitespace-nowrap ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}
+          >
             {summaryStats.riskExceedancePercent.toFixed(1)}%
           </span>
         </div>
@@ -242,9 +246,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
         {summaryStats.wilcoxonHQ && (
           <div className="pt-1.5 border-t border-slate-200/60 text-[10px] space-y-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-slate-600 font-medium">
-                H₀ 4 Test (Median HQ ≤ 1.0):
-              </span>
+              <span className="text-slate-600 font-medium">H₀ 4 Test (Median HQ ≤ 1.0):</span>
               <span
                 className={`font-bold px-1.5 py-0.5 rounded text-[9px] shrink-0 whitespace-nowrap border ${
                   summaryStats.wilcoxonHQ.isSignificantRisk
@@ -259,9 +261,14 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             </div>
             <div className="flex items-center justify-between text-[9px] text-slate-400 font-mono">
               <span className="whitespace-nowrap">
-                Wilcoxon {summaryStats.wilcoxonHQ.pValue < 0.001 ? 'p < 0.001' : `p = ${summaryStats.wilcoxonHQ.pValue.toFixed(4)}`}
+                Wilcoxon{' '}
+                {summaryStats.wilcoxonHQ.pValue < 0.001
+                  ? 'p < 0.001'
+                  : `p = ${summaryStats.wilcoxonHQ.pValue.toFixed(4)}`}
               </span>
-              <span className="whitespace-nowrap">Z = {summaryStats.wilcoxonHQ.zScore.toFixed(2)}</span>
+              <span className="whitespace-nowrap">
+                Z = {summaryStats.wilcoxonHQ.zScore.toFixed(2)}
+              </span>
             </div>
           </div>
         )}
@@ -271,7 +278,8 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             <div className="flex items-center justify-between gap-2 text-[11px] text-slate-700">
               <span className="text-slate-600">PFAS Mixture Hazard Index:</span>
               <span className="font-mono font-bold text-slate-800 shrink-0 whitespace-nowrap">
-                Median = {(summaryStats.medianHazardIndex ?? summaryStats.meanHazardIndex).toFixed(2)}{' '}
+                Median ={' '}
+                {(summaryStats.medianHazardIndex ?? summaryStats.meanHazardIndex).toFixed(2)}{' '}
                 <span
                   className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}
                 >
@@ -289,8 +297,14 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                       : 'text-emerald-700 bg-emerald-50 border-emerald-200'
                   }`}
                 >
-                  {summaryStats.wilcoxonHI.isSignificantRisk ? 'Reject H₀ 4' : 'Fail to Reject H₀ 4'}{' '}
-                  ({summaryStats.wilcoxonHI.pValue < 0.001 ? 'p < 0.001' : `p = ${summaryStats.wilcoxonHI.pValue.toFixed(4)}`})
+                  {summaryStats.wilcoxonHI.isSignificantRisk
+                    ? 'Reject H₀ 4'
+                    : 'Fail to Reject H₀ 4'}{' '}
+                  (
+                  {summaryStats.wilcoxonHI.pValue < 0.001
+                    ? 'p < 0.001'
+                    : `p = ${summaryStats.wilcoxonHI.pValue.toFixed(4)}`}
+                  )
                 </span>
               </div>
             )}
@@ -377,37 +391,84 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 Population quantiles
               </span>
             </div>
-            <span className="text-[10px] text-slate-500">
-              N = {summaryStats.count.toLocaleString()}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-500">
+                N = {summaryStats.count.toLocaleString()}
+              </span>
+              <GuidanceTooltip
+                title="Population Quantiles and Percentile Exposure"
+                summary="Percentiles of steady-state blood serum concentrations across the simulated cohort."
+                items={[
+                  'P5 (5th Percentile): Lower exposure baseline. 95% of simulated individuals have higher serum concentrations.',
+                  'P25 (First Quartile, Q1): Lower cutoff of the middle 50% of the cohort.',
+                  'P50 (Median): The middle exposure value. Unlike the mean, it is not pulled upward by a few high-exposure individuals.',
+                  'P75 (Third Quartile, Q3): Upper cutoff of the middle 50% of the cohort. 25% of individuals have higher concentrations.',
+                  'P95 (95th Percentile): Common regulatory benchmark used by the US EPA and EFSA for higher-exposure groups, such as heavy water drinkers.',
+                  'P99 (Extreme Tail): The top 1% of exposure, where multiple risk factors like low body weight and high water intake coincide.',
+                ]}
+                align="right"
+              />
+            </div>
           </div>
+
+          <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
+            Percentiles of predicted steady-state serum PFAS concentrations (
+            <MathView math="C_{ss}" />) across the simulated cohort, showing typical exposure (
+            <MathView math="P_{50}" />) and higher-exposure percentiles (
+            <MathView math="P_{95}, P_{99}" />
+            ).
+          </p>
 
           <div className="space-y-1.5 text-[11px]">
             <div className="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
-              <span className="text-slate-600">P5 (5th Percentile)</span>
+              <div>
+                <span className="text-slate-700 font-medium block">P5 (5th Percentile)</span>
+                <span className="text-[10px] text-slate-400 font-sans">
+                  Lower baseline (5% of cohort below)
+                </span>
+              </div>
               <span className="text-slate-900 font-bold">{summaryStats.p5.toFixed(4)} µg/L</span>
             </div>
             <div className="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
-              <span className="text-slate-600">P25 (First Quartile)</span>
+              <div>
+                <span className="text-slate-700 font-medium block">P25 (First Quartile)</span>
+                <span className="text-[10px] text-slate-400 font-sans">25% of cohort below</span>
+              </div>
               <span className="text-slate-900 font-bold">{summaryStats.p25.toFixed(4)} µg/L</span>
             </div>
             <div className="flex justify-between items-center bg-blue-50/70 p-2 rounded border border-blue-200">
-              <span className="text-blue-900 font-semibold">P50 (Median)</span>
+              <div>
+                <span className="text-blue-900 font-semibold block">P50 (Median)</span>
+                <span className="text-[10px] text-blue-700/80 font-sans">
+                  Typical exposure (50% of cohort below)
+                </span>
+              </div>
               <span className="text-blue-950 font-bold">{summaryStats.median.toFixed(4)} µg/L</span>
             </div>
             <div className="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
-              <span className="text-slate-600">P75 (Third Quartile)</span>
+              <div>
+                <span className="text-slate-700 font-medium block">P75 (Third Quartile)</span>
+                <span className="text-[10px] text-slate-400 font-sans">75% of cohort below</span>
+              </div>
               <span className="text-slate-900 font-bold">{summaryStats.p75.toFixed(4)} µg/L</span>
             </div>
             <div className="flex justify-between items-center bg-amber-50 p-2 rounded border border-amber-200">
-              <span className="text-amber-900 font-semibold">P95 (High Exposure)</span>
+              <div>
+                <span className="text-amber-900 font-semibold block">P95 (High Exposure)</span>
+                <span className="text-[10px] text-amber-700/80 font-sans">
+                  Top 5% exposure tier
+                </span>
+              </div>
               <span className="text-amber-950 font-bold">{summaryStats.p95.toFixed(4)} µg/L</span>
             </div>
             <div className="flex justify-between items-center bg-red-50 p-2 rounded border border-red-200">
-              <span className="text-red-900 font-semibold flex items-center gap-1">
-                <ShieldAlert className="w-3 h-3 text-red-600" />
-                P99 (Extreme Tail)
-              </span>
+              <div>
+                <span className="text-red-900 font-semibold flex items-center gap-1">
+                  <ShieldAlert className="w-3 h-3 text-red-600" />
+                  P99 (Extreme Tail)
+                </span>
+                <span className="text-[10px] text-red-700/80 font-sans">Top 1% exposure tier</span>
+              </div>
               <span className="text-red-950 font-bold">{summaryStats.p99.toFixed(4)} µg/L</span>
             </div>
           </div>
@@ -416,25 +477,80 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
       {/* Variance & Deviation Metrics (Advanced Mode Only) */}
       {!isSimpleMode && (
-        <div className="card-panel p-4 rounded-xl space-y-2">
-          <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2">
-            <TrendingUp className="w-4 h-4 text-purple-600" />
-            <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-              Variance metrics
-            </span>
+        <div className="card-panel p-4 rounded-xl space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="w-4 h-4 text-purple-600" />
+              <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                Variance metrics
+              </span>
+            </div>
+            <GuidanceTooltip
+              title="Variance and Dispersion Metrics"
+              summary="Measures how widely individual serum concentrations spread around the cohort mean."
+              items={[
+                'Standard Deviation (σ): Average distance of individual serum concentrations from the mean, in µg/L.',
+                'Variance (σ²): Squared spread of the values (µg²/L²), showing total variability from differences in physiology and intake.',
+                'Coefficient of Variation (CV = σ / μ): Standard deviation as a percentage of the mean, useful for comparing relative spread across compounds.',
+                '95% Confidence Interval (CI): The range expected to contain the true population mean 95% of the time.',
+              ]}
+              align="right"
+            />
           </div>
+
+          <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
+            Measures how biological differences in water consumption, body weight, and elimination
+            rate spread serum levels across the cohort.
+          </p>
+
           <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <div className="bg-slate-50 p-2 rounded border border-slate-200">
-              <div className="text-slate-500 text-[10px]">
-                Std Dev (<MathView math="\sigma" />)
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200 space-y-0.5">
+              <div className="text-slate-500 text-[10px] flex items-center justify-between">
+                <span>
+                  Std Dev (<MathView math="\sigma" />)
+                </span>
+                <span className="text-[9px] text-slate-400">µg/L</span>
               </div>
               <div className="text-slate-900 font-bold">{summaryStats.stdDev.toFixed(4)}</div>
+              <p className="text-[9px] text-slate-400 font-sans leading-tight">
+                Spread around mean
+              </p>
             </div>
-            <div className="bg-slate-50 p-2 rounded border border-slate-200">
-              <div className="text-slate-500 text-[10px]">
-                Variance (<MathView math="\sigma^2" />)
+            <div className="bg-slate-50 p-2.5 rounded border border-slate-200 space-y-0.5">
+              <div className="text-slate-500 text-[10px] flex items-center justify-between">
+                <span>
+                  Variance (<MathView math="\sigma^2" />)
+                </span>
+                <span className="text-[9px] text-slate-400">µg²/L²</span>
               </div>
               <div className="text-slate-900 font-bold">{summaryStats.variance.toFixed(4)}</div>
+              <p className="text-[9px] text-slate-400 font-sans leading-tight">Squared variance</p>
+            </div>
+          </div>
+
+          {/* Additional Variance Context: CV & 95% CI */}
+          <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+            <div className="bg-purple-50/60 p-2 rounded border border-purple-200/80 space-y-0.5">
+              <div className="text-purple-800 text-[10px] font-medium">
+                Coefficient of Variation (CV)
+              </div>
+              <div className="text-purple-950 font-bold">
+                {summaryStats.mean > 0
+                  ? `${((summaryStats.stdDev / summaryStats.mean) * 100).toFixed(1)}%`
+                  : '0.0%'}
+              </div>
+              <p className="text-[9px] text-purple-700/80 font-sans leading-tight">
+                Relative spread (σ / μ)
+              </p>
+            </div>
+            <div className="bg-purple-50/60 p-2 rounded border border-purple-200/80 space-y-0.5">
+              <div className="text-purple-800 text-[10px] font-medium">95% Mean CI</div>
+              <div className="text-purple-950 font-bold font-mono text-[10px]">
+                [{summaryStats.ci95Lower.toFixed(3)}, {summaryStats.ci95Upper.toFixed(3)}]
+              </div>
+              <p className="text-[9px] text-purple-700/80 font-sans leading-tight">
+                Range for cohort mean
+              </p>
             </div>
           </div>
         </div>

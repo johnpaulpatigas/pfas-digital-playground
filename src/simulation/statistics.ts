@@ -33,9 +33,7 @@ export function normalCdf(z: number): number {
   const a4 = -1.453152027;
   const a5 = 1.061405429;
   const t = 1.0 / (1.0 + p * absZ);
-  const erf =
-    1.0 -
-    ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absZ * absZ);
+  const erf = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-absZ * absZ);
   return 0.5 * (1.0 + sign * erf);
 }
 
@@ -419,10 +417,7 @@ export function calculateSensitivityRanks(
  * Two-Sided Mann-Whitney U Test (Wilcoxon Rank-Sum Test)
  * Compares two independent cohorts (e.g. Average vs Pregnant Filipino Women).
  */
-export function calculateMannWhitneyU(
-  sampleA: number[],
-  sampleB: number[],
-): MannWhitneyUResult {
+export function calculateMannWhitneyU(sampleA: number[], sampleB: number[]): MannWhitneyUResult {
   const n1 = sampleA.length;
   const n2 = sampleB.length;
   if (n1 === 0 || n2 === 0) {
@@ -514,9 +509,7 @@ export function calculateOneSampleWilcoxon(
   const exceedanceCount = values.filter((v) => v > hypothesizedMedian).length;
   const exceedancePercent = (exceedanceCount / nTotal) * 100;
 
-  const diffs = values
-    .map((v) => v - hypothesizedMedian)
-    .filter((d) => Math.abs(d) > 1e-9);
+  const diffs = values.map((v) => v - hypothesizedMedian).filter((d) => Math.abs(d) > 1e-9);
 
   const n = diffs.length;
   if (n === 0) {

@@ -149,4 +149,40 @@ describe('Statistics Engine', () => {
     expect(testSafe.pValue).toBeGreaterThan(0.5);
     expect(testSafe.isSignificantRisk).toBe(false);
   });
+
+  it('evaluates SOP Question 4: multi-compound HQs and combined Hazard Index exceedance', () => {
+    // 5 PFAS compounds simulated across a cohort of N=15
+    const pfoaHQ = [0.2, 0.4, 0.6, 0.8, 1.2, 1.3, 1.4, 1.5, 1.6, 1.8, 2.0, 2.2, 2.5, 2.8, 3.0];
+    const pfosHQ = [0.3, 0.5, 0.7, 0.9, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.3, 2.4, 2.6, 2.8];
+    const pfhxsHQ = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.8, 0.9, 1.0, 1.1, 1.2];
+    const pfnaHQ = [
+      0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.3, 0.35, 0.4, 0.4, 0.45, 0.5, 0.5, 0.55, 0.6,
+    ];
+    const genxHQ = [
+      0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.1, 0.12, 0.15, 0.18, 0.2,
+    ];
+
+    // Sum for Mixture Hazard Index
+    const hazardIndex = pfoaHQ.map((v, i) => v + pfosHQ[i] + pfhxsHQ[i] + pfnaHQ[i] + genxHQ[i]);
+
+    const resPfoa = calculateOneSampleWilcoxon(pfoaHQ, 1.0);
+    const resHI = calculateOneSampleWilcoxon(hazardIndex, 1.0);
+
+    expect(resPfoa.exceedancePercent).toBeGreaterThan(60);
+    expect(resHI.exceedancePercent).toBeGreaterThan(90);
+    expect(resHI.medianValue).toBeGreaterThan(1.0);
+    expect(resHI.pValue).toBeLessThan(0.05);
+    expect(resHI.isSignificantRisk).toBe(true);
+  });
+
+  it('evaluates SOP Question 1 & 2: cohort difference via Mann-Whitney U for 22 yrs vs 19 yrs horizons', () => {
+    // Average cohort (22 yrs exposure) vs Pregnant cohort (19 yrs exposure with hemodilution)
+    const avgCohortCss = [1.5, 1.7, 1.9, 2.1, 2.3, 2.5, 2.7, 2.9];
+    const pregCohortCss = [0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]; // Lower due to plasma expansion
+
+    const mwResult = calculateMannWhitneyU(avgCohortCss, pregCohortCss);
+    expect(mwResult.pValue).toBeLessThan(0.01);
+    expect(mwResult.isSignificant).toBe(true);
+    expect(mwResult.rankBiserialCorrelation).toBeGreaterThan(0.8);
+  });
 });

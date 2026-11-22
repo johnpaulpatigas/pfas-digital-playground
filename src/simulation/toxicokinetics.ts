@@ -9,8 +9,8 @@ import type {
   ParameterCriticalThreshold,
   SimulationParameters,
 } from '../types';
-import { calculateOneSampleWilcoxon } from './statistics';
 import { PFAS_COMPOUNDS, type PFASCompound } from './pfasCompounds';
+import { calculateOneSampleWilcoxon } from './statistics';
 
 export interface ToxicokineticInput {
   dailyIntake: number; // µg/day

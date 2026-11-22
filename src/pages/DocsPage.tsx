@@ -213,6 +213,110 @@ export const DocsPage: React.FC = () => {
             </ul>
           </div>
         </div>
+
+        {/* Section 3.1: Population Quantiles and Variance Metrics */}
+        <div className="pt-4 border-t border-slate-200 space-y-4">
+          <h3 className="text-base font-bold text-slate-900 font-heading">
+            Population quantiles and variance metrics
+          </h3>
+          <p className="text-slate-600 text-xs font-sans leading-relaxed">
+            Probabilistic exposure modeling yields continuous output distributions for steady-state
+            serum concentration (<MathView math="C_{ss}" />) and internal body burden. Because human
+            exposure data is typically right-skewed (lognormally distributed), non-parametric
+            population quantiles and variance metrics are essential to avoid biased conclusions from
+            arithmetic means alone.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+            {/* Quantiles Card */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="font-bold text-teal-900 text-sm font-heading block">
+                Population Quantiles (<MathView math="P_k" />)
+              </span>
+              <p className="text-slate-600 text-[11px] font-sans leading-relaxed">
+                Calculated by sorting simulated iteration outputs (
+                <MathView math="x_{(1)} \le x_{(2)} \le \dots \le x_{(N)}" />) and interpolating the
+                empirical cumulative distribution function <MathView math="P_k = F^{-1}(k/100)" />:
+              </p>
+              <ul className="space-y-1.5 text-[11px] text-slate-700 font-sans">
+                <li>
+                  <strong>P5 (5th Percentile):</strong> Lower baseline exposure; 95% of the modeled
+                  cohort accumulates concentrations exceeding this level.
+                </li>
+                <li>
+                  <strong>P25 & P75 (Quartiles / IQR):</strong> The interquartile range [
+                  <MathView math="P_{25}, P_{75}" />] spans the middle 50% of the population without
+                  being pulled by extreme values.
+                </li>
+                <li>
+                  <strong>P50 (Median):</strong> Non-parametric central tendency, representing
+                  typical exposure without distortion from high-dose right-skewed tails.
+                </li>
+                <li>
+                  <strong>P95 (95th Percentile):</strong> Regulatory high-exposure benchmark (US EPA
+                  / EFSA), representing sensitive or highly exposed subgroups (e.g., high fluid
+                  consumers).
+                </li>
+                <li>
+                  <strong>P99 (Extreme Tail):</strong> Captures worst-case susceptibility where
+                  lower body weight, elevated intake, and slower excretion coincide.
+                </li>
+              </ul>
+            </div>
+
+            {/* Variance Metrics Card */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="font-bold text-purple-900 text-sm font-heading block">
+                Variance & Dispersion Metrics (<MathView math="\sigma, \sigma^2, CV" />)
+              </span>
+              <p className="text-slate-600 text-[11px] font-sans leading-relaxed">
+                Quantifies the magnitude of statistical dispersion and parametric uncertainty
+                propagated from physiological inputs into internal dose metrics:
+              </p>
+              <div className="text-slate-900 bg-white p-2.5 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs space-y-1">
+                <MathView
+                  math="s^2 = \frac{1}{N - 1} \sum_{i=1}^N (x_i - \bar{x})^2, \quad s = \sqrt{s^2}"
+                  block
+                />
+                <MathView
+                  math="CV = \frac{s}{\bar{x}} \times 100\%, \quad \text{CI}_{95\%} = \bar{x} \pm 1.96 \frac{s}{\sqrt{N}}"
+                  block
+                />
+              </div>
+              <ul className="space-y-1 text-[11px] text-slate-700 font-sans">
+                <li>
+                  <strong>
+                    Standard Deviation (<MathView math="s" />
+                    ):
+                  </strong>{' '}
+                  Average dispersion around the mean, measured in original concentration units
+                  (µg/L).
+                </li>
+                <li>
+                  <strong>
+                    Sample Variance (<MathView math="s^2" />
+                    ):
+                  </strong>{' '}
+                  Squared dispersion (µg²/L²), reflecting cumulative uncertainty across model
+                  variables.
+                </li>
+                <li>
+                  <strong>
+                    Coefficient of Variation (<MathView math="CV" />
+                    ):
+                  </strong>{' '}
+                  Ratio of standard deviation to the mean, allowing comparison of relative spread
+                  across compounds.
+                </li>
+                <li>
+                  <strong>95% Mean Confidence Interval:</strong> Estimated bounds for the population
+                  mean. Stratified Latin Hypercube Sampling narrows these bounds compared to simple
+                  random sampling.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Section 4: Health Risk Assessment & Hazard Quotient */}
@@ -315,15 +419,16 @@ export const DocsPage: React.FC = () => {
           <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
             Where <MathView math="C" /> is the rank correlation matrix of all model parameters and
             output <MathView math="Y" />, and <MathView math="B" /> is its inverse. Statistical
-            significance is evaluated using Student&apos;s <MathView math="t" />-distribution with{' '}
-            <MathView math="df = N - k - 1" />:
+            significance is evaluated using Student&apos;s <MathView math="t" />
+            -distribution with <MathView math="df = N - k - 1" />:
           </p>
           <div className="text-slate-900 bg-white p-2.5 rounded-lg border border-slate-300 text-center font-semibold text-xs">
             <MathView math="t = \text{PRCC} \sqrt{\frac{N - k - 1}{1 - \text{PRCC}^2}}" block />
           </div>
           <p className="text-slate-600 text-[11px] font-sans">
-            A parameter exerts a statistically and biologically meaningful effect (<MathView math="H_1 3" />)
-            when <MathView math="|\text{PRCC}| \ge 0.10" /> and <MathView math="p < 0.05" />.
+            A parameter exerts a statistically and biologically meaningful effect (
+            <MathView math="H_1 3" />) when <MathView math="|\text{PRCC}| \ge 0.10" /> and{' '}
+            <MathView math="p < 0.05" />.
           </p>
         </div>
       </section>
@@ -360,76 +465,336 @@ export const DocsPage: React.FC = () => {
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               Models gestational hemodilution (+40 to 50% blood plasma volume expansion), increased
               hydration demands (<strong>2.8 L/day</strong>), gestational mass (
-              <strong>65.2 kg</strong>), transplacental clearance dynamics shortening maternal
-              serum half-life (<strong>2.4 yrs</strong>), and a pre-gestational chronic exposure
-              horizon of <strong>19 years</strong> based on NDHS median maternal age.
+              <strong>65.2 kg</strong>), transplacental clearance dynamics shortening maternal serum
+              half-life (<strong>2.4 yrs</strong>), and a pre-gestational chronic exposure horizon
+              of <strong>19 years</strong> based on NDHS median maternal age.
             </p>
           </div>
         </div>
       </section>
 
       {/* Section 7: Study SOP, Hypotheses, and Inferential Statistics */}
-      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-6">
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-8">
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <CheckCircle className="w-5 h-5 text-purple-700" />
           <h2 className="text-xl font-bold text-slate-900 font-heading">
-            7. Statement of the problem, hypotheses, and statistical framework
+            7. Statement of the problem (SOP), hypotheses, and statistical framework
           </h2>
         </div>
 
-        <div className="space-y-4 text-xs font-sans text-slate-700 leading-relaxed">
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-            <h3 className="font-bold text-slate-900 text-sm font-heading">
-              Hypothesis 1 & 2: Cohort Comparison (Two-Sided Mann-Whitney U Test)
+        {/* 7.1 Statement of the Problem */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-100 text-purple-800 text-xs font-mono font-bold">
+              Research Problem
+            </span>
+            <h3 className="text-base font-bold text-slate-900 font-heading">
+              Statement of the problem (SOP)
             </h3>
-            <p>
-              To evaluate differences in steady-state serum PFAS concentration (<MathView math="C_{ss}" />)
-              (<strong>H₀ 1</strong>) and cumulative body burden (<MathView math="B(t)" />) over modeled
-              horizons (22 yrs vs. 19 yrs) (<strong>H₀ 2</strong>) between Average and Pregnant Filipino
-              Women:
-            </p>
-            <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
-              <MathView
-                math="U_1 = R_1 - \frac{n_1(n_1 + 1)}{2}, \quad U_2 = n_1 n_2 - U_1, \quad Z = \frac{U_1 - \mu_U}{\sigma_U}"
-                block
-              />
+          </div>
+          <p className="text-xs text-slate-600 leading-relaxed font-sans">
+            Specifically, this study seeks to answer the following four scientific and toxicokinetic
+            questions:
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans text-xs">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="font-bold text-purple-900 font-heading text-xs block">
+                1. Steady-state serum concentration (<MathView math="C_{ss}" />)
+              </span>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                What are the estimated steady-state serum PFAS concentrations (
+                <MathView math="C_{ss}" />) among Average and Pregnant Filipino Women modeled using
+                a one-compartment toxicokinetic model with Latin Hypercube Sampling, and do the two
+                cohorts differ significantly for:
+              </p>
+              <ul className="text-[11px] text-slate-700 font-mono space-y-0.5 pl-2">
+                <li>1.1 Perfluorooctanoic acid (PFOA)</li>
+                <li>1.2 Perfluorooctane sulfonate (PFOS)</li>
+                <li>1.3 Perfluorohexane sulfonic acid (PFHxS)</li>
+                <li>1.4 Perfluorononanoic acid (PFNA)</li>
+                <li>1.5 HFPO-DA (GenX)</li>
+              </ul>
             </div>
-            <p className="text-[11px] text-slate-500">
-              Evaluated at <MathView math="\alpha = 0.05" /> separately for PFOA, PFOS, PFHxS, PFNA, and
-              GenX (HFPO-DA). Effect size is quantified via rank-biserial correlation <MathView math="r = 1 - \frac{2U}{n_1 n_2}" />.
-            </p>
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="font-bold text-purple-900 font-heading text-xs block">
+                2. Cumulative body burden (<MathView math="B(t)" />)
+              </span>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                What is the average cumulative PFAS body burden accumulated over calibrated exposure
+                windows (<strong>22 years</strong> for Average and <strong>19 years</strong> for
+                Pregnant Filipino Women), and does body burden differ significantly between cohorts
+                for:
+              </p>
+              <ul className="text-[11px] text-slate-700 font-mono space-y-0.5 pl-2">
+                <li>2.1 PFOA</li>
+                <li>2.2 PFOS</li>
+                <li>2.3 PFHxS</li>
+                <li>2.4 PFNA</li>
+                <li>2.5 GenX</li>
+              </ul>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="font-bold text-purple-900 font-heading text-xs block">
+                3. Parameter sensitivity analysis
+              </span>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                How do individual physiological and behavioral input parameters influence predicted
+                steady-state serum concentrations (<MathView math="C_{ss}" />) in global sensitivity
+                analysis, and which parameters serve as the primary drivers of internal dose?
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+              <span className="font-bold text-purple-900 font-heading text-xs block">
+                4. Health risk level and population exceedance
+              </span>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                What is the estimated health risk among Average and Pregnant Filipino Women,
+                expressed as compound-specific Hazard Quotients (HQ) and a mixture Hazard Index (HI)
+                derived from U.S. EPA oral reference doses (RfD), and what percentage of simulated
+                women exceeds an HQ or HI of 1.0 for:
+              </p>
+              <ul className="text-[11px] text-slate-700 font-mono space-y-0.5 pl-2">
+                <li>4.1 PFOA</li>
+                <li>4.2 PFOS</li>
+                <li>4.3 PFHxS</li>
+                <li>4.4 PFNA</li>
+                <li>4.5 GenX</li>
+                <li>4.6 Combined PFAS mixture (Hazard Index)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* 7.2 Formal Hypotheses */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800 text-xs font-mono font-bold">
+              Inferential Framework
+            </span>
+            <h3 className="text-base font-bold text-slate-900 font-heading">
+              Null (H₀) and Alternative (H₁) hypotheses (all tests at α = 0.05, run separately for
+              each PFAS)
+            </h3>
           </div>
 
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-            <h3 className="font-bold text-slate-900 text-sm font-heading">
-              Hypothesis 3: Parameter Sensitivity (PRCC)
+          <div className="space-y-4 text-xs font-sans text-slate-700 leading-relaxed">
+            {/* H0 1 */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 text-sm font-heading">
+                  Hypothesis 1: Serum Concentration Difference (Two-Sided Mann-Whitney U Test)
+                </h4>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                  α = 0.05
+                </span>
+              </div>
+              <p>
+                <strong>H₀ 1:</strong> Steady-state serum PFAS concentration (
+                <MathView math="C_{ss}" />) does not differ significantly between Average and
+                Pregnant Filipino Women.
+                <br />
+                <strong>H₁ 1:</strong> Steady-state serum PFAS concentration (
+                <MathView math="C_{ss}" />) differs significantly between Average and Pregnant
+                Filipino Women.
+              </p>
+              <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
+                <MathView
+                  math="U_1 = R_1 - \frac{n_1(n_1 + 1)}{2}, \quad U_2 = n_1 n_2 - U_1, \quad Z = \frac{U_1 - \mu_U}{\sigma_U}, \quad r = 1 - \frac{2U}{n_1 n_2}"
+                  block
+                />
+              </div>
+            </div>
+
+            {/* H0 2 */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 text-sm font-heading">
+                  Hypothesis 2: Cumulative Body Burden Difference (Two-Sided Mann-Whitney U Test)
+                </h4>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                  α = 0.05
+                </span>
+              </div>
+              <p>
+                <strong>H₀ 2:</strong> Cumulative PFAS body burden accumulated over the modeled
+                exposure window (22 years for Average vs. 19 years for Pregnant Filipino Women) does
+                not differ significantly between Average and Pregnant Filipino Women.
+                <br />
+                <strong>H₁ 2:</strong> Cumulative PFAS body burden differs significantly between
+                Average and Pregnant Filipino Women.
+              </p>
+              <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
+                <MathView
+                  math="B(t) = \frac{I \cdot f_{\text{abs}}}{k_e}\left(1 - e^{-k_e \cdot t}\right), \quad t_{\text{avg}} = 22 \text{ yrs}, \quad t_{\text{preg}} = 19 \text{ yrs}"
+                  block
+                />
+              </div>
+            </div>
+
+            {/* H0 3 */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 text-sm font-heading">
+                  Hypothesis 3: Parameter Sensitivity on Serum Concentration (PRCC)
+                </h4>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                  |PRCC| &ge; 0.10, p &lt; 0.05
+                </span>
+              </div>
+              <p>
+                <strong>H₀ 3:</strong> No toxicokinetic model parameter has a significant monotonic
+                effect on estimated steady-state serum concentration (<MathView math="C_{ss}" />
+                ).
+                <br />
+                <strong>H₁ 3:</strong> At least one toxicokinetic model parameter has a significant
+                monotonic effect on estimated steady-state serum concentration (
+                <MathView math="C_{ss}" />
+                ).
+              </p>
+              <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
+                <MathView
+                  math="\text{PRCC}(X_j, C_{ss}) = -\frac{B_{j, p}}{\sqrt{B_{j,j} \cdot B_{p,p}}}, \quad t = \text{PRCC} \sqrt{\frac{N - k - 1}{1 - \text{PRCC}^2}}"
+                  block
+                />
+              </div>
+            </div>
+
+            {/* H0 4 */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 text-sm font-heading">
+                  Hypothesis 4: Health Risk Level (One-Sample One-Sided Wilcoxon Signed-Rank Test)
+                </h4>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
+                  Threshold = 1.0, α = 0.05
+                </span>
+              </div>
+              <p>
+                <strong>H₀ 4:</strong> Exposure risk is not significant: the median Hazard Quotient
+                for each PFAS and the median mixture Hazard Index do not exceed 1.0 based on the EPA
+                oral RfD.
+                <br />
+                <strong>H₁ 4:</strong> Exposure risk is significant: the median Hazard Quotient for
+                a PFAS, or the median mixture Hazard Index, exceeds 1.0 based on the EPA oral RfD.
+              </p>
+              <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
+                <MathView
+                  math="W^+ = \sum_{D_i > 0} \text{rank}(|D_i|), \quad D_i = \text{HQ}_i - 1.0, \quad Z = \frac{W^+ - \mu_W - 0.5}{\sigma_W}"
+                  block
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 7.3 Methodological Evolution: Old SOP vs New Proposed SOP */}
+        <div className="space-y-4 pt-2 border-t border-slate-200">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
+              Evolutionary Comparison
+            </span>
+            <h3 className="text-base font-bold text-slate-900 font-heading">
+              Methodological transition: Old SOP & hypotheses vs. New proposed framework
             </h3>
-            <p>
-              <strong>H₀ 3</strong>: No TK parameter has a significant monotonic effect on steady-state serum
-              concentration (<MathView math="C_{ss}" />) (<MathView math="|\text{PRCC}| < 0.10" /> or <MathView math="p \ge 0.05" />).
-              <br />
-              <strong>H₁ 3</strong>: At least one TK parameter has a significant monotonic effect on <MathView math="C_{ss}" />.
-            </p>
           </div>
 
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-            <h3 className="font-bold text-slate-900 text-sm font-heading">
-              Hypothesis 4: Health Risk Level (One-Sample One-Sided Wilcoxon Signed-Rank Test)
-            </h3>
-            <p>
-              <strong>H₀ 4</strong>: The health risk level associated with PFAS exposure is not significant:
-              the median Hazard Quotient (<MathView math="\text{HQ}" />) of each PFAS and the median mixture
-              Hazard Index (<MathView math="\text{HI}" />) do not exceed 1.0 based on EPA oral Reference Doses
-              (<MathView math="\text{RfD}" />).
-              <br />
-              <strong>H₁ 4</strong>: The median HQ or median HI significantly exceeds 1.0 (<MathView math="p < 0.05" />).
-            </p>
-            <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
-              <MathView
-                math="W^+ = \sum_{D_i > 0} \text{rank}(|D_i|), \quad D_i = \text{HQ}_i - 1.0, \quad Z = \frac{W^+ - \mu_W - 0.5}{\sigma_W}"
-                block
-              />
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 text-slate-500 text-[11px]">
+                  <th className="py-2 px-3 font-semibold w-1/5">Research Domain</th>
+                  <th className="py-2 px-3 font-semibold w-2/5">
+                    Initial Framework (Old SOP & Hypotheses)
+                  </th>
+                  <th className="py-2 px-3 font-semibold w-2/5">
+                    Calibrated Framework (New Proposed SOP & Hypotheses)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-sans text-[11px] leading-relaxed">
+                <tr className="hover:bg-slate-50/70">
+                  <td className="py-3 px-3 font-bold text-slate-900">
+                    Question 1 & Hypothesis 1<br />
+                    <span className="font-mono text-[10px] text-slate-500 font-normal">
+                      Serum Concentration (Css)
+                    </span>
+                  </td>
+                  <td className="py-3 px-3 text-slate-600">
+                    Estimated Css in relation to external Human Biomonitoring thresholds (HBM-I and
+                    HBM-II). Hypotheses tested whether Css exceeds European HBM guidance values.
+                  </td>
+                  <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
+                    <strong>Direct cohort comparative inferential testing:</strong> Two-sided
+                    Mann-Whitney U test (α = 0.05) comparing Average and Pregnant Filipino Women
+                    across all 5 target PFAS to measure physiological differences from gestational
+                    hemodilution.
+                  </td>
+                </tr>
+
+                <tr className="hover:bg-slate-50/70">
+                  <td className="py-3 px-3 font-bold text-slate-900">
+                    Question 2 & Hypothesis 2<br />
+                    <span className="font-mono text-[10px] text-slate-500 font-normal">
+                      Accumulated Body Burden
+                    </span>
+                  </td>
+                  <td className="py-3 px-3 text-slate-600">
+                    Modeled accumulated body burden over an arbitrary generic{' '}
+                    <em>30-year study period</em> in relation to HBM guidance and critical burden
+                    limits.
+                  </td>
+                  <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
+                    <strong>Demographically calibrated exposure horizons:</strong> Modeled over{' '}
+                    <strong>22 years</strong> for Average Filipino Women and{' '}
+                    <strong>19 years</strong> for Pregnant Filipino Women based on Philippine NDHS
+                    maternal demographic statistics, tested via two-sided Mann-Whitney U test.
+                  </td>
+                </tr>
+
+                <tr className="hover:bg-slate-50/70">
+                  <td className="py-3 px-3 font-bold text-slate-900">
+                    Question 3 & Hypothesis 3<br />
+                    <span className="font-mono text-[10px] text-slate-500 font-normal">
+                      Sensitivity Analysis
+                    </span>
+                  </td>
+                  <td className="py-3 px-3 text-slate-600">
+                    Tested parameter effects on estimated <em>body burden</em> without controlling
+                    for parameter covariation or specifying non-parametric partial correlation.
+                  </td>
+                  <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
+                    <strong>PRCC on Steady-State Serum Concentration (Css):</strong> Partial Rank
+                    Correlation Coefficients isolate monotonic relationships with serum
+                    concentration while holding other model inputs constant (|PRCC| &ge; 0.10, p
+                    &lt; 0.05).
+                  </td>
+                </tr>
+
+                <tr className="hover:bg-slate-50/70">
+                  <td className="py-3 px-3 font-bold text-slate-900">
+                    Question 4 & Hypothesis 4<br />
+                    <span className="font-mono text-[10px] text-slate-500 font-normal">
+                      Health Risk & Hazard Indices
+                    </span>
+                  </td>
+                  <td className="py-3 px-3 text-slate-600">
+                    Generic health risk evaluation for individuals exceeding normal thresholds
+                    without chemical-specific toxicological benchmark ratios or mixture dose
+                    additivity.
+                  </td>
+                  <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
+                    <strong>EPA RfD Hazard Quotients (HQ) & Mixture Hazard Index (HI):</strong>{' '}
+                    Evaluates 4.1 PFOA, 4.2 PFOS, 4.3 PFHxS, 4.4 PFNA, 4.5 GenX, and 4.6 Combined
+                    PFAS (HI), with population exceedance percentages (% &gt; 1.0) and one-sided
+                    Wilcoxon signed-rank tests against 1.0.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

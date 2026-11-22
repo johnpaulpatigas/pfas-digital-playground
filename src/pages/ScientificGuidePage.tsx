@@ -283,6 +283,84 @@ export const ScientificGuidePage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Population Quantiles & Variance Metrics Card */}
+              <div className="p-6 rounded-2xl bg-teal-50/50 border border-teal-200 space-y-4 font-sans text-xs">
+                <div className="flex items-center gap-2 text-teal-950 font-bold text-sm font-heading">
+                  <Activity className="w-4 h-4 text-teal-700" />
+                  <span>Population quantiles and variance metrics in biomonitoring</span>
+                </div>
+                <p className="text-slate-700 leading-relaxed">
+                  Probabilistic modeling accounts for non-normal distributions in the population.
+                  Because intake and clearance rates follow lognormal or triangular distributions,
+                  summary metrics report percentiles alongside variance measures:
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-white rounded-xl border border-teal-200 space-y-2">
+                    <strong className="text-teal-950 font-heading text-xs block">
+                      Population quantiles
+                    </strong>
+                    <ul className="space-y-1.5 text-[11px] text-slate-600 font-sans">
+                      <li>
+                        <strong>P5 (5th percentile):</strong> Lower baseline exposure. Only 5% of
+                        simulated women fall below this level.
+                      </li>
+                      <li>
+                        <strong>P25 to P75 (Interquartile range, IQR):</strong> Spans the middle 50%
+                        of the cohort without distortion from extreme values.
+                      </li>
+                      <li>
+                        <strong>P50 (Median):</strong> The central value for skewed data, showing
+                        what a typical individual receives.
+                      </li>
+                      <li>
+                        <strong>P95 (95th percentile):</strong> Regulatory benchmark for higher
+                        exposure, such as individuals with high drinking water intake.
+                      </li>
+                      <li>
+                        <strong>P99 (Extreme tail):</strong> Upper exposure tier where high intake
+                        and lower body weight coincide.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 bg-white rounded-xl border border-teal-200 space-y-2">
+                    <strong className="text-teal-950 font-heading text-xs block">
+                      Variance and dispersion metrics
+                    </strong>
+                    <ul className="space-y-1.5 text-[11px] text-slate-600 font-sans">
+                      <li>
+                        <strong>
+                          Standard Deviation (<MathView math="\sigma" />
+                          ):
+                        </strong>{' '}
+                        Average distance of individual concentrations from the mean, in µg/L.
+                      </li>
+                      <li>
+                        <strong>
+                          Variance (<MathView math="\sigma^2" />
+                          ):
+                        </strong>{' '}
+                        Squared dispersion (µg²/L²), showing total variability from physiological
+                        and intake differences.
+                      </li>
+                      <li>
+                        <strong>
+                          Coefficient of Variation (<MathView math="CV = \sigma / \mu" />
+                          ):
+                        </strong>{' '}
+                        Standard deviation divided by the mean, used to compare relative spread
+                        across different PFAS compounds.
+                      </li>
+                      <li>
+                        <strong>95% Confidence interval:</strong> Estimated range for the population
+                        mean, narrower under Latin Hypercube Sampling than standard Monte Carlo.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               {/* Section on 6 Critical Parameter Thresholds & 25-30 yr Chronic Body Burden */}
               <div className="p-6 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-4 font-sans text-xs">
                 <div className="flex items-center gap-2 text-purple-950 font-bold text-sm font-heading">

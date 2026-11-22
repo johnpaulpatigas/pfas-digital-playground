@@ -2,11 +2,16 @@ import {
   AlertCircle,
   ArrowRightLeft,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Cpu,
+  FileText,
+  Flame,
   GitMerge,
   Layers,
   Play,
   Scale,
+  ShieldAlert,
   Users,
 } from 'lucide-react';
 import type React from 'react';
@@ -29,11 +34,13 @@ import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 import { executeComparisonAsync } from '../simulation/runSimulationAsync';
 import {
   calculateMannWhitneyU,
+  calculateOneSampleWilcoxon,
+  calculatePRCC,
   calculateSummaryStatistics,
   quantileSorted,
 } from '../simulation/statistics';
 import { useSimulationStore } from '../stores/useSimulationStore';
-import type { ComparisonResult, MannWhitneyUResult } from '../types';
+import type { ComparisonResult, MannWhitneyUResult, WilcoxonOneSampleResult } from '../types';
 
 interface CohortHypothesisRow {
   compoundId: string;
@@ -51,21 +58,53 @@ interface CohortHypothesisRow {
   testResult: MannWhitneyUResult;
 }
 
+interface CohortSensitivityRow {
+  parameterId: string;
+  parameterName: string;
+  avgPRCC: number;
+  avgTStat: number;
+  avgPValue: number;
+  avgIsSignificant: boolean;
+  pregPRCC: number;
+  pregTStat: number;
+  pregPValue: number;
+  pregIsSignificant: boolean;
+}
+
+interface CohortHealthRiskRow {
+  id: string;
+  sopId: string;
+  name: string;
+  benchmark: string;
+  rfdDose?: number;
+  avgMedianHQ: number;
+  avgMeanHQ: number;
+  avgExceedancePercent: number;
+  avgWilcoxon: WilcoxonOneSampleResult;
+  pregMedianHQ: number;
+  pregMeanHQ: number;
+  pregExceedancePercent: number;
+  pregWilcoxon: WilcoxonOneSampleResult;
+}
+
 export const ComparePage: React.FC = () => {
   const { parameters } = useSimulationStore();
   const [activeTab, setActiveTab] = useState<'cohorts' | 'sampling'>('cohorts');
+  const [showFrameworkTransition, setShowFrameworkTransition] = useState<boolean>(false);
 
   // Sampling benchmark state
   const [iterations, setIterations] = useState<number>(3000);
   const [isBenchmarking, setIsBenchmarking] = useState<boolean>(false);
   const [comparison, setComparison] = useState<ComparisonResult | null>(null);
 
-  // Cohort comparison state (H0 1 & H0 2)
+  // Cohort comparison state (SOP Questions 1, 2, 3, 4)
   const [cohortIterations, setCohortIterations] = useState<number>(5000);
   const [isEvaluatingCohorts, setIsEvaluatingCohorts] = useState<boolean>(false);
   const [cohortResults, setCohortResults] = useState<{
     h1Rows: CohortHypothesisRow[];
     h2Rows: CohortHypothesisRow[];
+    h3Rows: CohortSensitivityRow[];
+    h4Rows: CohortHealthRiskRow[];
     totalIterations: number;
   } | null>(null);
 
@@ -157,14 +196,18 @@ export const ComparePage: React.FC = () => {
 
         const h1Rows: CohortHypothesisRow[] = [];
         const h2Rows: CohortHypothesisRow[] = [];
+        const h4Rows: CohortHealthRiskRow[] = [];
 
-        PFAS_COMPOUNDS.forEach((c) => {
+        // Question 1, 2, and 4 (4.1 to 4.5 for individual PFAS)
+        PFAS_COMPOUNDS.forEach((c, idx) => {
           // 1. Steady-state serum concentration (Css)
           const avgCss = simAvg.map(
-            (r) => r.compoundOutputs?.[c.id]?.steadyStateConcentration ?? r.steadyStateConcentration,
+            (r) =>
+              r.compoundOutputs?.[c.id]?.steadyStateConcentration ?? r.steadyStateConcentration,
           );
           const pregCss = simPreg.map(
-            (r) => r.compoundOutputs?.[c.id]?.steadyStateConcentration ?? r.steadyStateConcentration,
+            (r) =>
+              r.compoundOutputs?.[c.id]?.steadyStateConcentration ?? r.steadyStateConcentration,
           );
 
           const sortedAvgCss = [...avgCss].sort((a, b) => a - b);
@@ -204,7 +247,7 @@ export const ComparePage: React.FC = () => {
             compoundName: c.name.split(' ')[0],
             endpoint: 'Cumulative Body Burden (B(t))',
             hypothesisId: `H₀ 2 (${c.name.split(' ')[0]})`,
-            nullHypothesis: `No significant difference in body burden over modeled exposure period.`,
+            nullHypothesis: `No significant difference in body burden over modeled exposure period (22 yrs vs. 19 yrs).`,
             avgMedian: parseFloat(quantileSorted(sortedAvgBb, 0.5).toFixed(3)),
             avgP25: parseFloat(quantileSorted(sortedAvgBb, 0.25).toFixed(3)),
             avgP75: parseFloat(quantileSorted(sortedAvgBb, 0.75).toFixed(3)),
@@ -214,11 +257,108 @@ export const ComparePage: React.FC = () => {
             unit: 'µg',
             testResult: mwBb,
           });
+
+          // 4. Health Risk Level: Hazard Quotient (HQ)
+          const avgHQs = simAvg.map((r) => r.compoundOutputs?.[c.id]?.hazardQuotient ?? 0);
+          const pregHQs = simPreg.map((r) => r.compoundOutputs?.[c.id]?.hazardQuotient ?? 0);
+
+          const sortedAvgHQ = [...avgHQs].sort((a, b) => a - b);
+          const sortedPregHQ = [...pregHQs].sort((a, b) => a - b);
+
+          const avgMeanHQ = avgHQs.reduce((acc, v) => acc + v, 0) / avgHQs.length;
+          const pregMeanHQ = pregHQs.reduce((acc, v) => acc + v, 0) / pregHQs.length;
+
+          const avgWilcoxon = calculateOneSampleWilcoxon(avgHQs, 1.0);
+          const pregWilcoxon = calculateOneSampleWilcoxon(pregHQs, 1.0);
+
+          h4Rows.push({
+            id: c.id,
+            sopId: `4.${idx + 1}`,
+            name: c.name,
+            benchmark: `RfD = ${c.rfdDose} µg/kg/day`,
+            rfdDose: c.rfdDose,
+            avgMedianHQ: parseFloat(quantileSorted(sortedAvgHQ, 0.5).toFixed(3)),
+            avgMeanHQ: parseFloat(avgMeanHQ.toFixed(3)),
+            avgExceedancePercent: avgWilcoxon.exceedancePercent,
+            avgWilcoxon,
+            pregMedianHQ: parseFloat(quantileSorted(sortedPregHQ, 0.5).toFixed(3)),
+            pregMeanHQ: parseFloat(pregMeanHQ.toFixed(3)),
+            pregExceedancePercent: pregWilcoxon.exceedancePercent,
+            pregWilcoxon,
+          });
+        });
+
+        // 4.6 Cumulative Mixture Hazard Index (HI)
+        const avgHIs = simAvg.map((r) => r.hazardIndex ?? 0);
+        const pregHIs = simPreg.map((r) => r.hazardIndex ?? 0);
+        const sortedAvgHI = [...avgHIs].sort((a, b) => a - b);
+        const sortedPregHI = [...pregHIs].sort((a, b) => a - b);
+
+        const avgMeanHI = avgHIs.reduce((acc, v) => acc + v, 0) / avgHIs.length;
+        const pregMeanHI = pregHIs.reduce((acc, v) => acc + v, 0) / pregHIs.length;
+
+        const avgWilcoxonHI = calculateOneSampleWilcoxon(avgHIs, 1.0);
+        const pregWilcoxonHI = calculateOneSampleWilcoxon(pregHIs, 1.0);
+
+        h4Rows.push({
+          id: 'mixture-hi',
+          sopId: '4.6',
+          name: 'Combined 5-PFAS Mixture (Hazard Index)',
+          benchmark: 'Cumulative Additive Limit (HI = 1.0)',
+          avgMedianHQ: parseFloat(quantileSorted(sortedAvgHI, 0.5).toFixed(3)),
+          avgMeanHQ: parseFloat(avgMeanHI.toFixed(3)),
+          avgExceedancePercent: avgWilcoxonHI.exceedancePercent,
+          avgWilcoxon: avgWilcoxonHI,
+          pregMedianHQ: parseFloat(quantileSorted(sortedPregHI, 0.5).toFixed(3)),
+          pregMeanHQ: parseFloat(pregMeanHI.toFixed(3)),
+          pregExceedancePercent: pregWilcoxonHI.exceedancePercent,
+          pregWilcoxon: pregWilcoxonHI,
+        });
+
+        // 3. Question 3 & Hypothesis 3: PRCC Sensitivity on Css for both cohorts
+        const avgPRCCs = calculatePRCC(simAvg, avgScenario.parameters, 'steadyStateConcentration');
+        const pregPRCCs = calculatePRCC(
+          simPreg,
+          pregScenario.parameters,
+          'steadyStateConcentration',
+        );
+
+        const prccMapAvg = new Map(avgPRCCs.map((p) => [p.parameterId, p]));
+        const prccMapPreg = new Map(pregPRCCs.map((p) => [p.parameterId, p]));
+
+        const paramOrder = [
+          'dailyIntake',
+          'bodyWeight',
+          'waterConsumption',
+          'eliminationHalfLife',
+          'bioavailability',
+          'exposureDuration',
+          'age',
+        ];
+
+        const h3Rows: CohortSensitivityRow[] = paramOrder.map((key) => {
+          const pAvg = prccMapAvg.get(key);
+          const pPreg = prccMapPreg.get(key);
+          return {
+            parameterId: key,
+            parameterName:
+              avgScenario.parameters[key as keyof typeof avgScenario.parameters]?.name || key,
+            avgPRCC: pAvg?.prcc ?? 0,
+            avgTStat: pAvg?.tStatistic ?? 0,
+            avgPValue: pAvg?.pValue ?? 1,
+            avgIsSignificant: pAvg?.isSignificant ?? false,
+            pregPRCC: pPreg?.prcc ?? 0,
+            pregTStat: pPreg?.tStatistic ?? 0,
+            pregPValue: pPreg?.pValue ?? 1,
+            pregIsSignificant: pPreg?.isSignificant ?? false,
+          };
         });
 
         setCohortResults({
           h1Rows,
           h2Rows,
+          h3Rows,
+          h4Rows,
           totalIterations: cohortIterations,
         });
       } catch (err) {
@@ -262,7 +402,7 @@ export const ComparePage: React.FC = () => {
               }`}
             >
               <Users className="w-3.5 h-3.5" />
-              <span>Demographic Cohorts (H₀ 1 & H₀ 2)</span>
+              <span>Demographic Cohorts (SOP & Hypotheses)</span>
             </button>
             <button
               type="button"
@@ -280,18 +420,105 @@ export const ComparePage: React.FC = () => {
         </div>
 
         {activeTab === 'cohorts' ? (
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
-              Cohort Comparison & Two-Sided Mann-Whitney U Hypothesis Testing
-            </h1>
-            <p className="text-slate-600 text-sm max-w-4xl leading-relaxed mt-2">
-              Evaluates <strong>Hypothesis 1</strong> (difference in steady-state serum PFAS concentration{' '}
-              <MathView math="C_{ss}" />) and <strong>Hypothesis 2</strong> (difference in cumulative body
-              burden <MathView math="B(t)" /> over modeled exposure horizons: <strong>22 years</strong> for
-              Average Filipino Women vs. <strong>19 years</strong> for Pregnant Filipino Women) using
-              independent Latin Hypercube Sampling (LHS-MCS) and two-sided Mann-Whitney U tests at{' '}
-              <MathView math="\alpha = 0.05" />.
-            </p>
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
+                  Cohort Comparison & Study Hypotheses Evaluation
+                </h1>
+                <p className="text-slate-600 text-sm max-w-4xl leading-relaxed mt-1">
+                  Tests the study&apos;s <strong>Statement of the Problem (SOP 1 to 4)</strong> and{' '}
+                  <strong>Hypotheses (H₀ 1 to 4)</strong> for Average Filipino Women (22-year
+                  exposure) and Pregnant Filipino Women (19-year exposure) using Latin Hypercube
+                  Sampling (LHS-MCS).
+                </p>
+              </div>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowFrameworkTransition((prev) => !prev)}
+                icon={
+                  showFrameworkTransition ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )
+                }
+              >
+                {showFrameworkTransition
+                  ? 'Hide SOP Evolution'
+                  : 'View Old vs New SOP & Hypotheses'}
+              </Button>
+            </div>
+
+            {/* Collapsible Comparison: Old SOP vs New Proposed SOP */}
+            {showFrameworkTransition && (
+              <div className="mt-4 p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 font-sans text-xs">
+                <div className="flex items-center gap-2 text-purple-900 font-bold font-heading text-sm border-b border-slate-200 pb-2">
+                  <FileText className="w-4 h-4 text-purple-700" />
+                  <span>
+                    Research Framework Evolution: Old SOP & Hypotheses vs. New Proposed Framework
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Old SOP Box */}
+                  <div className="p-4 rounded-xl bg-white border border-rose-200 space-y-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-rose-50 text-rose-800 border border-rose-200">
+                      Previous / Initial Framework (Old SOP)
+                    </span>
+                    <ul className="space-y-1.5 text-slate-600 text-[11px] list-disc list-inside">
+                      <li>
+                        <strong>Q1 (Css):</strong> Evaluated against external Human Biomonitoring
+                        guidance values (HBM-I & HBM-II) without direct inferential comparison.
+                      </li>
+                      <li>
+                        <strong>Q2 (Body Burden):</strong> Assumed a generic{' '}
+                        <em>30-year study period</em> rather than demographically calibrated local
+                        exposure durations.
+                      </li>
+                      <li>
+                        <strong>Q3 (Sensitivity):</strong> Evaluated parameter effects on estimated{' '}
+                        <em>body burden</em> rather than steady-state serum concentration.
+                      </li>
+                      <li>
+                        <strong>Q4 (Health Risk):</strong> Generic body burden threshold exceedance
+                        without compound-specific or mixture hazard indices.
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* New Proposed SOP Box */}
+                  <div className="p-4 rounded-xl bg-white border border-emerald-200 space-y-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      New Proposed SOP & Hypotheses (Calibrated)
+                    </span>
+                    <ul className="space-y-1.5 text-slate-600 text-[11px] list-disc list-inside">
+                      <li>
+                        <strong>Q1 & H₀ 1 (Css):</strong> Two-sided Mann-Whitney U test (α = 0.05)
+                        comparing Average vs. Pregnant women across all 5 PFAS.
+                      </li>
+                      <li>
+                        <strong>Q2 & H₀ 2 (Body Burden):</strong> Calibrated modeled exposure
+                        horizons: <strong>22 years</strong> for Average and{' '}
+                        <strong>19 years</strong> for Pregnant women (NDHS data).
+                      </li>
+                      <li>
+                        <strong>Q3 & H₀ 3 (Sensitivity):</strong> Global sensitivity on steady-state
+                        serum concentration (Css) using Partial Rank Correlation Coefficients (PRCC,
+                        |PRCC| ≥ 0.10, p &lt; 0.05).
+                      </li>
+                      <li>
+                        <strong>Q4 & H₀ 4 (Health Risk):</strong> EPA RfD-based Hazard Quotient (HQ
+                        4.1 to 4.5), combined Hazard Index (HI 4.6), % exceeding 1.0, and one-sided
+                        Wilcoxon signed-rank test against 1.0.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-200 mt-4">
               <div className="flex items-center gap-3 font-mono text-xs">
@@ -315,7 +542,7 @@ export const ComparePage: React.FC = () => {
                 size="md"
                 icon={<ArrowRightLeft className="w-4 h-4" />}
               >
-                Execute cohort hypothesis tests (H₀ 1 & H₀ 2)
+                Execute full study SOP & hypothesis tests (H₀ 1, H₀ 2, H₀ 3, H₀ 4)
               </Button>
             </div>
           </div>
@@ -376,7 +603,9 @@ export const ComparePage: React.FC = () => {
                   Average Filipino Woman Profile
                 </span>
                 <ul className="space-y-0.5 text-[11px] text-slate-600">
-                  <li>• Chronic Exposure Horizon: <strong>22 years</strong></li>
+                  <li>
+                    • Chronic Exposure Horizon: <strong>22 years</strong>
+                  </li>
                   <li>• Baseline Body Mass: 55.4 kg (±8.2 kg)</li>
                   <li>• Daily Water Intake: 2.0 L/day (mode)</li>
                 </ul>
@@ -386,7 +615,9 @@ export const ComparePage: React.FC = () => {
                   Pregnant Female Cohort Profile
                 </span>
                 <ul className="space-y-0.5 text-[11px] text-slate-600">
-                  <li>• Pre-Gestational Exposure: <strong>19 years</strong></li>
+                  <li>
+                    • Pre-Gestational Exposure: <strong>19 years</strong>
+                  </li>
                   <li>• Baseline Body Mass: 65.2 kg (plasma volume expansion)</li>
                   <li>• Daily Water Intake: 2.8 L/day (increased fluid demands)</li>
                 </ul>
@@ -399,10 +630,12 @@ export const ComparePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
               <div>
                 <h2 className="text-base font-bold text-slate-900 font-heading">
-                  Hypothesis 1: Steady-State Serum Concentration (<MathView math="C_{ss}" />) Differences
+                  Hypothesis 1: Steady-State Serum Concentration (<MathView math="C_{ss}" />)
+                  Differences
                 </h2>
                 <p className="text-slate-500 text-xs">
-                  H₀ 1: No significant difference in Css between cohorts | Two-Sided Mann-Whitney U Test (α = 0.05)
+                  H₀ 1: No significant difference in Css between cohorts | Two-Sided Mann-Whitney U
+                  Test (α = 0.05)
                 </p>
               </div>
               <span className="text-[11px] text-slate-500 font-mono">
@@ -433,13 +666,15 @@ export const ComparePage: React.FC = () => {
                       <td className="py-3 px-3 font-mono">
                         <span className="font-bold text-blue-900">{row.avgMedian.toFixed(4)}</span>{' '}
                         <span className="text-[10px] text-slate-400">
-                          [{row.avgP25.toFixed(4)} – {row.avgP75.toFixed(4)}] {row.unit}
+                          [{row.avgP25.toFixed(4)} to {row.avgP75.toFixed(4)}] {row.unit}
                         </span>
                       </td>
                       <td className="py-3 px-3 font-mono">
-                        <span className="font-bold text-purple-900">{row.pregMedian.toFixed(4)}</span>{' '}
+                        <span className="font-bold text-purple-900">
+                          {row.pregMedian.toFixed(4)}
+                        </span>{' '}
                         <span className="text-[10px] text-slate-400">
-                          [{row.pregP25.toFixed(4)} – {row.pregP75.toFixed(4)}] {row.unit}
+                          [{row.pregP25.toFixed(4)} to {row.pregP75.toFixed(4)}] {row.unit}
                         </span>
                       </td>
                       <td className="py-3 px-3 font-mono text-slate-700">
@@ -490,7 +725,8 @@ export const ComparePage: React.FC = () => {
                   Hypothesis 2: Cumulative Body Burden (<MathView math="B(t)" />) Differences
                 </h2>
                 <p className="text-slate-500 text-xs">
-                  H₀ 2: No significant difference in body burden over modeled exposure (22 yrs vs. 19 yrs) | Two-Sided Mann-Whitney U Test (α = 0.05)
+                  H₀ 2: Cumulative body burden does not differ significantly between cohorts over
+                  modeled exposure (22 yrs vs. 19 yrs) | Two-Sided Mann-Whitney U Test (α = 0.05)
                 </p>
               </div>
               <span className="text-[11px] text-slate-500 font-mono">
@@ -521,13 +757,15 @@ export const ComparePage: React.FC = () => {
                       <td className="py-3 px-3 font-mono">
                         <span className="font-bold text-slate-900">{row.avgMedian.toFixed(3)}</span>{' '}
                         <span className="text-[10px] text-slate-400">
-                          [{row.avgP25.toFixed(3)} – {row.avgP75.toFixed(3)}] {row.unit}
+                          [{row.avgP25.toFixed(3)} to {row.avgP75.toFixed(3)}] {row.unit}
                         </span>
                       </td>
                       <td className="py-3 px-3 font-mono">
-                        <span className="font-bold text-purple-900">{row.pregMedian.toFixed(3)}</span>{' '}
+                        <span className="font-bold text-purple-900">
+                          {row.pregMedian.toFixed(3)}
+                        </span>{' '}
                         <span className="text-[10px] text-slate-400">
-                          [{row.pregP25.toFixed(3)} – {row.pregP75.toFixed(3)}] {row.unit}
+                          [{row.pregP25.toFixed(3)} to {row.pregP75.toFixed(3)}] {row.unit}
                         </span>
                       </td>
                       <td className="py-3 px-3 font-mono text-slate-700">
@@ -569,6 +807,255 @@ export const ComparePage: React.FC = () => {
               </table>
             </div>
           </div>
+
+          {/* Hypothesis 3 Table: Parameter Sensitivity Analysis (PRCC on Css) */}
+          <div className="card-panel p-6 rounded-2xl space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Flame className="w-4 h-4 text-amber-600" />
+                  <h2 className="text-base font-bold text-slate-900 font-heading">
+                    Hypothesis 3: Parameter Sensitivity Analysis (PRCC on <MathView math="C_{ss}" />
+                    )
+                  </h2>
+                </div>
+                <p className="text-slate-500 text-xs mt-0.5">
+                  H₀ 3: No TK parameter has a significant monotonic effect on steady-state serum
+                  concentration (<MathView math="C_{ss}" />) (|PRCC| &lt; 0.10 or p &ge; 0.05) vs.
+                  H₁ 3: At least one parameter has a significant effect (|PRCC| &ge; 0.10 and p &lt;
+                  0.05).
+                </p>
+              </div>
+              <span className="text-[11px] text-slate-500 font-mono">
+                Student&apos;s t-test (df = N - k - 1)
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 text-[11px]">
+                    <th className="py-2.5 px-3 font-semibold">Model Parameter</th>
+                    <th className="py-2.5 px-3 font-semibold">Average Cohort PRCC</th>
+                    <th className="py-2.5 px-3 font-semibold">Average t-stat (p-val)</th>
+                    <th className="py-2.5 px-3 font-semibold">Average Decision</th>
+                    <th className="py-2.5 px-3 font-semibold">Pregnant Cohort PRCC</th>
+                    <th className="py-2.5 px-3 font-semibold">Pregnant t-stat (p-val)</th>
+                    <th className="py-2.5 px-3 font-semibold">Pregnant Decision</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {cohortResults.h3Rows.map((row) => (
+                    <tr key={row.parameterId} className="hover:bg-slate-50/70">
+                      <td className="py-3 px-3 font-bold text-slate-900 font-sans">
+                        {row.parameterName}
+                      </td>
+                      <td className="py-3 px-3 font-mono">
+                        <span
+                          className={`font-bold ${
+                            row.avgIsSignificant
+                              ? row.avgPRCC >= 0
+                                ? 'text-teal-700'
+                                : 'text-red-700'
+                              : 'text-slate-600'
+                          }`}
+                        >
+                          {row.avgPRCC.toFixed(4)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono text-slate-600">
+                        t = {row.avgTStat.toFixed(2)}{' '}
+                        <span className="text-[10px] text-slate-400">
+                          ({row.avgPValue < 0.001 ? 'p < 0.001' : `p = ${row.avgPValue.toFixed(4)}`}
+                          )
+                        </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        {row.avgIsSignificant ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            Reject H₀ 3 (Significant)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                            Fail to Reject H₀ 3
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 font-mono">
+                        <span
+                          className={`font-bold ${
+                            row.pregIsSignificant
+                              ? row.pregPRCC >= 0
+                                ? 'text-teal-700'
+                                : 'text-red-700'
+                              : 'text-slate-600'
+                          }`}
+                        >
+                          {row.pregPRCC.toFixed(4)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono text-slate-600">
+                        t = {row.pregTStat.toFixed(2)}{' '}
+                        <span className="text-[10px] text-slate-400">
+                          (
+                          {row.pregPValue < 0.001
+                            ? 'p < 0.001'
+                            : `p = ${row.pregPValue.toFixed(4)}`}
+                          )
+                        </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        {row.pregIsSignificant ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            Reject H₀ 3 (Significant)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                            Fail to Reject H₀ 3
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Hypothesis 4 Table: Health Risk Level & Population Exceedance */}
+          <div className="card-panel p-6 rounded-2xl space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-red-600" />
+                  <h2 className="text-base font-bold text-slate-900 font-heading">
+                    Hypothesis 4 & SOP Question 4: Health Risk Level & Population Exceedance (% &gt;
+                    1.0)
+                  </h2>
+                </div>
+                <p className="text-slate-500 text-xs mt-0.5">
+                  H₀ 4: Median HQ of each PFAS and median mixture HI do not exceed 1.0 based on EPA
+                  RfD | One-Sided Wilcoxon Signed-Rank Test (α = 0.05 against 1.0)
+                </p>
+              </div>
+              <span className="text-[11px] text-slate-500 font-mono">
+                Threshold: HQ &gt; 1.0 / HI &gt; 1.0
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 text-[11px]">
+                    <th className="py-2.5 px-3 font-semibold">Classification & Chemical</th>
+                    <th className="py-2.5 px-3 font-semibold">Reference Benchmark</th>
+                    <th className="py-2.5 px-3 font-semibold">Average Median HQ (Mean)</th>
+                    <th className="py-2.5 px-3 font-semibold">Average % &gt; 1.0</th>
+                    <th className="py-2.5 px-3 font-semibold">Average H₀ 4 Wilcoxon</th>
+                    <th className="py-2.5 px-3 font-semibold">Pregnant Median HQ (Mean)</th>
+                    <th className="py-2.5 px-3 font-semibold">Pregnant % &gt; 1.0</th>
+                    <th className="py-2.5 px-3 font-semibold">Pregnant H₀ 4 Wilcoxon</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {cohortResults.h4Rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className={`hover:bg-slate-50/70 ${
+                        row.id === 'mixture-hi' ? 'bg-purple-50/30 font-semibold' : ''
+                      }`}
+                    >
+                      <td className="py-3 px-3 font-bold text-slate-900 font-sans">
+                        <span className="text-slate-500 font-mono text-[10px] mr-1.5">
+                          {row.sopId}
+                        </span>
+                        {row.name}
+                      </td>
+                      <td className="py-3 px-3 font-mono text-slate-600 text-[11px]">
+                        {row.benchmark}
+                      </td>
+                      <td className="py-3 px-3 font-mono">
+                        <span className="font-bold text-slate-900">
+                          {row.avgMedianHQ.toFixed(3)}
+                        </span>{' '}
+                        <span className="text-[10px] text-slate-400">
+                          ({row.avgMeanHQ.toFixed(3)})
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono">
+                        <span
+                          className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
+                            row.avgExceedancePercent > 5
+                              ? 'bg-red-50 text-red-700 border border-red-200'
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          }`}
+                        >
+                          {row.avgExceedancePercent.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        {row.avgWilcoxon.isSignificantRisk ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">
+                            <CheckCircle2 className="w-3 h-3 text-red-600" />
+                            Reject H₀ 4 (Risk)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                            Fail to Reject H₀ 4
+                          </span>
+                        )}
+                        <span className="block text-[9px] text-slate-400 font-mono mt-0.5">
+                          {row.avgWilcoxon.pValue < 0.001
+                            ? 'p < 0.001'
+                            : `p = ${row.avgWilcoxon.pValue.toFixed(4)}`}{' '}
+                          (Z={row.avgWilcoxon.zScore.toFixed(2)})
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono">
+                        <span className="font-bold text-purple-900">
+                          {row.pregMedianHQ.toFixed(3)}
+                        </span>{' '}
+                        <span className="text-[10px] text-slate-400">
+                          ({row.pregMeanHQ.toFixed(3)})
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 font-mono">
+                        <span
+                          className={`font-bold px-1.5 py-0.5 rounded text-[10px] ${
+                            row.pregExceedancePercent > 5
+                              ? 'bg-red-50 text-red-700 border border-red-200'
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          }`}
+                        >
+                          {row.pregExceedancePercent.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-3">
+                        {row.pregWilcoxon.isSignificantRisk ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">
+                            <CheckCircle2 className="w-3 h-3 text-red-600" />
+                            Reject H₀ 4 (Risk)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-50 text-slate-600 border border-slate-200">
+                            Fail to Reject H₀ 4
+                          </span>
+                        )}
+                        <span className="block text-[9px] text-slate-400 font-mono mt-0.5">
+                          {row.pregWilcoxon.pValue < 0.001
+                            ? 'p < 0.001'
+                            : `p = ${row.pregWilcoxon.pValue.toFixed(4)}`}{' '}
+                          (Z={row.pregWilcoxon.zScore.toFixed(2)})
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
 
@@ -590,32 +1077,48 @@ export const ComparePage: React.FC = () => {
 
               <div className="space-y-2 text-slate-700">
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Mean Serum <MathView math="C_{ss}" />
-                  </span>
-                  <span className="text-teal-800 font-bold">
+                  <div>
+                    <span className="block">
+                      Mean Serum <MathView math="C_{ss}" />
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Expected central value
+                    </span>
+                  </div>
+                  <span className="text-teal-800 font-bold self-center">
                     {comparison.mcStats.mean.toFixed(4)} µg/L
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Std Dev (<MathView math="\sigma" />)
-                  </span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">
+                      Std Dev (<MathView math="\sigma" />)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">Spread around mean</span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     {comparison.mcStats.stdDev.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Variance (<MathView math="\sigma^2" />)
-                  </span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">
+                      Variance (<MathView math="\sigma^2" />)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">Squared dispersion</span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     {comparison.mcStats.variance.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>95% CI</span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">95% Mean CI</span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Confidence interval
+                    </span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     [{comparison.mcStats.ci95Lower.toFixed(3)},{' '}
                     {comparison.mcStats.ci95Upper.toFixed(3)}]
                   </span>
@@ -637,32 +1140,46 @@ export const ComparePage: React.FC = () => {
 
               <div className="space-y-2 text-slate-700">
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Mean Serum <MathView math="C_{ss}" />
-                  </span>
-                  <span className="text-purple-800 font-bold">
+                  <div>
+                    <span className="block">
+                      Mean Serum <MathView math="C_{ss}" />
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Expected central value
+                    </span>
+                  </div>
+                  <span className="text-purple-800 font-bold self-center">
                     {comparison.lhsStats.mean.toFixed(4)} µg/L
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Std Dev (<MathView math="\sigma" />)
-                  </span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">
+                      Std Dev (<MathView math="\sigma" />)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">Spread around mean</span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     {comparison.lhsStats.stdDev.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Variance (<MathView math="\sigma^2" />)
-                  </span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">
+                      Variance (<MathView math="\sigma^2" />)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">Reduced variance</span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     {comparison.lhsStats.variance.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>95% CI</span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">95% Mean CI</span>
+                    <span className="text-[10px] text-slate-400 font-sans">Tighter confidence</span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     [{comparison.lhsStats.ci95Lower.toFixed(3)},{' '}
                     {comparison.lhsStats.ci95Upper.toFixed(3)}]
                   </span>
@@ -675,7 +1192,9 @@ export const ComparePage: React.FC = () => {
               <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
                   <GitMerge className="w-4 h-4 text-blue-700" />
-                  <h2 className="text-sm font-bold text-slate-900 font-heading">Monte Carlo + LHS</h2>
+                  <h2 className="text-sm font-bold text-slate-900 font-heading">
+                    Monte Carlo + LHS
+                  </h2>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 text-[10px] font-semibold border border-blue-200">
                   {comparison.mcLhsRuntimeMs} ms
@@ -684,32 +1203,50 @@ export const ComparePage: React.FC = () => {
 
               <div className="space-y-2 text-slate-700">
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Mean Serum <MathView math="C_{ss}" />
-                  </span>
-                  <span className="text-blue-800 font-bold">
+                  <div>
+                    <span className="block">
+                      Mean Serum <MathView math="C_{ss}" />
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Expected central value
+                    </span>
+                  </div>
+                  <span className="text-blue-800 font-bold self-center">
                     {comparison.mcLhsStats?.mean.toFixed(4)} µg/L
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Std Dev (<MathView math="\sigma" />)
-                  </span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">
+                      Std Dev (<MathView math="\sigma" />)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">Spread around mean</span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     {comparison.mcLhsStats?.stdDev.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>
-                    Variance (<MathView math="\sigma^2" />)
-                  </span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">
+                      Variance (<MathView math="\sigma^2" />)
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Balanced dispersion
+                    </span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     {comparison.mcLhsStats?.variance.toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span>95% CI</span>
-                  <span className="text-slate-900 font-bold">
+                  <div>
+                    <span className="block">95% Mean CI</span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Confidence interval
+                    </span>
+                  </div>
+                  <span className="text-slate-900 font-bold self-center">
                     [{comparison.mcLhsStats?.ci95Lower.toFixed(3)},{' '}
                     {comparison.mcLhsStats?.ci95Upper.toFixed(3)}]
                   </span>
