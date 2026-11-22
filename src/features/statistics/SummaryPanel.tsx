@@ -11,7 +11,7 @@ import { MathView } from '../../components/ui/MathView';
 interface SummaryPanelProps {
   summaryStats: SummaryStatistics | null;
   sensitivityRanks: SensitivityRank[];
-  samplingMethod: string;
+  samplingMethod?: string;
   compoundId?: string;
   results?: IterationResult[] | null;
   parameters?: SimulationParameters;
@@ -21,7 +21,6 @@ interface SummaryPanelProps {
 export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   summaryStats,
   sensitivityRanks,
-  samplingMethod,
   compoundId = 'pfoa',
   results,
   parameters,
@@ -43,53 +42,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
     }
     return [];
   }, [storeCompoundSummaries, results, parameters]);
-
-  const highestCompound = useMemo(() => {
-    if (!multiCompoundSummaries || multiCompoundSummaries.length === 0) return null;
-    return multiCompoundSummaries.reduce((highest, current) => {
-      return current.meanCss > highest.meanCss ? current : highest;
-    }, multiCompoundSummaries[0]);
-  }, [multiCompoundSummaries]);
-
-  const highestCompoundStats = useMemo(() => {
-    if (!highestCompound) return null;
-    if (!results || results.length === 0) {
-      return {
-        meanCss: highestCompound.meanCss,
-        ci95Lower: summaryStats?.ci95Lower ?? 0,
-        ci95Upper: summaryStats?.ci95Upper ?? 0,
-      };
-    }
-
-    const count = results.length;
-    let sum = 0;
-    const values: number[] = new Array(count);
-    const cId = highestCompound.compoundId;
-
-    for (let i = 0; i < count; i++) {
-      const val = results[i].compoundOutputs?.[cId]?.steadyStateConcentration ?? results[i].steadyStateConcentration;
-      values[i] = val;
-      sum += val;
-    }
-
-    const mean = sum / count;
-    let varianceSum = 0;
-    for (let i = 0; i < count; i++) {
-      const diff = values[i] - mean;
-      varianceSum += diff * diff;
-    }
-    const variance = count > 1 ? varianceSum / (count - 1) : 0;
-    const stdDev = Math.sqrt(variance);
-    const stdError = stdDev / Math.sqrt(count);
-    const ci95Lower = Math.max(0, mean - 1.96 * stdError);
-    const ci95Upper = mean + 1.96 * stdError;
-
-    return {
-      meanCss: mean,
-      ci95Lower,
-      ci95Upper,
-    };
-  }, [highestCompound, results, summaryStats]);
 
   const exceedanceStats = useMemo(() => {
     if (!results || results.length === 0 || !parameters) return null;
@@ -113,59 +65,8 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   const isHighRisk = summaryStats.riskExceedancePercent > 5;
 
-  const getMethodBadge = () => {
-    if (samplingMethod === 'monte-carlo') return 'MONTE CARLO';
-    if (samplingMethod === 'latin-hypercube') return 'LATIN HYPERCUBE';
-    if (samplingMethod === 'monte-carlo-lhs') return 'MC + LHS';
-    return samplingMethod.toUpperCase();
-  };
-
-  const displayMeanCss = isSimpleMode && highestCompound ? highestCompound.meanCss : summaryStats.mean;
-  const displayCiLower = isSimpleMode && highestCompoundStats ? highestCompoundStats.ci95Lower : summaryStats.ci95Lower;
-  const displayCiUpper = isSimpleMode && highestCompoundStats ? highestCompoundStats.ci95Upper : summaryStats.ci95Upper;
-
   return (
     <div className="w-full space-y-4 font-mono text-xs">
-      {/* Primary Top KPI Card */}
-      <div className="card-panel-teal p-4 rounded-xl space-y-2 relative overflow-hidden">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] text-slate-600 uppercase tracking-wider font-bold">
-            {isSimpleMode ? 'Multi-PFAS Simulation' : `Expected Mean Serum (${activeCompound.name.split(' ')[0]})`}
-          </span>
-          <div className="flex items-center gap-1.5">
-            {isSimpleMode && highestCompound && (
-              <span className="px-2 py-0.5 rounded bg-teal-100/90 text-teal-900 border border-teal-200 text-[10px] font-bold">
-                Highest: {highestCompound.compoundName.split(' ')[0]}
-              </span>
-            )}
-            <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-[10px] font-bold">
-              {isSimpleMode ? '100K MC + LHS' : getMethodBadge()}
-            </span>
-          </div>
-        </div>
-
-        <div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-heading">
-            {displayMeanCss.toFixed(4)} <span className="text-sm font-medium text-teal-700">µg/L</span>
-          </div>
-          {isSimpleMode && highestCompound && (
-            <div className="text-[11px] text-teal-800 font-medium flex flex-wrap items-center gap-x-1 mt-0.5">
-              <span>Highest Serum <MathView math="C_{ss}" />:</span>
-              <span className="font-bold text-slate-900 font-sans">{highestCompound.compoundName}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="text-[11px] text-slate-600 flex items-center justify-between pt-0.5">
-          <span className="text-teal-800 font-semibold">
-            N = {summaryStats.count.toLocaleString()} iterations
-          </span>
-          <span className="text-slate-500">
-            95% CI: [{displayCiLower.toFixed(3)} to {displayCiUpper.toFixed(3)}]
-          </span>
-        </div>
-      </div>
-
       {/* Health Risk & Hazard Quotient Card */}
       <div className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}>
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
@@ -217,14 +118,14 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
         )}
       </div>
 
-      {/* Revamped Critical Burden & Exceedance Matrix: Simple Mode (All 5 PFAS Types) */}
+      {/* Simple Mode: Compound Summaries (Average Css & Body Burden) */}
       {isSimpleMode && multiCompoundSummaries.length > 0 ? (
         <div className="card-panel p-4 rounded-xl space-y-3">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div className="flex items-center gap-1.5">
               <Scale className="w-4 h-4 text-slate-700" />
               <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                Critical burden and exceedance per PFAS
+                Average <MathView math="C_{ss}" /> and body burden per PFAS
               </span>
             </div>
             {onOpenExceedanceAnalyzer && (
@@ -242,69 +143,35 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             {multiCompoundSummaries.map((summary) => (
               <div
                 key={summary.compoundId}
-                className={`p-3 rounded-lg border text-[11px] space-y-2 ${
-                  summary.status === 'exceeded'
-                    ? 'bg-red-50/40 border-red-200/80'
-                    : summary.status === 'borderline'
-                    ? 'bg-amber-50/40 border-amber-200/80'
-                    : 'bg-slate-50/70 border-slate-200'
-                }`}
+                className="p-3 rounded-lg border border-slate-200 bg-slate-50/70 text-[11px] space-y-2"
               >
                 {/* Compound Header */}
                 <div className="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-slate-900 font-sans">{summary.compoundName.split(' ')[0]}</span>
+                    <span className="font-bold text-slate-900 font-sans" title={summary.compoundName}>
+                      {summary.compoundName.split(' ')[0]}
+                    </span>
                     <span className="text-[10px] text-slate-500 font-mono">
                       (T1/2 = {summary.halfLifeYears} yrs)
                     </span>
-                    {highestCompound && summary.compoundId === highestCompound.compoundId && (
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-teal-100 text-teal-800 border border-teal-200">
-                        Highest C<sub>ss</sub>
-                      </span>
-                    )}
                   </div>
-                  <span
-                    className={`px-1.5 py-0.2 rounded text-[9px] font-bold border ${
-                      summary.status === 'exceeded'
-                        ? 'bg-red-100 text-red-800 border-red-200'
-                        : summary.status === 'borderline'
-                        ? 'bg-amber-100 text-amber-800 border-amber-200'
-                        : 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                    }`}
-                  >
-                    {summary.status === 'exceeded' ? 'Exceeds limit' : summary.status === 'borderline' ? 'Elevated' : 'Safe'}
-                  </span>
                 </div>
 
-                {/* 2-Column Side-by-Side: Mean Css beside Average Body Burden */}
+                {/* 2-Column Side-by-Side: Average Css beside Average Body Burden */}
                 <div className="grid grid-cols-2 gap-2 pt-0.5">
-                  {/* Left Column: Mean Css & Exceeding Range */}
+                  {/* Left Column: Average Css */}
                   <div className="space-y-1 bg-white/70 p-2 rounded border border-slate-200/70">
-                    <div className="text-[10px] text-slate-500">Mean Serum <MathView math="C_{ss}" />:</div>
+                    <div className="text-[10px] text-slate-500">Average Serum <MathView math="C_{ss}" />:</div>
                     <div className="font-bold text-blue-900 font-mono text-xs">
                       {summary.meanCss.toFixed(4)} <span className="text-[10px] text-slate-500 font-normal">µg/L</span>
                     </div>
-                    <div className="pt-1 border-t border-slate-100 text-[10px]">
-                      <span className="text-slate-500 block">Exceeding Serum <MathView math="C_{ss}" />:</span>
-                      <span className={`font-semibold font-mono ${summary.exceedingSerumMax > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
-                        {summary.exceedingSerumMax > 0
-                          ? `[${summary.exceedingSerumMin.toFixed(4)} to ${summary.exceedingSerumMax.toFixed(4)}] µg/L`
-                          : 'None'}
-                      </span>
-                    </div>
                   </div>
 
-                  {/* Right Column: Average Body Burden & Critical Limit */}
+                  {/* Right Column: Average Body Burden */}
                   <div className="space-y-1 bg-white/70 p-2 rounded border border-slate-200/70">
-                    <div className="text-[10px] text-slate-500">Avg Body Burden <MathView math="B(t)" />:</div>
-                    <div className={`font-bold font-mono text-xs ${summary.isBurdenExceeded ? 'text-red-700' : 'text-slate-900'}`}>
+                    <div className="text-[10px] text-slate-500">Average Body Burden <MathView math="B(t)" />:</div>
+                    <div className="font-bold font-mono text-xs text-slate-900">
                       {summary.meanBodyBurden.toFixed(3)} <span className="text-[10px] text-slate-500 font-normal">µg</span>
-                    </div>
-                    <div className="pt-1 border-t border-slate-100 text-[10px]">
-                      <span className="text-slate-500 block">Critical Burden Limit:</span>
-                      <span className="text-slate-800 font-semibold font-mono">
-                        {summary.criticalBodyBurden.toFixed(3)} µg
-                      </span>
                     </div>
                   </div>
                 </div>
