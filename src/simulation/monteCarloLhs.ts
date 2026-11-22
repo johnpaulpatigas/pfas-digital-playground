@@ -17,7 +17,7 @@ export function runMonteCarloLhsSimulation(
   const lhsCount = iterations - mcCount;
 
   const mcResults = runMonteCarloSimulation(parameters, mcCount, seed, compoundId);
-  const lhsResults = runLatinHypercubeSimulation(parameters, lhsCount, seed + 100000, compoundId);
+  const lhsResults = runLatinHypercubeSimulation(parameters, lhsCount, seed + 1, compoundId);
 
   const combined: IterationResult[] = [];
   const maxLen = Math.max(mcResults.length, lhsResults.length);

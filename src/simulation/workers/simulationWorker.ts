@@ -44,7 +44,7 @@ export interface SimulationWorkerResponse {
 }
 
 self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
-  const { id, type, parameters, samplingConfig, iterations = 100000 } = event.data;
+  const { id, type, parameters, samplingConfig, iterations = 25000 } = event.data;
 
   try {
     if (type === 'RUN_SIMULATION' && samplingConfig) {
