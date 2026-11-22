@@ -114,6 +114,16 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                     <div className="font-bold text-blue-900 font-mono text-xs">
                       {summary.meanCss.toFixed(4)} <span className="text-[10px] text-slate-500 font-normal">µg/L</span>
                     </div>
+                    {!isSimpleMode && (
+                      <div className="pt-1 border-t border-slate-100 text-[10px]">
+                        <span className="text-slate-500 block">Exceeding Serum <MathView math="C_{ss}" />:</span>
+                        <span className={`font-semibold font-mono break-words leading-tight block ${summary.exceedingSerumMax > 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+                          {summary.exceedingSerumMax > 0
+                            ? `[${summary.exceedingSerumMin.toFixed(4)} to ${summary.exceedingSerumMax.toFixed(4)}] µg/L`
+                            : 'None'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column: Average Body Burden */}
@@ -122,6 +132,14 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                     <div className="font-bold font-mono text-xs text-slate-900">
                       {summary.meanBodyBurden.toFixed(3)} <span className="text-[10px] text-slate-500 font-normal">µg</span>
                     </div>
+                    {!isSimpleMode && (
+                      <div className="pt-1 border-t border-slate-100 text-[10px]">
+                        <span className="text-slate-500 block">Critical Burden Limit:</span>
+                        <span className="text-slate-800 font-semibold font-mono block">
+                          {summary.criticalBodyBurden.toFixed(3)} µg
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
