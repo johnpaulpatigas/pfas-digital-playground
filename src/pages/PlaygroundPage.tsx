@@ -5,10 +5,8 @@ import {
   ChevronDown,
   Clock,
   Download,
-  ExternalLink,
   FileSpreadsheet,
   Flame,
-  GraduationCap,
   LineChart as LineChartIcon,
   ScatterChart as ScatterIcon,
   Sparkles,
@@ -17,7 +15,6 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { MathView } from '../components/ui/MathView';
 import { CDFChart } from '../features/charts/CDFChart';
@@ -267,16 +264,6 @@ export const PlaygroundPage: React.FC = () => {
             Parameter guide
           </Button>
 
-          <Link to="/guide">
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={<GraduationCap className="w-3.5 h-3.5 text-blue-600" />}
-            >
-              Scientific guide
-            </Button>
-          </Link>
-
           <Button
             variant="secondary"
             size="sm"
@@ -386,18 +373,9 @@ export const PlaygroundPage: React.FC = () => {
                     className="overflow-hidden"
                   >
                     <div className="pt-2.5 border-t border-slate-200/60 bg-blue-50/50 p-3 rounded-md border border-blue-100/80 text-[11px] space-y-2 mt-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 text-blue-900 font-bold font-sans text-[11px]">
-                          <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          <span>Specific indicators to look for:</span>
-                        </div>
-                        <Link
-                          to="/guide"
-                          className="text-[10.5px] text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 transition-colors"
-                        >
-                          <span>Full scientific guide</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </Link>
+                      <div className="flex items-center gap-1.5 text-blue-900 font-bold font-sans text-[11px]">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                        <span>Specific indicators to look for:</span>
                       </div>
                       <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700 text-[10.5px] font-sans list-disc list-inside">
                         {activeTabMeta.whatToLookFor.map((item, idx) => (
@@ -670,7 +648,6 @@ export const PlaygroundPage: React.FC = () => {
             compoundId={samplingConfig.compoundId}
             results={results}
             parameters={parameters}
-            onOpenExceedanceAnalyzer={() => setActiveTab('thresholds')}
           />
         </div>
       </div>

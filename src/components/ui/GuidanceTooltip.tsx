@@ -18,7 +18,7 @@ export const GuidanceTooltip: React.FC<GuidanceTooltipProps> = ({
   items,
   summary,
   guideLink = '/guide',
-  guideText = 'Read full scientific guide',
+  guideText = 'Scientific guide',
   buttonLabel,
   align = 'right',
 }) => {

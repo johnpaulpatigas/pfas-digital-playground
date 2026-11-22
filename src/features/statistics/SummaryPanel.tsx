@@ -2,7 +2,6 @@ import {
   Activity,
   AlertTriangle,
   Award,
-  ChevronRight,
   Cpu,
   Scale,
   ShieldAlert,
@@ -34,7 +33,6 @@ interface SummaryPanelProps {
   compoundId?: string;
   results?: IterationResult[] | null;
   parameters?: SimulationParameters;
-  onOpenExceedanceAnalyzer?: () => void;
 }
 
 export const SummaryPanel: React.FC<SummaryPanelProps> = ({
@@ -43,7 +41,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   compoundId = 'pfoa',
   results,
   parameters,
-  onOpenExceedanceAnalyzer,
 }) => {
   const { mode, compoundSummaries: storeCompoundSummaries } = useSimulationStore();
   const isSimpleMode = mode === 'simple';
@@ -106,15 +103,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 Average <MathView math="C_{ss}" /> and body burden per PFAS
               </span>
             </div>
-            {onOpenExceedanceAnalyzer && (
-              <button
-                onClick={onOpenExceedanceAnalyzer}
-                className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
-              >
-                <span>Analyzer</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            )}
           </div>
 
           <div className="space-y-2.5">
@@ -212,7 +200,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 'Target HQ > 1.0 %: Percentage of simulated iterations where daily intake per kg body weight exceeds the RfD for this compound.',
                 'Mixture Hazard Index (HI): Sum of Hazard Quotients across all 5 PFAS compounds (∑ HQ_i). HI > 1.0 indicates combined exposure exceeds the cumulative threshold even if individual compounds are below 1.0.',
               ]}
-              guideLink="/guide"
               align="right"
             />
           </div>
@@ -259,15 +246,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 Critical burden and exceedance ({activeCompound.name.split(' ')[0]})
               </span>
             </div>
-            {onOpenExceedanceAnalyzer && (
-              <button
-                onClick={onOpenExceedanceAnalyzer}
-                className="flex items-center gap-0.5 text-[10px] font-semibold text-blue-600 hover:text-blue-800 cursor-pointer"
-              >
-                <span>Analyzer</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            )}
           </div>
 
           <div className="space-y-1.5 text-[11px]">
@@ -418,7 +396,6 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                 'Spearman Rank (ρ): Values near +1.0 indicate positive drivers (e.g. higher water intake increases serum concentration); values near -1.0 indicate inverse relationships (e.g. higher body weight dilutes dose across volume).',
                 'Application: Shows which parameter change produces the largest reduction in serum concentration.',
               ]}
-              guideLink="/guide"
               align="right"
             />
           </div>
