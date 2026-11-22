@@ -67,59 +67,8 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   return (
     <div className="w-full space-y-4 font-mono text-xs">
-      {/* Health Risk & Hazard Quotient Card */}
-      <div className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}>
-        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-          <div className="flex items-center gap-1.5">
-            {isHighRisk ? (
-              <AlertTriangle className="w-4 h-4 text-red-600" />
-            ) : (
-              <ShieldCheck className="w-4 h-4 text-blue-600" />
-            )}
-            <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-              Health risk quotient (HQ)
-            </span>
-            <Link
-              to="/guide"
-              title="Read scientific guide on health risk assessment and HQ"
-              className="text-slate-400 hover:text-blue-600 transition-colors p-0.5"
-            >
-              <Info className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <span
-            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-              isHighRisk
-                ? 'bg-red-50 text-red-700 border-red-200'
-                : 'bg-blue-50 text-blue-700 border-blue-200'
-            }`}
-          >
-            Mean HQ = {summaryStats.meanHazardQuotient.toFixed(2)}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between text-[11px] text-slate-700">
-          <span>Target ({compoundId.toUpperCase()}) HQ &gt; 1.0:</span>
-          <span className={`font-bold ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
-            {summaryStats.riskExceedancePercent.toFixed(1)}%
-          </span>
-        </div>
-
-        {summaryStats.meanHazardIndex !== undefined && (
-          <div className="flex items-center justify-between text-[11px] text-slate-700 pt-1.5 border-t border-slate-200/60">
-            <span className="text-slate-600">PFAS Mixture Hazard Index (HI):</span>
-            <span className="font-mono font-bold text-slate-800">
-              Mean HI = {summaryStats.meanHazardIndex.toFixed(2)}{' '}
-              <span className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}>
-                ({(summaryStats.mixtureExceedancePercent || 0).toFixed(1)}% &gt; 1.0)
-              </span>
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Simple Mode: Compound Summaries (Average Css & Body Burden) */}
-      {isSimpleMode && multiCompoundSummaries.length > 0 ? (
+      {/* Compound Summaries: Average Css & Body Burden per PFAS (Simple & Advanced) */}
+      {multiCompoundSummaries.length > 0 && (
         <div className="card-panel p-4 rounded-xl space-y-3">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div className="flex items-center gap-1.5">
@@ -179,7 +128,58 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             ))}
           </div>
         </div>
-      ) : null}
+      )}
+
+      {/* Health Risk & Hazard Quotient Card */}
+      <div className={`p-4 rounded-xl ${isHighRisk ? 'card-panel-rose' : 'card-panel-accent'} space-y-2`}>
+        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+          <div className="flex items-center gap-1.5">
+            {isHighRisk ? (
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+            ) : (
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+            )}
+            <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+              Health risk quotient (HQ)
+            </span>
+            <Link
+              to="/guide"
+              title="Read scientific guide on health risk assessment and HQ"
+              className="text-slate-400 hover:text-blue-600 transition-colors p-0.5"
+            >
+              <Info className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <span
+            className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+              isHighRisk
+                ? 'bg-red-50 text-red-700 border-red-200'
+                : 'bg-blue-50 text-blue-700 border-blue-200'
+            }`}
+          >
+            Mean HQ = {summaryStats.meanHazardQuotient.toFixed(2)}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] text-slate-700">
+          <span>Target ({compoundId.toUpperCase()}) HQ &gt; 1.0:</span>
+          <span className={`font-bold ${isHighRisk ? 'text-red-700' : 'text-blue-700'}`}>
+            {summaryStats.riskExceedancePercent.toFixed(1)}%
+          </span>
+        </div>
+
+        {summaryStats.meanHazardIndex !== undefined && (
+          <div className="flex items-center justify-between text-[11px] text-slate-700 pt-1.5 border-t border-slate-200/60">
+            <span className="text-slate-600">PFAS Mixture Hazard Index (HI):</span>
+            <span className="font-mono font-bold text-slate-800">
+              Mean HI = {summaryStats.meanHazardIndex.toFixed(2)}{' '}
+              <span className={`text-[10px] ${(summaryStats.mixtureExceedancePercent || 0) > 5 ? 'text-red-700' : 'text-emerald-700'}`}>
+                ({(summaryStats.mixtureExceedancePercent || 0).toFixed(1)}% &gt; 1.0)
+              </span>
+            </span>
+          </div>
+        )}
+      </div>
 
       {/* Advanced Mode: Single Compound Critical Exceedance Range Card */}
       {!isSimpleMode && exceedanceStats && (
