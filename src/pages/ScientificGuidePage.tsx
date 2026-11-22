@@ -680,6 +680,10 @@ export const ScientificGuidePage: React.FC = () => {
                       <strong>18 to 45 years</strong>
                     </div>
                     <div className="flex justify-between p-2 rounded bg-white border border-slate-200">
+                      <span>Chronic exposure horizon:</span>
+                      <strong>22 years (modeled duration)</strong>
+                    </div>
+                    <div className="flex justify-between p-2 rounded bg-white border border-slate-200">
                       <span>Elimination half-life:</span>
                       <strong>3.2 to 5.4 yrs (PFOA, PFOS, PFNA)</strong>
                     </div>
@@ -718,6 +722,10 @@ export const ScientificGuidePage: React.FC = () => {
                     <div className="flex justify-between p-2 rounded bg-white border border-purple-200">
                       <span>Hemodilution:</span>
                       <strong>+40 to 50% blood plasma volume expansion</strong>
+                    </div>
+                    <div className="flex justify-between p-2 rounded bg-white border border-purple-200">
+                      <span>Pre-gestational exposure:</span>
+                      <strong>19 years (NDHS maternal median)</strong>
                     </div>
                     <div className="flex justify-between p-2 rounded bg-white border border-purple-200">
                       <span>Apparent half-life:</span>

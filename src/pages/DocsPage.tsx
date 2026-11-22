@@ -290,44 +290,41 @@ export const DocsPage: React.FC = () => {
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <Flame className="w-5 h-5 text-amber-600" />
           <h2 className="text-xl font-bold text-slate-900 font-heading">
-            5. Sensitivity and parameter uncertainty
+            5. Sensitivity and parameter uncertainty (PRCC & Spearman Rank)
           </h2>
         </div>
 
         <p className="text-slate-600 text-sm leading-relaxed font-sans">
           Sensitivity analysis measures how much each uncertain input parameter affects predicted
-          serum concentration. Monotonic relationships are evaluated using non-parametric{' '}
-          <strong>Spearman rank correlation</strong>.
+          serum concentration (<MathView math="C_{ss}" />) and body burden. In addition to bivariate{' '}
+          <strong>Spearman rank correlation</strong>, global sensitivity is quantified via{' '}
+          <strong>Partial Rank Correlation Coefficients (PRCC)</strong>, which controls for the
+          covariation of all other <MathView math="k-1" /> model parameters.
         </p>
 
         <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3 font-mono text-xs">
           <h3 className="text-amber-900 font-bold text-sm font-heading">
-            Spearman rank correlation coefficient (<MathView math="\rho" />)
+            Partial Rank Correlation Coefficient (PRCC)
           </h3>
           <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
-            <MathView math="\rho = 1 - \frac{6 \sum_{i=1}^N d_i^2}{N(N^2 - 1)}" block />
+            <MathView
+              math="\text{PRCC}(X_j, Y) = -\frac{B_{j, p}}{\sqrt{B_{j,j} \cdot B_{p,p}}}, \quad B = C^{-1}"
+              block
+            />
           </div>
           <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-            Where <MathView math="d_i" /> represents the rank difference between parameter input{' '}
-            <MathView math="X_i" /> and output serum concentration <MathView math="Y_i" /> for
-            iteration <MathView math="i" />.
+            Where <MathView math="C" /> is the rank correlation matrix of all model parameters and
+            output <MathView math="Y" />, and <MathView math="B" /> is its inverse. Statistical
+            significance is evaluated using Student&apos;s <MathView math="t" />-distribution with{' '}
+            <MathView math="df = N - k - 1" />:
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-slate-700 font-sans text-xs">
-            <div className="p-3 bg-white rounded-lg border border-slate-200">
-              <strong className="text-amber-900 font-mono">
-                Positive drivers (<MathView math="\rho > 0" />
-                ):
-              </strong>{' '}
-              Daily intake, elimination half-life, and GI absorption increase bioaccumulation.
-            </div>
-            <div className="p-3 bg-white rounded-lg border border-slate-200">
-              <strong className="text-blue-900 font-mono">
-                Inversely related drivers (<MathView math="\rho < 0" />
-                ):
-              </strong>{' '}
-              Body weight dilutes internal serum concentration via increased volume of distribution.
-            </div>
+          <div className="text-slate-900 bg-white p-2.5 rounded-lg border border-slate-300 text-center font-semibold text-xs">
+            <MathView math="t = \text{PRCC} \sqrt{\frac{N - k - 1}{1 - \text{PRCC}^2}}" block />
           </div>
+          <p className="text-slate-600 text-[11px] font-sans">
+            A parameter exerts a statistically and biologically meaningful effect (<MathView math="H_1 3" />)
+            when <MathView math="|\text{PRCC}| \ge 0.10" /> and <MathView math="p < 0.05" />.
+          </p>
         </div>
       </section>
 
@@ -351,7 +348,8 @@ export const DocsPage: React.FC = () => {
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               Calibrated from Philippine National Nutrition Council (NNC) health surveys: baseline
               adult body weight of <strong>55.4 kg</strong>, baseline tropical drinking water intake
-              of <strong>2.0 L/day</strong>, and lifetime exposure kinetics.
+              of <strong>2.0 L/day</strong>, and a chronic exposure duration of{' '}
+              <strong>22 years</strong> derived from adult chronological age (NDHS).
             </p>
           </div>
 
@@ -362,9 +360,76 @@ export const DocsPage: React.FC = () => {
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               Models gestational hemodilution (+40 to 50% blood plasma volume expansion), increased
               hydration demands (<strong>2.8 L/day</strong>), gestational mass (
-              <strong>65.2 kg</strong>), and transplacental clearance dynamics shortening maternal
-              serum half-life (<strong>2.4 yrs</strong>).
+              <strong>65.2 kg</strong>), transplacental clearance dynamics shortening maternal
+              serum half-life (<strong>2.4 yrs</strong>), and a pre-gestational chronic exposure
+              horizon of <strong>19 years</strong> based on NDHS median maternal age.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7: Study SOP, Hypotheses, and Inferential Statistics */}
+      <section className="card-panel p-6 sm:p-8 rounded-2xl space-y-6">
+        <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+          <CheckCircle className="w-5 h-5 text-purple-700" />
+          <h2 className="text-xl font-bold text-slate-900 font-heading">
+            7. Statement of the problem, hypotheses, and statistical framework
+          </h2>
+        </div>
+
+        <div className="space-y-4 text-xs font-sans text-slate-700 leading-relaxed">
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+            <h3 className="font-bold text-slate-900 text-sm font-heading">
+              Hypothesis 1 & 2: Cohort Comparison (Two-Sided Mann-Whitney U Test)
+            </h3>
+            <p>
+              To evaluate differences in steady-state serum PFAS concentration (<MathView math="C_{ss}" />)
+              (<strong>H₀ 1</strong>) and cumulative body burden (<MathView math="B(t)" />) over modeled
+              horizons (22 yrs vs. 19 yrs) (<strong>H₀ 2</strong>) between Average and Pregnant Filipino
+              Women:
+            </p>
+            <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
+              <MathView
+                math="U_1 = R_1 - \frac{n_1(n_1 + 1)}{2}, \quad U_2 = n_1 n_2 - U_1, \quad Z = \frac{U_1 - \mu_U}{\sigma_U}"
+                block
+              />
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Evaluated at <MathView math="\alpha = 0.05" /> separately for PFOA, PFOS, PFHxS, PFNA, and
+              GenX (HFPO-DA). Effect size is quantified via rank-biserial correlation <MathView math="r = 1 - \frac{2U}{n_1 n_2}" />.
+            </p>
+          </div>
+
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+            <h3 className="font-bold text-slate-900 text-sm font-heading">
+              Hypothesis 3: Parameter Sensitivity (PRCC)
+            </h3>
+            <p>
+              <strong>H₀ 3</strong>: No TK parameter has a significant monotonic effect on steady-state serum
+              concentration (<MathView math="C_{ss}" />) (<MathView math="|\text{PRCC}| < 0.10" /> or <MathView math="p \ge 0.05" />).
+              <br />
+              <strong>H₁ 3</strong>: At least one TK parameter has a significant monotonic effect on <MathView math="C_{ss}" />.
+            </p>
+          </div>
+
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+            <h3 className="font-bold text-slate-900 text-sm font-heading">
+              Hypothesis 4: Health Risk Level (One-Sample One-Sided Wilcoxon Signed-Rank Test)
+            </h3>
+            <p>
+              <strong>H₀ 4</strong>: The health risk level associated with PFAS exposure is not significant:
+              the median Hazard Quotient (<MathView math="\text{HQ}" />) of each PFAS and the median mixture
+              Hazard Index (<MathView math="\text{HI}" />) do not exceed 1.0 based on EPA oral Reference Doses
+              (<MathView math="\text{RfD}" />).
+              <br />
+              <strong>H₁ 4</strong>: The median HQ or median HI significantly exceeds 1.0 (<MathView math="p < 0.05" />).
+            </p>
+            <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
+              <MathView
+                math="W^+ = \sum_{D_i > 0} \text{rank}(|D_i|), \quad D_i = \text{HQ}_i - 1.0, \quad Z = \frac{W^+ - \mu_W - 0.5}{\sigma_W}"
+                block
+              />
+            </div>
           </div>
         </div>
       </section>
