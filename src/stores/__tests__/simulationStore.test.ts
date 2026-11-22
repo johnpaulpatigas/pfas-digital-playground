@@ -12,7 +12,7 @@ describe('useSimulationStore demographic scenario and simple mode synchronizatio
     expect(state.mode).toBe('simple');
     expect(state.activeScenarioId).toBe('average-filipino-woman');
     expect(state.simpleProfile.bodyWeight).toBe(55.4);
-    expect(state.simpleProfile.age).toBe(30);
+    expect(state.simpleProfile.age).toBe(32);
     expect(state.simpleProfile.waterConsumption).toBe(2.0);
   });
 
@@ -88,7 +88,7 @@ describe('useSimulationStore demographic scenario and simple mode synchronizatio
     const state = useSimulationStore.getState();
     expect(state.activeScenarioId).toBe('average-filipino-woman');
     expect(state.simpleProfile.bodyWeight).toBe(55.4);
-    expect(state.simpleProfile.age).toBe(30);
+    expect(state.simpleProfile.age).toBe(32);
     expect(state.simpleProfile.waterConsumption).toBe(2.0);
   });
 

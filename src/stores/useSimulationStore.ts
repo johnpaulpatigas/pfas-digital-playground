@@ -61,7 +61,7 @@ interface SimulationState {
 const defaultScenario = DEMOGRAPHIC_PRESETS[0];
 const initialSimpleProfile: SimpleProfile = {
   bodyWeight: 55.4,
-  age: 30,
+  age: 32,
   waterConsumption: 2.0,
   waterConcentrationNgL: 20,
 };
