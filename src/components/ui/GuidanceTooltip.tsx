@@ -1,6 +1,6 @@
 import { ExternalLink, Info, Sparkles, X } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export interface GuidanceTooltipProps {
@@ -13,6 +13,15 @@ export interface GuidanceTooltipProps {
   align?: 'left' | 'right' | 'center';
 }
 
+interface PopoverPosition {
+  top: number;
+  left: number;
+  maxHeight?: number;
+}
+
+const VIEWPORT_MARGIN = 8;
+const TRIGGER_GAP = 6;
+
 export const GuidanceTooltip: React.FC<GuidanceTooltipProps> = ({
   title,
   items,
@@ -23,7 +32,9 @@ export const GuidanceTooltip: React.FC<GuidanceTooltipProps> = ({
   align = 'right',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState<PopoverPosition | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
@@ -65,8 +76,69 @@ export const GuidanceTooltip: React.FC<GuidanceTooltipProps> = ({
     };
   }, [isOpen]);
 
-  const alignmentClass =
-    align === 'left' ? 'left-0' : align === 'center' ? 'left-1/2 -translate-x-1/2' : 'right-0';
+  // Fixed positioning keeps the popover out of the document's scrollable area,
+  // so hovering it never reveals a new page scrollbar. Flip above the trigger
+  // when there isn't enough room below, and clamp it inside the viewport.
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const updatePosition = () => {
+      const trigger = containerRef.current?.getBoundingClientRect();
+      const popover = popoverRef.current;
+      if (!trigger || !popover) return;
+
+      const popoverWidth = popover.offsetWidth;
+      const popoverHeight = popover.scrollHeight;
+      const spaceAbove = trigger.top;
+      const spaceBelow = window.innerHeight - trigger.bottom;
+      const fitsBelow = spaceBelow >= popoverHeight + TRIGGER_GAP + VIEWPORT_MARGIN;
+      const fitsAbove = spaceAbove >= popoverHeight + TRIGGER_GAP + VIEWPORT_MARGIN;
+
+      let top: number;
+      let maxHeight: number | undefined;
+
+      if (fitsBelow) {
+        top = trigger.bottom + TRIGGER_GAP;
+      } else if (fitsAbove) {
+        top = trigger.top - popoverHeight - TRIGGER_GAP;
+      } else {
+        const placeBelow = spaceBelow >= spaceAbove;
+        maxHeight = Math.max(
+          120,
+          (placeBelow ? spaceBelow : spaceAbove) - TRIGGER_GAP - VIEWPORT_MARGIN,
+        );
+        top = placeBelow
+          ? trigger.bottom + TRIGGER_GAP
+          : Math.max(VIEWPORT_MARGIN, trigger.top - TRIGGER_GAP - maxHeight);
+      }
+
+      let left =
+        align === 'left'
+          ? trigger.left
+          : align === 'center'
+            ? trigger.left + (trigger.width - popoverWidth) / 2
+            : trigger.right - popoverWidth;
+      left = Math.min(
+        Math.max(left, VIEWPORT_MARGIN),
+        Math.max(VIEWPORT_MARGIN, window.innerWidth - popoverWidth - VIEWPORT_MARGIN),
+      );
+      top = Math.max(VIEWPORT_MARGIN, top);
+
+      setPosition((prev) =>
+        prev && prev.top === top && prev.left === left && prev.maxHeight === maxHeight
+          ? prev
+          : { top, left, maxHeight },
+      );
+    };
+
+    updatePosition();
+    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition);
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [align, isOpen]);
 
   return (
     <div
@@ -92,8 +164,15 @@ export const GuidanceTooltip: React.FC<GuidanceTooltipProps> = ({
 
       {isOpen && (
         <div
+          ref={popoverRef}
           role="tooltip"
-          className={`absolute top-full mt-1.5 z-50 w-72 sm:w-80 p-3.5 text-xs bg-white border border-slate-200/90 rounded-xl shadow-xl space-y-2.5 font-sans animate-in fade-in zoom-in-95 duration-100 ${alignmentClass}`}
+          style={{
+            top: position?.top ?? 0,
+            left: position?.left ?? 0,
+            maxHeight: position?.maxHeight,
+            visibility: position ? 'visible' : 'hidden',
+          }}
+          className="fixed z-50 w-72 sm:w-80 max-w-[calc(100vw-1rem)] overflow-y-auto p-3.5 text-xs bg-white border border-slate-200/90 rounded-xl shadow-xl space-y-2.5 font-sans"
         >
           {/* Popover Header */}
           <div className="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
