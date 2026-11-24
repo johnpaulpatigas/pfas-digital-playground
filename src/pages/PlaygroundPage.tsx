@@ -61,10 +61,10 @@ const TAB_METADATA: Record<TabId, TabMeta> = {
     description:
       'Compares simulated internal exposure against toxicological reference limits (EPA RfD) to determine whether body burden or serum concentration exceeds safe benchmark limits (HQ > 1.0).',
     whatToLookFor: [
-      'In the area chart, the vertical red dashed line marks the critical threshold; the red shaded area to the right shows iterations with HQ > 1.0.',
+      'The red area marks iterations with HQ > 1.0; the dashed line marks the cohort-mean limit for context.',
       'Use the toggle buttons to switch between Body Burden (µg) and Serum Concentration (µg/L) views.',
-      'Check the status banner for the baseline Hazard Quotient (HQ) and equilibrium progress percentage.',
-      'Review the Analytical Parameter Thresholds table to identify which input variable is closest to or exceeding its critical limit.',
+      'Check the status banner for the cohort median HQ and average body burden, matching the statistics panel.',
+      'Review the Analytical Single-Parameter Limits table as a reference case with other inputs held at their means.',
     ],
   },
   histogram: {

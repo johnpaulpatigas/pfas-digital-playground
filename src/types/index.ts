@@ -85,6 +85,10 @@ export interface CompoundIterationOutput {
   peakBodyBurden: number; // ug
   clearanceRate: number; // L/kg/day
   hazardQuotient: number; // HQ = Dose / RfD
+  criticalBodyBurden: number; // burden at HQ = 1 for this iteration (ug)
+  criticalSerumCss: number; // steady-state serum at HQ = 1 for this iteration (ug/L)
+  criticalDailyIntake: number; // intake at HQ = 1 for this iteration (ug/day)
+  isExceeded: boolean; // peakBodyBurden > criticalBodyBurden, equivalent to HQ > 1.0
 }
 
 // Single Sample Iteration Output
@@ -105,6 +109,8 @@ export interface IterationResult {
   clearanceRate: number; // L/kg/day
   hazardQuotient: number; // HQ = Dose / RfD
   hazardIndex?: number; // Cumulative mixture Hazard Index HI = sum(HQ_j)
+  criticalBodyBurden?: number; // active-compound limit at HQ = 1 (ug)
+  isExceeded?: boolean; // active-compound exceedance (HQ > 1.0)
 
   // Multi-Compound Results (PFOA, PFOS, PFHxS, PFNA, GenX)
   compoundOutputs?: Record<string, CompoundIterationOutput>;
@@ -129,10 +135,12 @@ export interface CompoundSummary {
   medianBodyBurden: number; // Median Body Burden (ug)
   p95BodyBurden: number; // 95th Percentile Body Burden (ug)
 
-  // Critical Limits & Exceedances
-  criticalBodyBurden: number; // Critical Threshold Body Burden (ug)
-  criticalSerumCss: number; // Critical Threshold Css (ug/L)
-  criticalDailyIntake: number; // Critical Daily Intake (ug/day)
+  // Critical Limits & Exceedances (cohort-mean limits)
+  criticalBodyBurden: number; // Mean critical burden (ug)
+  criticalSerumCss: number; // Mean critical steady-state Css (ug/L)
+  criticalDailyIntake: number; // Mean critical daily intake (ug/day)
+  exceedingIntakeMin: number; // Min intake in exceeding cohort (ug/day)
+  exceedingIntakeMax: number; // Max intake in exceeding cohort (ug/day)
   exceedingSerumMin: number; // Min Css in exceeding cohort (ug/L)
   exceedingSerumMax: number; // Max Css in exceeding cohort (ug/L)
   exceedingBodyBurdenMin: number; // Min Body Burden in exceeding cohort (ug)
@@ -141,6 +149,8 @@ export interface CompoundSummary {
   // Risk Metrics
   meanHazardQuotient: number; // Mean HQ
   medianHazardQuotient: number; // Median HQ (needed for H0 4)
+  totalCount: number; // number of simulated iterations
+  exceedanceCount: number; // iterations with HQ > 1.0 for this compound
   riskExceedancePercent: number; // % of cohort exceeding HQ > 1.0
   wilcoxonTest?: WilcoxonOneSampleResult; // Formal H0 4 test result against threshold 1.0
   isBurdenExceeded: boolean;

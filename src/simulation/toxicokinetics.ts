@@ -25,6 +25,58 @@ export interface ToxicokineticInput {
 }
 
 /**
+ * Canonical toxicokinetic helpers.
+ * Every panel derives its limits, HQ and exceedance flag from these formulas so
+ * the same quantity never has two different values.
+ */
+
+/** Body weight floor used by the dose model. */
+const getEffectiveBodyWeight = (bodyWeight: number) => Math.max(10, bodyWeight);
+
+/** First-order serum elimination rate (day^-1) for a half-life in years. */
+export const getEliminationRate = (halfLifeYears: number) =>
+  Math.LN2 / Math.max(1, halfLifeYears * 365.25);
+
+/** Intake (ug/day) at which the dose per kg equals the compound RfD. */
+export const calculateCriticalIntake = (compound: PFASCompound, bodyWeight: number): number =>
+  getEffectiveBodyWeight(bodyWeight) * compound.rfdDose;
+
+/** Single definition of the hazard quotient used across the app. */
+export const calculateHazardQuotient = (
+  compound: PFASCompound,
+  dailyIntake: number,
+  bodyWeight: number,
+): number =>
+  compound.rfdDose > 0 ? dailyIntake / (getEffectiveBodyWeight(bodyWeight) * compound.rfdDose) : 0;
+
+/** Burden at HQ = 1.0, accumulated over the same exposure window as the sample. */
+export const calculateCriticalBodyBurden = (
+  compound: PFASCompound,
+  bodyWeight: number,
+  bioavailability: number,
+  halfLifeYears: number,
+  exposureDurationYears: number,
+): number => {
+  const k = getEliminationRate(halfLifeYears);
+  const criticalAbsorbedDose = calculateCriticalIntake(compound, bodyWeight) * bioavailability;
+  return (criticalAbsorbedDose / k) * (1 - Math.exp(-k * exposureDurationYears * 365.25));
+};
+
+/** Steady-state serum concentration at HQ = 1.0 (Css has no duration term). */
+export const calculateCriticalSerumCss = (
+  compound: PFASCompound,
+  bodyWeight: number,
+  bioavailability: number,
+  halfLifeYears: number,
+): number => {
+  const k = getEliminationRate(halfLifeYears);
+  const volumeOfDistribution = Math.max(1, bodyWeight * compound.volumeOfDistribution);
+  return (
+    (calculateCriticalIntake(compound, bodyWeight) * bioavailability) / (volumeOfDistribution * k)
+  );
+};
+
+/**
  * 1-Compartment Pharmacokinetic Model for PFAS (Research Grade)
  * Computes outputs for the active compound and populates compoundOutputs for all 5 PFAS types.
  */
@@ -51,9 +103,6 @@ export function calculateToxicokinetics(
   // Cumulative exposure window (days)
   const exposureDays = exposureDuration * 365.25;
 
-  // Daily intake per kg body mass (ug/kg/day)
-  const dailyDosePerKg = dailyIntake / Math.max(10, bodyWeight);
-
   // Multi-compound evaluations for all 5 PFAS compounds and mixture Hazard Index (HI).
   // The active compound uses the sampled half-life; the others use their reference value.
   const compoundOutputs: Record<string, CompoundIterationOutput> = {};
@@ -61,13 +110,20 @@ export function calculateToxicokinetics(
   for (let i = 0; i < PFAS_COMPOUNDS.length; i++) {
     const c = PFAS_COMPOUNDS[i];
     const cHalfLife = compoundId === c.id ? eliminationHalfLife : c.halfLifeYears;
-    const cEliminationRate = Math.LN2 / Math.max(1, cHalfLife * 365.25);
+    const cEliminationRate = getEliminationRate(cHalfLife);
     const cVdTotal = Math.max(1, bodyWeight * c.volumeOfDistribution);
     const cCss = absorbedDose / (cVdTotal * cEliminationRate);
     const cBodyBurden =
       (absorbedDose / cEliminationRate) * (1 - Math.exp(-cEliminationRate * exposureDays));
     const cClearance = cEliminationRate * c.volumeOfDistribution;
-    const cHQ = c.rfdDose > 0 ? dailyDosePerKg / c.rfdDose : 0;
+    const cHQ = calculateHazardQuotient(c, dailyIntake, bodyWeight);
+    const cCriticalBodyBurden = calculateCriticalBodyBurden(
+      c,
+      bodyWeight,
+      bioavailability,
+      cHalfLife,
+      exposureDuration,
+    );
     hazardIndex += cHQ;
 
     compoundOutputs[c.id] = {
@@ -77,6 +133,10 @@ export function calculateToxicokinetics(
       peakBodyBurden: Math.max(0, cBodyBurden),
       clearanceRate: cClearance,
       hazardQuotient: Math.max(0, cHQ),
+      criticalBodyBurden: cCriticalBodyBurden,
+      criticalSerumCss: calculateCriticalSerumCss(c, bodyWeight, bioavailability, cHalfLife),
+      criticalDailyIntake: calculateCriticalIntake(c, bodyWeight),
+      isExceeded: cBodyBurden > cCriticalBodyBurden,
     };
   }
 
@@ -98,6 +158,8 @@ export function calculateToxicokinetics(
     clearanceRate: activeOutput.clearanceRate,
     hazardQuotient: activeOutput.hazardQuotient,
     hazardIndex: Math.max(0, hazardIndex),
+    criticalBodyBurden: activeOutput.criticalBodyBurden,
+    isExceeded: activeOutput.isExceeded,
     compoundOutputs,
   };
 }
@@ -212,7 +274,7 @@ export function calculateCriticalThresholds(
   const eliminationRate = Math.LN2 / Math.max(1, halfLifeDays);
 
   // Critical daily intake (ug/day) where Dose/BW = RfD => Intake = BW * RfD
-  const criticalDailyIntake = bodyWeight * compound.rfdDose;
+  const criticalDailyIntake = calculateCriticalIntake(compound, bodyWeight);
 
   // Critical daily absorbed dose (ug/day)
   const criticalAbsorbedDose = criticalDailyIntake * bioavailability;
@@ -293,7 +355,13 @@ export function calculateDetailedCriticalAnalysis(
   const steadyStateBodyBurden = currentAbsorbedDose / eliminationRate;
 
   // Critical body burden at current exposure duration & steady state
-  const criticalBodyBurden = (criticalAbsorbedDose / eliminationRate) * steadyStateFraction;
+  const criticalBodyBurden = calculateCriticalBodyBurden(
+    compound,
+    meanBW,
+    meanBio,
+    meanHalfLife,
+    meanDuration,
+  );
   const criticalSteadyStateBodyBurden = thresholds.criticalBodyBurden;
 
   // Serum Css
@@ -302,8 +370,7 @@ export function calculateDetailedCriticalAnalysis(
   const criticalSerumCss = thresholds.criticalSerumConcentration;
 
   // Hazard Quotient
-  const dailyDosePerKg = meanIntake / Math.max(1, meanBW);
-  const hazardQuotient = compound.rfdDose > 0 ? dailyDosePerKg / compound.rfdDose : 0;
+  const hazardQuotient = calculateHazardQuotient(compound, meanIntake, meanBW);
 
   const burdenExceedanceRatio =
     criticalBodyBurden > 0 ? currentBodyBurden / criticalBodyBurden : hazardQuotient;
@@ -554,8 +621,11 @@ export function calculateExceedanceRangeStats(
     };
   }
 
-  const exceeding = results.filter((r) => r.hazardQuotient > 1.0);
-  const safe = results.filter((r) => r.hazardQuotient <= 1.0);
+  // Use the same per-iteration exceedance flag that the compound summaries use.
+  const isExceeded = (r: IterationResult) =>
+    r.compoundOutputs?.[compound.id]?.isExceeded ?? r.isExceeded ?? r.hazardQuotient > 1.0;
+  const exceeding = results.filter(isExceeded);
+  const safe = results.filter((r) => !isExceeded(r));
 
   const getStats = (arr: IterationResult[], key: keyof IterationResult) => {
     if (arr.length === 0) return { min: 0, median: 0, max: 0, p5: 0, p95: 0 };
@@ -596,89 +666,116 @@ export function calculateExceedanceRangeStats(
 }
 
 /**
- * Multi-Compound Summary Calculator
- * Computes average Css, average Body Burden, critical boundaries, and exceedance ranges across all 5 PFAS compounds.
+ * Canonical multi-compound analysis. Both the summary panel and the exceedance
+ * analyzer read these numbers, so a label means the same thing in both places.
+ * Limits use the sampled exposure window and are averaged over the same
+ * iterations as the exposures they are compared with.
  */
 export function calculateCompoundSummaries(
   results: IterationResult[],
-  parameters: SimulationParameters,
+  _parameters: SimulationParameters,
 ): CompoundSummary[] {
   if (!results || results.length === 0) return [];
-
-  const bwStats = extractDistributionCentralValue(parameters.bodyWeight.distribution);
-  const bioStats = extractDistributionCentralValue(parameters.bioavailability.distribution);
-  const meanBW = bwStats.mean;
-  const meanBio = Math.min(1.0, Math.max(0.01, bioStats.mean));
 
   return PFAS_COMPOUNDS.map((compound) => {
     const totalCount = results.length;
     const cssVals: number[] = new Array(totalCount);
     const bbVals: number[] = new Array(totalCount);
     const hqVals: number[] = new Array(totalCount);
+    const criticalBbVals: number[] = new Array(totalCount);
+    const criticalCssVals: number[] = new Array(totalCount);
+    const criticalIntakeVals: number[] = new Array(totalCount);
     const exceedingCss: number[] = [];
     const exceedingBb: number[] = [];
+    const exceedingIntake: number[] = [];
+    let exceedanceCount = 0;
 
     for (let i = 0; i < totalCount; i++) {
-      const out = results[i].compoundOutputs?.[compound.id] || {
-        steadyStateConcentration: results[i].steadyStateConcentration,
-        peakBodyBurden: results[i].peakBodyBurden,
-        hazardQuotient: results[i].hazardQuotient,
-      };
-      cssVals[i] = out.steadyStateConcentration;
-      bbVals[i] = out.peakBodyBurden;
-      hqVals[i] = out.hazardQuotient;
+      const iteration = results[i];
+      const sampledOut = iteration.compoundOutputs?.[compound.id];
+      // Derive the half-life from the rate when only legacy fixtures are available.
+      const eliminationRate = sampledOut?.eliminationRate ?? iteration.eliminationRate;
+      const halfLifeYears = eliminationRate
+        ? Math.LN2 / eliminationRate / 365.25
+        : compound.halfLifeYears;
+      const criticalBb =
+        sampledOut?.criticalBodyBurden ??
+        calculateCriticalBodyBurden(
+          compound,
+          iteration.bodyWeight,
+          iteration.bioavailability,
+          halfLifeYears,
+          iteration.exposureDuration,
+        );
+      const criticalCss =
+        sampledOut?.criticalSerumCss ??
+        calculateCriticalSerumCss(
+          compound,
+          iteration.bodyWeight,
+          iteration.bioavailability,
+          halfLifeYears,
+        );
+      const criticalIntake =
+        sampledOut?.criticalDailyIntake ?? calculateCriticalIntake(compound, iteration.bodyWeight);
+      const css = sampledOut?.steadyStateConcentration ?? iteration.steadyStateConcentration;
+      const bb = sampledOut?.peakBodyBurden ?? iteration.peakBodyBurden;
+      const hq = sampledOut?.hazardQuotient ?? iteration.hazardQuotient;
+      const isExceeded = sampledOut?.isExceeded ?? bb > criticalBb;
 
-      if (out.hazardQuotient > 1.0) {
-        exceedingCss.push(out.steadyStateConcentration);
-        exceedingBb.push(out.peakBodyBurden);
+      cssVals[i] = css;
+      bbVals[i] = bb;
+      hqVals[i] = hq;
+      criticalBbVals[i] = criticalBb;
+      criticalCssVals[i] = criticalCss;
+      criticalIntakeVals[i] = criticalIntake;
+
+      if (isExceeded) {
+        exceedanceCount++;
+        exceedingCss.push(css);
+        exceedingBb.push(bb);
+        exceedingIntake.push(iteration.dailyIntake);
       }
     }
 
-    cssVals.sort((a, b) => a - b);
-    bbVals.sort((a, b) => a - b);
-
-    const sumCss = cssVals.reduce((acc, v) => acc + v, 0);
-    const meanCss = sumCss / totalCount;
-    const medianCss = quantileSorted(cssVals, 0.5);
-    const p95Css = quantileSorted(cssVals, 0.95);
-
-    const sumBb = bbVals.reduce((acc, v) => acc + v, 0);
-    const meanBodyBurden = sumBb / totalCount;
-    const medianBodyBurden = quantileSorted(bbVals, 0.5);
-    const p95BodyBurden = quantileSorted(bbVals, 0.95);
-
-    const sumHq = hqVals.reduce((acc, v) => acc + v, 0);
-    const meanHazardQuotient = sumHq / totalCount;
-    const sortedHq = [...hqVals].sort((a, b) => a - b);
-    const medianHazardQuotient = quantileSorted(sortedHq, 0.5);
-    const riskExceedancePercent = (exceedingCss.length / totalCount) * 100;
+    const mean = (values: number[]) => values.reduce((acc, v) => acc + v, 0) / totalCount;
+    const meanCss = mean(cssVals);
+    const meanBodyBurden = mean(bbVals);
+    const meanHazardQuotient = mean(hqVals);
+    const criticalBodyBurden = mean(criticalBbVals);
+    const criticalSerumCss = mean(criticalCssVals);
+    const criticalDailyIntake = mean(criticalIntakeVals);
+    const medianCss = quantileSorted(
+      [...cssVals].sort((a, b) => a - b),
+      0.5,
+    );
+    const p95Css = quantileSorted(
+      [...cssVals].sort((a, b) => a - b),
+      0.95,
+    );
+    const medianBodyBurden = quantileSorted(
+      [...bbVals].sort((a, b) => a - b),
+      0.5,
+    );
+    const p95BodyBurden = quantileSorted(
+      [...bbVals].sort((a, b) => a - b),
+      0.95,
+    );
+    const medianHazardQuotient = quantileSorted(
+      [...hqVals].sort((a, b) => a - b),
+      0.5,
+    );
+    const riskExceedancePercent = (exceedanceCount / totalCount) * 100;
     const wilcoxonTest = calculateOneSampleWilcoxon(hqVals, 1.0);
 
-    const thresholds = calculateCriticalThresholds(
-      compound,
-      meanBW,
-      meanBio,
-      compound.halfLifeYears,
-    );
+    const range = (values: number[]) =>
+      values.length > 0
+        ? { min: Math.min(...values), max: Math.max(...values) }
+        : { min: 0, max: 0 };
+    const intakeRange = range(exceedingIntake);
+    const serumRange = range(exceedingCss);
+    const burdenRange = range(exceedingBb);
 
-    let exceedingSerumMin = 0;
-    let exceedingSerumMax = 0;
-    if (exceedingCss.length > 0) {
-      exceedingCss.sort((a, b) => a - b);
-      exceedingSerumMin = exceedingCss[0];
-      exceedingSerumMax = exceedingCss[exceedingCss.length - 1];
-    }
-
-    let exceedingBodyBurdenMin = 0;
-    let exceedingBodyBurdenMax = 0;
-    if (exceedingBb.length > 0) {
-      exceedingBb.sort((a, b) => a - b);
-      exceedingBodyBurdenMin = exceedingBb[0];
-      exceedingBodyBurdenMax = exceedingBb[exceedingBb.length - 1];
-    }
-
-    const isBurdenExceeded =
-      meanBodyBurden > thresholds.criticalBodyBurden || meanHazardQuotient > 1.0;
+    const isBurdenExceeded = meanBodyBurden > criticalBodyBurden || meanHazardQuotient > 1.0;
     const status: 'safe' | 'borderline' | 'exceeded' = isBurdenExceeded
       ? 'exceeded'
       : meanHazardQuotient >= 0.85
@@ -700,15 +797,19 @@ export function calculateCompoundSummaries(
       meanBodyBurden: parseFloat(meanBodyBurden.toFixed(3)),
       medianBodyBurden: parseFloat(medianBodyBurden.toFixed(3)),
       p95BodyBurden: parseFloat(p95BodyBurden.toFixed(3)),
-      criticalBodyBurden: parseFloat(thresholds.criticalBodyBurden.toFixed(3)),
-      criticalSerumCss: parseFloat(thresholds.criticalSerumConcentration.toFixed(4)),
-      criticalDailyIntake: thresholds.criticalDailyIntake,
-      exceedingSerumMin: parseFloat(exceedingSerumMin.toFixed(4)),
-      exceedingSerumMax: parseFloat(exceedingSerumMax.toFixed(4)),
-      exceedingBodyBurdenMin: parseFloat(exceedingBodyBurdenMin.toFixed(3)),
-      exceedingBodyBurdenMax: parseFloat(exceedingBodyBurdenMax.toFixed(3)),
+      criticalBodyBurden: parseFloat(criticalBodyBurden.toFixed(3)),
+      criticalSerumCss: parseFloat(criticalSerumCss.toFixed(4)),
+      criticalDailyIntake: parseFloat(criticalDailyIntake.toFixed(5)),
+      exceedingIntakeMin: parseFloat(intakeRange.min.toFixed(4)),
+      exceedingIntakeMax: parseFloat(intakeRange.max.toFixed(4)),
+      exceedingSerumMin: parseFloat(serumRange.min.toFixed(4)),
+      exceedingSerumMax: parseFloat(serumRange.max.toFixed(4)),
+      exceedingBodyBurdenMin: parseFloat(burdenRange.min.toFixed(3)),
+      exceedingBodyBurdenMax: parseFloat(burdenRange.max.toFixed(3)),
       meanHazardQuotient: parseFloat(meanHazardQuotient.toFixed(2)),
       medianHazardQuotient: parseFloat(medianHazardQuotient.toFixed(2)),
+      totalCount,
+      exceedanceCount,
       riskExceedancePercent: parseFloat(riskExceedancePercent.toFixed(1)),
       wilcoxonTest,
       isBurdenExceeded,

@@ -360,4 +360,111 @@ describe('Toxicokinetics Engine', () => {
       summaries.find((s) => s.compoundId === 'pfoa')!.meanCss,
     );
   });
+
+  it('keeps limits, HQ and exceedance counts on a single source of truth', () => {
+    const fixed = (value: number) => ({ type: 'fixed' as const, value });
+    const params: SimulationParameters = {
+      dailyIntake: {
+        id: 'dailyIntake',
+        name: 'Intake',
+        unit: 'µg/d',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(0.1),
+      },
+      bodyWeight: {
+        id: 'bodyWeight',
+        name: 'Body weight',
+        unit: 'kg',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(55),
+      },
+      age: {
+        id: 'age',
+        name: 'Age',
+        unit: 'y',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(30),
+      },
+      waterConsumption: {
+        id: 'waterConsumption',
+        name: 'Water',
+        unit: 'L/d',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(2),
+      },
+      bioavailability: {
+        id: 'bioavailability',
+        name: 'Bioavailability',
+        unit: 'fraction',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(0.9),
+      },
+      eliminationHalfLife: {
+        id: 'eliminationHalfLife',
+        name: 'Half-life',
+        unit: 'y',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(3.8),
+      },
+      exposureDuration: {
+        id: 'exposureDuration',
+        name: 'Duration',
+        unit: 'y',
+        description: '',
+        scientificContext: '',
+        distribution: fixed(22),
+      },
+    };
+
+    const results = Array.from({ length: 8 }, (_, i) =>
+      calculateToxicokinetics(
+        {
+          dailyIntake: 0.02 * (i + 1),
+          bodyWeight: 55,
+          age: 30,
+          waterConsumption: 2,
+          bioavailability: 0.9,
+          eliminationHalfLife: 3.8,
+          exposureDuration: 22,
+          compoundId: 'pfoa',
+        },
+        i + 1,
+      ),
+    );
+
+    // The per-iteration flag is the only exceedance definition used by the UI.
+    results.forEach((r) => {
+      expect(r.isExceeded).toBe(r.hazardQuotient > 1.0);
+      Object.values(r.compoundOutputs!).forEach((out) => {
+        expect(out.isExceeded).toBe(out.hazardQuotient > 1.0);
+        expect(out.criticalBodyBurden).toBeGreaterThan(0);
+      });
+    });
+
+    const summaries = calculateCompoundSummaries(results, params);
+    for (const compound of PFAS_COMPOUNDS) {
+      const summary = summaries.find((s) => s.compoundId === compound.id)!;
+      const stats = calculateExceedanceRangeStats(
+        results,
+        compound,
+        55,
+        0.9,
+        compound.halfLifeYears,
+        params,
+      );
+      expect(stats.exceedanceCount).toBe(summary.exceedanceCount);
+      expect(stats.exceedancePercent).toBeCloseTo(summary.riskExceedancePercent, 1);
+
+      const meanCritical =
+        results.reduce((sum, r) => sum + r.compoundOutputs![compound.id].criticalBodyBurden, 0) /
+        results.length;
+      expect(summary.criticalBodyBurden).toBeCloseTo(meanCritical, 3);
+    }
+  });
 });

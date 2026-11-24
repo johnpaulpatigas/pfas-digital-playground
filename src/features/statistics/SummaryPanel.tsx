@@ -12,19 +12,14 @@ import type React from 'react';
 import { useMemo } from 'react';
 import { GuidanceTooltip } from '../../components/ui/GuidanceTooltip';
 import { MathView } from '../../components/ui/MathView';
-import { getDistributionMean } from '../../simulation/distributions';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
-import {
-  calculateCompoundSummaries,
-  calculateExceedanceRangeStats,
-} from '../../simulation/toxicokinetics';
-import { useSimulationStore } from '../../stores/useSimulationStore';
 import type {
   IterationResult,
   SensitivityRank,
   SimulationParameters,
   SummaryStatistics,
 } from '../../types';
+import { useCompoundSummaries } from './useCompoundSummaries';
 
 interface SummaryPanelProps {
   summaryStats: SummaryStatistics | null;
@@ -42,39 +37,13 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   results,
   parameters,
 }) => {
-  const { compoundSummaries: storeCompoundSummaries } = useSimulationStore();
+  const multiCompoundSummaries = useCompoundSummaries(results, parameters);
 
+  const activeSummary =
+    multiCompoundSummaries.find((summary) => summary.compoundId === compoundId) ?? null;
   const activeCompound = useMemo(() => {
     return PFAS_COMPOUNDS.find((c) => c.id === compoundId) || PFAS_COMPOUNDS[0];
   }, [compoundId]);
-
-  const multiCompoundSummaries = useMemo(() => {
-    if (storeCompoundSummaries && storeCompoundSummaries.length > 0) {
-      return storeCompoundSummaries;
-    }
-    if (results && results.length > 0 && parameters) {
-      return calculateCompoundSummaries(results, parameters);
-    }
-    return [];
-  }, [storeCompoundSummaries, results, parameters]);
-
-  const exceedanceStats = useMemo(() => {
-    if (!results || results.length === 0 || !parameters) return null;
-    const meanBW = getDistributionMean(parameters.bodyWeight.distribution, 55);
-    const meanBio = getDistributionMean(parameters.bioavailability.distribution, 0.9);
-    const meanHalfLife = getDistributionMean(
-      parameters.eliminationHalfLife.distribution,
-      activeCompound.halfLifeYears,
-    );
-    return calculateExceedanceRangeStats(
-      results,
-      activeCompound,
-      meanBW,
-      meanBio,
-      meanHalfLife,
-      parameters,
-    );
-  }, [results, activeCompound, parameters]);
 
   if (!summaryStats) {
     return (
@@ -308,7 +277,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       </div>
 
       {/* Single Compound Critical Exceedance Range Card */}
-      {exceedanceStats && (
+      {activeSummary && (
         <div className="card-panel p-4 rounded-xl space-y-2.5">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <div className="flex items-center gap-1.5">
@@ -320,41 +289,47 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           </div>
 
           <div className="space-y-1.5 text-[11px]">
-            {exceedanceStats.detailedAnalysis && (
-              <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
-                <span className="text-slate-600">
-                  Avg Body Burden (<MathView math="B(t)" />
-                  ):
-                </span>
-                <span
-                  className={`font-bold font-mono ${exceedanceStats.detailedAnalysis.isBurdenExceeded ? 'text-red-700' : 'text-slate-900'}`}
-                >
-                  {exceedanceStats.detailedAnalysis.baselineBodyBurden.toFixed(3)} µg
-                </span>
-              </div>
-            )}
+            <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+              <span className="text-slate-600">
+                Average Body Burden (<MathView math="B(t)" />
+                ):
+              </span>
+              <span
+                className={`font-bold font-mono ${activeSummary.isBurdenExceeded ? 'text-red-700' : 'text-slate-900'}`}
+              >
+                {activeSummary.meanBodyBurden.toFixed(3)} µg
+              </span>
+            </div>
 
             <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
               <span className="text-slate-600">Critical Body Burden Limit:</span>
               <span className="text-slate-900 font-bold font-mono">
-                {exceedanceStats.thresholds.criticalBodyBurden.toFixed(3)} µg
+                {activeSummary.criticalBodyBurden.toFixed(3)} µg
               </span>
             </div>
 
             <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
               <span className="text-slate-600">Critical Intake Cutoff:</span>
               <span className="text-red-700 font-bold font-mono">
-                &gt; {exceedanceStats.thresholds.criticalDailyIntake.toFixed(5)} µg/d
+                &gt; {activeSummary.criticalDailyIntake.toFixed(5)} µg/d
               </span>
             </div>
 
-            {exceedanceStats.exceedanceCount > 0 ? (
+            <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
+              <span className="text-slate-600">Cohort Exceedance Rate:</span>
+              <span className="font-bold font-mono text-slate-900">
+                {activeSummary.riskExceedancePercent.toFixed(1)}% ({activeSummary.exceedanceCount}/
+                {activeSummary.totalCount})
+              </span>
+            </div>
+
+            {activeSummary.exceedanceCount > 0 ? (
               <>
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
                   <span className="text-slate-600">Exceeding Intake Span:</span>
                   <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingDailyIntake.min.toFixed(4)} to{' '}
-                    {exceedanceStats.exceedingDailyIntake.max.toFixed(4)}]
+                    [{activeSummary.exceedingIntakeMin.toFixed(4)} to{' '}
+                    {activeSummary.exceedingIntakeMax.toFixed(4)}]
                   </span>
                 </div>
                 <div className="flex justify-between bg-slate-50 p-1.5 rounded border border-slate-200">
@@ -362,8 +337,8 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
                     Exceeding Serum <MathView math="C_{ss}" />:
                   </span>
                   <span className="text-slate-900 font-bold font-mono">
-                    [{exceedanceStats.exceedingSerumCss.min.toFixed(4)} to{' '}
-                    {exceedanceStats.exceedingSerumCss.max.toFixed(4)}] µg/L
+                    [{activeSummary.exceedingSerumMin.toFixed(4)} to{' '}
+                    {activeSummary.exceedingSerumMax.toFixed(4)}] µg/L
                   </span>
                 </div>
               </>
