@@ -10,10 +10,8 @@ import {
   calculateCriticalThresholds,
   calculateDetailedCriticalAnalysis,
   calculateExceedanceRangeStats,
-  calculateMultiCompoundTimeCourse,
   calculateTimeCourseTrajectory,
   calculateToxicokinetics,
-  deriveAutomatedParameters,
 } from '../toxicokinetics';
 
 describe('Toxicokinetics Engine', () => {
@@ -264,41 +262,6 @@ describe('Toxicokinetics Engine', () => {
     expect(genxOut.eliminationRate).toBeGreaterThan(pfoaOut.eliminationRate);
   });
 
-  it('calculateMultiCompoundTimeCourse generates trajectories for all 5 PFAS compounds', () => {
-    const mockResults: IterationResult[] = Array.from({ length: 20 }, (_, i) => {
-      return calculateToxicokinetics(
-        {
-          dailyIntake: 0.0001 * (i + 1),
-          bodyWeight: 60,
-          age: 30,
-          waterConsumption: 2.0,
-          bioavailability: 0.9,
-          eliminationHalfLife: 3.8,
-          exposureDuration: 20,
-          compoundId: 'pfoa',
-        },
-        i + 1,
-      );
-    });
-
-    const trajectory = calculateMultiCompoundTimeCourse(mockResults, 40);
-    expect(trajectory.length).toBe(41);
-    expect(trajectory[0].year).toBe(0);
-    expect(trajectory[0].pfoa).toBe(0);
-    expect(trajectory[0].pfos).toBe(0);
-    expect(trajectory[0].pfhxs).toBe(0);
-    expect(trajectory[0].pfna).toBe(0);
-    expect(trajectory[0].genx).toBe(0);
-
-    const lastPoint = trajectory[trajectory.length - 1];
-    expect(lastPoint.year).toBe(40);
-    expect(lastPoint.pfoa).toBeGreaterThan(0);
-    expect(lastPoint.pfos).toBeGreaterThan(0);
-    expect(lastPoint.pfhxs).toBeGreaterThan(0);
-    expect(lastPoint.pfna).toBeGreaterThan(0);
-    expect(lastPoint.genx).toBeGreaterThan(0);
-  });
-
   it('calculateCompoundSummaries calculates statistics for all 5 PFAS compounds', () => {
     const safeParams: SimulationParameters = {
       dailyIntake: {
@@ -396,32 +359,5 @@ describe('Toxicokinetics Engine', () => {
     expect(highestCompound.meanCss).toBeGreaterThan(
       summaries.find((s) => s.compoundId === 'pfoa')!.meanCss,
     );
-  });
-
-  it('deriveAutomatedParameters accurately computes aggregate daily intake, exposure duration, and physiological distributions from 3 user inputs', () => {
-    const profile = {
-      bodyWeight: 55.4,
-      age: 30,
-      waterConsumption: 2.0,
-      waterConcentrationNgL: 20, // 20 ng/L = 0.020 µg/L
-    };
-
-    const derived = deriveAutomatedParameters(profile);
-
-    // Water intake = 2.0 L * 0.020 µg/L = 0.040 µg/day
-    expect(derived.derivedIntakeWaterUg).toBeCloseTo(0.04, 4);
-    // Dietary intake = 55.4 kg * 0.0005 µg/kg/d = 0.0277 µg/day
-    expect(derived.derivedIntakeDietaryUg).toBeCloseTo(0.0277, 4);
-    // Total intake = 0.040 + 0.0277 = 0.0677 µg/day
-    expect(derived.derivedTotalIntakeUg).toBeCloseTo(0.0677, 4);
-    // Exposure duration = clamp(30 - 10, 1, 40) = 20 years
-    expect(derived.derivedExposureYears).toBe(20);
-    expect(derived.derivedBioavailability).toBe(0.92);
-
-    expect(derived.parameters.dailyIntake.distribution.type).toBe('lognormal');
-    expect(derived.parameters.bodyWeight.distribution.type).toBe('normal');
-    expect(derived.parameters.age.distribution.type).toBe('fixed');
-    expect(derived.parameters.waterConsumption.distribution.type).toBe('lognormal');
-    expect(derived.parameters.bioavailability.distribution.type).toBe('fixed');
   });
 });

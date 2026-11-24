@@ -1,24 +1,19 @@
 import { create } from 'zustand';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
-import { deriveAutomatedParameters } from '../simulation/toxicokinetics';
 import type {
   ComparisonResult,
   CompoundSummary,
   DistributionParams,
   IterationResult,
-  PlaygroundMode,
   SamplingConfig,
   SensitivityRank,
-  SimpleProfile,
   SimulationParameters,
   SummaryStatistics,
 } from '../types';
 
 interface SimulationState {
   // Config state
-  mode: PlaygroundMode;
-  simpleProfile: SimpleProfile;
   parameters: SimulationParameters;
   samplingConfig: SamplingConfig;
   activeScenarioId: string;
@@ -35,8 +30,6 @@ interface SimulationState {
   logs: string[];
 
   // Actions
-  setPlaygroundMode: (mode: PlaygroundMode) => void;
-  updateSimpleProfile: (profile: Partial<SimpleProfile>) => void;
   setParameterDistribution: (
     paramId: keyof SimulationParameters,
     distribution: DistributionParams,
@@ -59,22 +52,12 @@ interface SimulationState {
 }
 
 const defaultScenario = DEMOGRAPHIC_PRESETS[0];
-const initialSimpleProfile: SimpleProfile = {
-  bodyWeight: 55.4,
-  age: 32,
-  waterConsumption: 2.0,
-  waterConcentrationNgL: 20,
-};
-
-const initialDerived = deriveAutomatedParameters(initialSimpleProfile);
 
 export const useSimulationStore = create<SimulationState>((set, get) => ({
-  mode: 'simple',
-  simpleProfile: initialSimpleProfile,
-  parameters: initialDerived.parameters,
+  parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
   samplingConfig: {
-    method: 'monte-carlo-lhs',
-    iterations: 25000,
+    method: 'monte-carlo',
+    iterations: 5000,
     seed: 42,
     compoundId: 'pfoa',
   },
@@ -87,58 +70,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   compoundSummaries: null,
   comparison: null,
 
-  logs: [
-    `[System] Initialized PFAS Toxicokinetic Playground in Simple Mode with automated exposure parameters.`,
-  ],
-
-  setPlaygroundMode: (mode) => {
-    set((state) => {
-      const activeScenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === state.activeScenarioId);
-      let newParams = state.parameters;
-      if (mode === 'simple') {
-        if (activeScenario && state.activeScenarioId !== 'custom') {
-          newParams = JSON.parse(JSON.stringify(activeScenario.parameters));
-        } else {
-          newParams = deriveAutomatedParameters(state.simpleProfile).parameters;
-        }
-      }
-      return {
-        mode,
-        parameters: newParams,
-        samplingConfig:
-          mode === 'simple'
-            ? { ...state.samplingConfig, method: 'monte-carlo-lhs', iterations: 25000 }
-            : state.samplingConfig,
-      };
-    });
-    get().addLog(
-      `[Mode] Switched to ${mode === 'simple' ? 'Simple Mode (3-Input Auto-Parameters & MC+LHS)' : 'Advanced Mode (Granular Parameters)'}.`,
-    );
-  },
-
-  updateSimpleProfile: (profileUpdate) => {
-    set((state) => {
-      const newProfile = { ...state.simpleProfile, ...profileUpdate };
-      const derived = deriveAutomatedParameters(newProfile);
-      const activeScenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === state.activeScenarioId);
-      const isStillPreset = activeScenario?.simpleProfile
-        ? Math.abs(newProfile.bodyWeight - activeScenario.simpleProfile.bodyWeight) < 0.01 &&
-          newProfile.age === activeScenario.simpleProfile.age &&
-          Math.abs(newProfile.waterConsumption - activeScenario.simpleProfile.waterConsumption) <
-            0.01
-        : false;
-
-      return {
-        simpleProfile: newProfile,
-        parameters: derived.parameters,
-        activeScenarioId: isStillPreset ? state.activeScenarioId : 'custom',
-      };
-    });
-    const current = get().simpleProfile;
-    get().addLog(
-      `[Simple Profile] Updated: BW=${current.bodyWeight}kg, Age=${current.age}y, Water=${current.waterConsumption}L/d -> Auto-calculated Daily Intake.`,
-    );
-  },
+  logs: [`[System] Initialized PFAS Toxicokinetic Playground with granular parameter controls.`],
 
   setParameterDistribution: (paramId, distribution) => {
     set((state) => ({
@@ -254,22 +186,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   loadScenario: (scenarioId) => {
     const scenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === scenarioId);
     if (scenario) {
-      const updatedProfile: SimpleProfile = scenario.simpleProfile
-        ? { ...scenario.simpleProfile }
-        : {
-            bodyWeight:
-              scenario.parameters.bodyWeight.distribution.type === 'normal'
-                ? scenario.parameters.bodyWeight.distribution.mean
-                : 55.4,
-            age: 30,
-            waterConsumption: 2.0,
-            waterConcentrationNgL: 20,
-          };
-
       set({
         parameters: JSON.parse(JSON.stringify(scenario.parameters)),
         activeScenarioId: scenario.id,
-        simpleProfile: updatedProfile,
       });
       get().addLog(`[Preset] Loaded scenario profile '${scenario.name}'.`);
     }
@@ -308,26 +227,20 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   clearLogs: () => set({ logs: [] }),
 
   resetToDefault: () => {
-    set((state) => {
-      const defaultProfile = defaultScenario.simpleProfile
-        ? { ...defaultScenario.simpleProfile }
-        : { ...initialSimpleProfile };
-      return {
-        simpleProfile: defaultProfile,
-        parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
-        activeScenarioId: defaultScenario.id,
-        samplingConfig: {
-          method: state.mode === 'simple' ? 'monte-carlo-lhs' : 'monte-carlo',
-          iterations: state.mode === 'simple' ? 25000 : 5000,
-          seed: 42,
-          compoundId: 'pfoa',
-        },
-        results: null,
-        summaryStats: null,
-        sensitivityRanks: [],
-        compoundSummaries: null,
-        comparison: null,
-      };
+    set({
+      parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
+      activeScenarioId: defaultScenario.id,
+      samplingConfig: {
+        method: 'monte-carlo',
+        iterations: 5000,
+        seed: 42,
+        compoundId: 'pfoa',
+      },
+      results: null,
+      summaryStats: null,
+      sensitivityRanks: [],
+      compoundSummaries: null,
+      comparison: null,
     });
     get().addLog(`[System] Reset parameters to default baseline.`);
   },

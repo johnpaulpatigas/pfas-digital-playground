@@ -17,7 +17,7 @@ This application lets users simulate chemical exposure, compare Monte Carlo and 
 
 ## Features
 
-- Dual simulation modes: Simple mode provides demographic presets, an automated 25,000-iteration blended run, and flags the highest accumulated compound. Advanced mode offers granular parameter controls across five distribution types.
+- Granular parameter controls: Configure demographic presets and all seven exposure and physiological parameters across five distribution types.
 - Interactive parameter distributions: Configure fixed, uniform, normal, lognormal, and triangular distributions for daily intake, body weight, water intake, bioavailability, elimination half-life, and exposure duration.
 - PFAS compound database: Chemical profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, formulas, half-lives, volumes of distribution, and US EPA Maximum Contaminant Levels (MCL).
 - Asynchronous Web Worker engine: Runs compute-heavy sampling loops off the main thread to keep charts and controls responsive.

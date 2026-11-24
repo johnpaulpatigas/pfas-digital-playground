@@ -19,8 +19,7 @@ interface ScatterPlotChartProps {
 }
 
 export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) => {
-  const { mode, samplingConfig } = useSimulationStore();
-  const isSimpleMode = mode === 'simple';
+  const { samplingConfig } = useSimulationStore();
   const [selectedCompoundId, setSelectedCompoundId] = useState<string | null>(null);
 
   const activeCompoundId = selectedCompoundId ?? samplingConfig.compoundId ?? 'pfoa';
@@ -62,7 +61,7 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
 
   return (
     <div className="w-full space-y-2 font-mono select-none">
-      {(isSimpleMode || results?.[0]?.compoundOutputs) && (
+      {results?.[0]?.compoundOutputs && (
         <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[10px]">
           <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">
             PFAS View:

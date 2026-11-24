@@ -90,7 +90,6 @@ const TAB_METADATA: Record<TabId, TabMeta> = {
       'Plots the cumulative percentage of simulation iterations resulting in serum concentrations at or below any given value.',
     whatToLookFor: [
       'Locate where the curve crosses the horizontal dashed lines at 50% (P50 median) and 95% (P95 upper boundary).',
-      'In Simple Mode, compare all 5 PFAS curves side-by-side to see which compounds shift furthest right toward higher concentrations.',
       'Steeper S-curves indicate tighter clustering of iteration values; flatter curves reflect wider input variability.',
     ],
   },
@@ -102,8 +101,7 @@ const TAB_METADATA: Record<TabId, TabMeta> = {
     description:
       'Models chronic serum accumulation over up to 40 years of exposure using 1-compartment first-order elimination kinetics (C(t) = Css(1 - e^(-ke*t))).',
     whatToLookFor: [
-      'In Simple Mode, compare trajectories across all 5 compounds: long half-life PFAS (PFHxS 8.5y, PFOS 5.4y, PFOA 3.8y) climb for decades, while GenX (0.2y) plateaus in months.',
-      'In Advanced Mode, observe the solid blue Mean trajectory bounded by the shaded P95 upper area and dashed P5 lower line.',
+      'Observe the solid blue Mean trajectory bounded by the shaded P95 upper area and dashed P5 lower line.',
       'The point where a curve levels off horizontally marks steady-state equilibrium where daily intake equals daily elimination.',
     ],
   },
@@ -143,7 +141,7 @@ const TAB_METADATA: Record<TabId, TabMeta> = {
     description:
       'Plots the running mean of steady-state concentration as simulation iterations accumulate to evaluate sample stability.',
     whatToLookFor: [
-      'In Simple Mode, compare running means for all 5 compounds; in Advanced Mode, observe the single compound mean trajectory.',
+      'Observe the running mean trajectory for the selected compound.',
       'Check whether the running mean line fluctuates at low iteration counts and flattens into a horizontal line as iterations accumulate.',
       'A flat, horizontal line confirms that the number of iterations (N) is sufficiently large to eliminate random sampling error.',
     ],
@@ -158,15 +156,13 @@ const TAB_METADATA: Record<TabId, TabMeta> = {
     whatToLookFor: [
       'Filter records using the "All", "Exceeding HQ > 1.0", or "Safe" buttons to focus on specific cohorts.',
       'Use the search box to locate a specific iteration number.',
-      'In Simple Mode, compare compound columns (PFOA, PFOS, PFHxS, PFNA, GenX) and Max HQ for each iteration.',
-      'In Advanced Mode, inspect sampled Half-Life alongside resulting Body Burden, Serum Css, and HQ.',
+      'Inspect sampled Half-Life alongside resulting Body Burden, Serum Css, and HQ.',
     ],
   },
 };
 
 export const PlaygroundPage: React.FC = () => {
   const {
-    mode,
     parameters,
     samplingConfig,
     results,
@@ -176,8 +172,6 @@ export const PlaygroundPage: React.FC = () => {
     setIsSimulating,
     setSimulationResults,
   } = useSimulationStore();
-
-  const isSimpleMode = mode === 'simple';
 
   const [activeTab, setActiveTab] = useState<TabId>('thresholds');
   const [isGuidanceOpen, setIsGuidanceOpen] = useState(false);
@@ -238,18 +232,12 @@ export const PlaygroundPage: React.FC = () => {
               PFAS toxicokinetic simulation playground
             </h1>
             <span className="px-2.5 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200 text-xs font-mono font-bold">
-              {isSimpleMode ? '5 PFAS types parallel evaluation' : activeCompound.name}
+              {activeCompound.name}
             </span>
           </div>
           <p className="text-xs text-slate-500 font-mono">
-            {isSimpleMode ? (
-              'Multi-PFAS hybrid simulation: evaluating PFOA, PFOS, PFHxS, PFNA, and GenX'
-            ) : (
-              <>
-                Probabilistic 1-compartment modeling: bioaccumulation serum concentration (
-                <MathView math="C_{ss}" />)
-              </>
-            )}
+            Probabilistic 1-compartment modeling: bioaccumulation serum concentration (
+            <MathView math="C_{ss}" />)
           </p>
         </div>
 
@@ -496,109 +484,35 @@ export const PlaygroundPage: React.FC = () => {
                                 <th className="p-2">#</th>
                                 <th className="p-2">Intake (µg/d)</th>
                                 <th className="p-2">BW (kg)</th>
-                                {isSimpleMode ? (
-                                  <>
-                                    <th className="p-2 text-blue-700">PFOA Css</th>
-                                    <th className="p-2 text-teal-700">PFOS Css</th>
-                                    <th className="p-2 text-purple-700">PFHxS Css</th>
-                                    <th className="p-2 text-amber-700">PFNA Css</th>
-                                    <th className="p-2 text-rose-700">GenX Css</th>
-                                    <th className="p-2 text-slate-900">Burden (µg)</th>
-                                    <th className="p-2 text-red-700">Max HQ</th>
-                                  </>
-                                ) : (
-                                  <>
-                                    <th className="p-2">Half-Life (yr)</th>
-                                    <th className="p-2 text-amber-800">Body Burden (µg)</th>
-                                    <th className="p-2 text-blue-700">Serum Css (µg/L)</th>
-                                    <th className="p-2 text-red-700">HQ</th>
-                                  </>
-                                )}
+                                <th className="p-2">Half-Life (yr)</th>
+                                <th className="p-2 text-amber-800">Body Burden (µg)</th>
+                                <th className="p-2 text-blue-700">Serum Css (µg/L)</th>
+                                <th className="p-2 text-red-700">HQ</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 text-slate-800">
-                              {paginatedResults.map((row) => {
-                                const pfoaCss =
-                                  row.compoundOutputs?.pfoa?.steadyStateConcentration ??
-                                  row.steadyStateConcentration;
-                                const pfosCss =
-                                  row.compoundOutputs?.pfos?.steadyStateConcentration ??
-                                  row.steadyStateConcentration;
-                                const pfhxsCss =
-                                  row.compoundOutputs?.pfhxs?.steadyStateConcentration ??
-                                  row.steadyStateConcentration;
-                                const pfnaCss =
-                                  row.compoundOutputs?.pfna?.steadyStateConcentration ??
-                                  row.steadyStateConcentration;
-                                const genxCss =
-                                  row.compoundOutputs?.genx?.steadyStateConcentration ??
-                                  row.steadyStateConcentration;
-                                const maxHq =
-                                  isSimpleMode && row.compoundOutputs
-                                    ? Math.max(
-                                        row.compoundOutputs.pfoa.hazardQuotient,
-                                        row.compoundOutputs.pfos.hazardQuotient,
-                                        row.compoundOutputs.pfhxs.hazardQuotient,
-                                        row.compoundOutputs.pfna.hazardQuotient,
-                                        row.compoundOutputs.genx.hazardQuotient,
-                                      )
-                                    : row.hazardQuotient;
-
-                                return (
-                                  <tr
-                                    key={row.iteration}
-                                    className={`hover:bg-slate-50 ${maxHq > 1.0 ? 'bg-red-50/25' : ''}`}
+                              {paginatedResults.map((row) => (
+                                <tr
+                                  key={row.iteration}
+                                  className={`hover:bg-slate-50 ${row.hazardQuotient > 1.0 ? 'bg-red-50/25' : ''}`}
+                                >
+                                  <td className="p-2 text-slate-400">{row.iteration}</td>
+                                  <td className="p-2 font-mono">{row.dailyIntake.toFixed(4)}</td>
+                                  <td className="p-2">{row.bodyWeight.toFixed(1)}</td>
+                                  <td className="p-2">{row.eliminationHalfLife.toFixed(2)}</td>
+                                  <td className="p-2 font-mono text-amber-900 font-semibold">
+                                    {row.peakBodyBurden.toFixed(3)}
+                                  </td>
+                                  <td className="p-2 font-mono text-blue-700 font-bold">
+                                    {row.steadyStateConcentration.toFixed(4)}
+                                  </td>
+                                  <td
+                                    className={`p-2 font-mono font-bold ${row.hazardQuotient > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}
                                   >
-                                    <td className="p-2 text-slate-400">{row.iteration}</td>
-                                    <td className="p-2 font-mono">{row.dailyIntake.toFixed(4)}</td>
-                                    <td className="p-2">{row.bodyWeight.toFixed(1)}</td>
-                                    {isSimpleMode ? (
-                                      <>
-                                        <td className="p-2 font-mono text-blue-700 font-semibold">
-                                          {pfoaCss.toFixed(4)}
-                                        </td>
-                                        <td className="p-2 font-mono text-teal-700 font-semibold">
-                                          {pfosCss.toFixed(4)}
-                                        </td>
-                                        <td className="p-2 font-mono text-purple-700 font-semibold">
-                                          {pfhxsCss.toFixed(4)}
-                                        </td>
-                                        <td className="p-2 font-mono text-amber-700 font-semibold">
-                                          {pfnaCss.toFixed(4)}
-                                        </td>
-                                        <td className="p-2 font-mono text-rose-700 font-semibold">
-                                          {genxCss.toFixed(4)}
-                                        </td>
-                                        <td className="p-2 font-mono text-slate-900">
-                                          {row.peakBodyBurden.toFixed(3)}
-                                        </td>
-                                        <td
-                                          className={`p-2 font-mono font-bold ${maxHq > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}
-                                        >
-                                          {maxHq.toFixed(2)}
-                                        </td>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <td className="p-2">
-                                          {row.eliminationHalfLife.toFixed(2)}
-                                        </td>
-                                        <td className="p-2 font-mono text-amber-900 font-semibold">
-                                          {row.peakBodyBurden.toFixed(3)}
-                                        </td>
-                                        <td className="p-2 font-mono text-blue-700 font-bold">
-                                          {row.steadyStateConcentration.toFixed(4)}
-                                        </td>
-                                        <td
-                                          className={`p-2 font-mono font-bold ${row.hazardQuotient > 1.0 ? 'text-red-600' : 'text-emerald-700'}`}
-                                        >
-                                          {row.hazardQuotient.toFixed(2)}
-                                        </td>
-                                      </>
-                                    )}
-                                  </tr>
-                                );
-                              })}
+                                    {row.hazardQuotient.toFixed(2)}
+                                  </td>
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>

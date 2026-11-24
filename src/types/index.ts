@@ -67,9 +67,6 @@ export interface SimulationParameters {
   exposureDuration: ExposureParameterConfig; // years
 }
 
-// Playground Interaction Modes
-export type PlaygroundMode = 'simple' | 'advanced';
-
 // Sampling Configuration
 export type SamplingMethod = 'monte-carlo' | 'latin-hypercube' | 'monte-carlo-lhs';
 
@@ -113,7 +110,7 @@ export interface IterationResult {
   compoundOutputs?: Record<string, CompoundIterationOutput>;
 }
 
-// Multi-Compound Summary Metrics for Simple Mode and Cross-Comparison
+// Multi-Compound Summary Metrics for Cross-Comparison
 export interface CompoundSummary {
   compoundId: string;
   compoundName: string;
@@ -316,14 +313,6 @@ export interface ExceedanceRangeStats {
   detailedAnalysis?: DetailedCriticalAnalysis;
 }
 
-// Simple Profile for 3-Input Mode
-export interface SimpleProfile {
-  bodyWeight: number; // kg
-  age: number; // years
-  waterConsumption: number; // L/day
-  waterConcentrationNgL?: number; // ng/L in drinking water
-}
-
 // Preset Scenario Profile
 export interface DemographicScenario {
   id: string;
@@ -331,5 +320,4 @@ export interface DemographicScenario {
   description: string;
   targetGroup: string;
   parameters: SimulationParameters;
-  simpleProfile?: SimpleProfile;
 }
