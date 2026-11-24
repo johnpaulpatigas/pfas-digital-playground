@@ -11,8 +11,10 @@ import {
   YAxis,
 } from 'recharts';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import { quantileSorted } from '../../simulation/statistics';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import type { IterationResult, SummaryStatistics } from '../../types';
+import { CompoundViewSelector } from './CompoundViewSelector';
 
 interface HistogramChartProps {
   results: IterationResult[];
@@ -55,7 +57,7 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({ results }) => {
     const max = sortedVals[sortedVals.length - 1] || 1;
     const sum = sortedVals.reduce((a, b) => a + b, 0);
     const mean = sum / sortedVals.length;
-    const p95 = sortedVals[Math.floor(sortedVals.length * 0.95)] || 0;
+    const p95 = quantileSorted(sortedVals, 0.95);
 
     const binCount = 30;
     const binWidth = (max - min) / binCount || 0.01;
@@ -90,25 +92,10 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({ results }) => {
   return (
     <div className="w-full space-y-2 font-mono select-none">
       {results?.[0]?.compoundOutputs && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[10px]">
-          <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">
-            PFAS View:
-          </span>
-          {PFAS_COMPOUNDS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setSelectedCompoundId(c.id)}
-              className={`px-2 py-0.5 rounded font-bold border transition-all cursor-pointer ${
-                activeCompoundId === c.id
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              {c.name.split(' ')[0]}
-            </button>
-          ))}
-        </div>
+        <CompoundViewSelector
+          activeCompoundId={activeCompoundId}
+          onSelect={setSelectedCompoundId}
+        />
       )}
 
       <div className="w-full h-64 sm:h-72 md:h-80 pt-1">

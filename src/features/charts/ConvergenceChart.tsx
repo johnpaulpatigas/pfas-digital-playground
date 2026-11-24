@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { calculateConvergenceSeries } from '../../simulation/statistics';
 import type { IterationResult } from '../../types';
 
 interface ConvergenceChartProps {
@@ -16,27 +17,7 @@ interface ConvergenceChartProps {
 }
 
 export const ConvergenceChart: React.FC<ConvergenceChartProps> = ({ results }) => {
-  const convergenceData = useMemo(() => {
-    if (!results || results.length === 0) return [];
-
-    const total = results.length;
-    const step = Math.max(1, Math.floor(total / 150));
-
-    let runningSum = 0;
-    const data = [];
-
-    for (let i = 0; i < total; i++) {
-      runningSum += results[i].steadyStateConcentration;
-      if (i % step === 0 || i === total - 1) {
-        data.push({
-          iteration: i + 1,
-          runningMean: parseFloat((runningSum / (i + 1)).toFixed(4)),
-        });
-      }
-    }
-
-    return data;
-  }, [results]);
+  const convergenceData = useMemo(() => calculateConvergenceSeries(results, 150), [results]);
 
   return (
     <div className="w-full h-64 sm:h-72 md:h-80 pt-2 font-mono select-none">

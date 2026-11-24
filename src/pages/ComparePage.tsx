@@ -33,6 +33,7 @@ import { runMonteCarloLhsSimulation } from '../simulation/monteCarloLhs';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 import { executeComparisonAsync } from '../simulation/runSimulationAsync';
 import {
+  calculateConvergenceSeries,
   calculateMannWhitneyU,
   calculateOneSampleWilcoxon,
   calculatePRCC,
@@ -118,38 +119,9 @@ export const ComparePage: React.FC = () => {
           const lhsStats = calculateSummaryStatistics(lhsResults);
           const mcLhsStats = calculateSummaryStatistics(mcLhsResults);
 
-          // Compute Convergence data over iterations
-          const step = Math.max(1, Math.floor(iterations / 100));
-          let mcSum = 0;
-          let lhsSum = 0;
-          let mcLhsSum = 0;
-          const mcConvergence = [];
-          const lhsConvergence = [];
-          const mcLhsConvergence = [];
-
-          for (let i = 0; i < iterations; i++) {
-            mcSum += mcResults[i].steadyStateConcentration;
-            lhsSum += lhsResults[i].steadyStateConcentration;
-            mcLhsSum += mcLhsResults[i].steadyStateConcentration;
-
-            if (i % step === 0 || i === iterations - 1) {
-              mcConvergence.push({
-                iteration: i + 1,
-                runningMean: parseFloat((mcSum / (i + 1)).toFixed(4)),
-                runningStd: 0,
-              });
-              lhsConvergence.push({
-                iteration: i + 1,
-                runningMean: parseFloat((lhsSum / (i + 1)).toFixed(4)),
-                runningStd: 0,
-              });
-              mcLhsConvergence.push({
-                iteration: i + 1,
-                runningMean: parseFloat((mcLhsSum / (i + 1)).toFixed(4)),
-                runningStd: 0,
-              });
-            }
-          }
+          const mcConvergence = calculateConvergenceSeries(mcResults, 100);
+          const lhsConvergence = calculateConvergenceSeries(lhsResults, 100);
+          const mcLhsConvergence = calculateConvergenceSeries(mcLhsResults, 100);
 
           setComparison({
             mcStats,

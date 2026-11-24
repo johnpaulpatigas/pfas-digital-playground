@@ -1,4 +1,8 @@
-import type { DistributionParams } from '../types';
+import type {
+  DistributionParams,
+  LognormalDistributionParams,
+  TriangularDistributionParams,
+} from '../types';
 
 /**
  * Seedable Mulberry32 Pseudo-Random Number Generator
@@ -73,6 +77,32 @@ export function normalInverseCDF(p: number): number {
 }
 
 /**
+ * Convert arithmetic mean/SD lognormal parameters into log-space (mu, sigma).
+ */
+function getLognormalParameters(dist: LognormalDistributionParams): {
+  mu: number;
+  sigma: number;
+} {
+  const m = Math.max(1e-9, dist.mean);
+  const s = Math.max(0, dist.sd);
+  const varianceRatio = (s * s) / (m * m);
+  const sigma = Math.sqrt(Math.log(1 + varianceRatio));
+  const mu = Math.log(m) - (sigma * sigma) / 2;
+  return { mu, sigma };
+}
+
+/**
+ * Inverse-CDF transform for a triangular distribution at probability u.
+ */
+function sampleTriangular(dist: TriangularDistributionParams, u: number): number {
+  const F = (dist.mode - dist.min) / (dist.max - dist.min);
+  if (u < F) {
+    return dist.min + Math.sqrt(u * (dist.max - dist.min) * (dist.mode - dist.min));
+  }
+  return dist.max - Math.sqrt((1 - u) * (dist.max - dist.min) * (dist.max - dist.mode));
+}
+
+/**
  * Sample a value from a parameter distribution using pseudo-random PRNG
  */
 export function sampleDistribution(dist: DistributionParams, prng: () => number): number {
@@ -90,25 +120,13 @@ export function sampleDistribution(dist: DistributionParams, prng: () => number)
 
     case 'lognormal': {
       const z = sampleStandardNormal(prng);
-      const m = Math.max(1e-9, dist.mean);
-      const s = Math.max(0, dist.sd);
-      if (s === 0) return m;
-      // Convert arithmetic mean (m) and arithmetic standard deviation (s) to log-normal parameters
-      const varianceRatio = (s * s) / (m * m);
-      const sigma = Math.sqrt(Math.log(1 + varianceRatio));
-      const mu = Math.log(m) - (sigma * sigma) / 2;
+      if (Math.max(0, dist.sd) === 0) return Math.max(1e-9, dist.mean);
+      const { mu, sigma } = getLognormalParameters(dist);
       return Math.exp(mu + z * sigma);
     }
 
-    case 'triangular': {
-      const u = prng();
-      const F = (dist.mode - dist.min) / (dist.max - dist.min);
-      if (u < F) {
-        return dist.min + Math.sqrt(u * (dist.max - dist.min) * (dist.mode - dist.min));
-      } else {
-        return dist.max - Math.sqrt((1 - u) * (dist.max - dist.min) * (dist.max - dist.mode));
-      }
-    }
+    case 'triangular':
+      return sampleTriangular(dist, prng());
   }
 }
 
@@ -133,23 +151,13 @@ export function quantileDistribution(dist: DistributionParams, p: number): numbe
 
     case 'lognormal': {
       const z = normalInverseCDF(prob);
-      const m = Math.max(1e-9, dist.mean);
-      const s = Math.max(0, dist.sd);
-      if (s === 0) return m;
-      const varianceRatio = (s * s) / (m * m);
-      const sigma = Math.sqrt(Math.log(1 + varianceRatio));
-      const mu = Math.log(m) - (sigma * sigma) / 2;
+      if (Math.max(0, dist.sd) === 0) return Math.max(1e-9, dist.mean);
+      const { mu, sigma } = getLognormalParameters(dist);
       return Math.exp(mu + z * sigma);
     }
 
-    case 'triangular': {
-      const F = (dist.mode - dist.min) / (dist.max - dist.min);
-      if (prob < F) {
-        return dist.min + Math.sqrt(prob * (dist.max - dist.min) * (dist.mode - dist.min));
-      } else {
-        return dist.max - Math.sqrt((1 - prob) * (dist.max - dist.min) * (dist.max - dist.mode));
-      }
-    }
+    case 'triangular':
+      return sampleTriangular(dist, prob);
   }
 }
 

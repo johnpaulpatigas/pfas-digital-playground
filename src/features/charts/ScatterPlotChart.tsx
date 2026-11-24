@@ -13,6 +13,7 @@ import {
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { useSimulationStore } from '../../stores/useSimulationStore';
 import type { IterationResult } from '../../types';
+import { CompoundViewSelector } from './CompoundViewSelector';
 
 interface ScatterPlotChartProps {
   results: IterationResult[];
@@ -62,25 +63,10 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
   return (
     <div className="w-full space-y-2 font-mono select-none">
       {results?.[0]?.compoundOutputs && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[10px]">
-          <span className="text-slate-500 font-sans text-[11px] font-semibold pr-1">
-            PFAS View:
-          </span>
-          {PFAS_COMPOUNDS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setSelectedCompoundId(c.id)}
-              className={`px-2 py-0.5 rounded font-bold border transition-all cursor-pointer ${
-                activeCompoundId === c.id
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              {c.name.split(' ')[0]}
-            </button>
-          ))}
-        </div>
+        <CompoundViewSelector
+          activeCompoundId={activeCompoundId}
+          onSelect={setSelectedCompoundId}
+        />
       )}
 
       <div className="w-full h-64 sm:h-72 md:h-80 pt-1">

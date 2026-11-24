@@ -15,7 +15,6 @@ import { MathView } from '../../components/ui/MathView';
 import { getDistributionMean } from '../../simulation/distributions';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import {
-  calculateCriticalThresholds,
   calculateDetailedCriticalAnalysis,
   calculateExceedanceRangeStats,
 } from '../../simulation/toxicokinetics';
@@ -59,10 +58,6 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
     [parameters.exposureDuration],
   );
 
-  const analyticalThresholds = useMemo(() => {
-    return calculateCriticalThresholds(compound, paramMeanBW, paramMeanBioavail, paramMeanHalfLife);
-  }, [compound, paramMeanBW, paramMeanBioavail, paramMeanHalfLife]);
-
   const criticalAnalysis = useMemo(() => {
     return calculateDetailedCriticalAnalysis(compound, parameters);
   }, [compound, parameters]);
@@ -76,13 +71,22 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
       paramMeanBioavail,
       paramMeanHalfLife,
       parameters,
+      criticalAnalysis,
     );
-  }, [results, compound, paramMeanBW, paramMeanBioavail, paramMeanHalfLife, parameters]);
+  }, [
+    results,
+    compound,
+    paramMeanBW,
+    paramMeanBioavail,
+    paramMeanHalfLife,
+    parameters,
+    criticalAnalysis,
+  ]);
 
   const activeThreshold =
     metricView === 'bodyBurden'
-      ? analyticalThresholds.criticalBodyBurden
-      : analyticalThresholds.criticalSerumConcentration;
+      ? criticalAnalysis.thresholds.criticalBodyBurden
+      : criticalAnalysis.thresholds.criticalSerumConcentration;
 
   const { chartData, domainMin, domainMax } = useMemo(() => {
     if (!results || results.length === 0) {
@@ -282,9 +286,9 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
               Critical Daily Intake <MathView math="I_{\text{crit}}" />
             </div>
             <div className="text-base font-bold text-slate-900 font-mono">
-              {analyticalThresholds.criticalDailyIntake < 0.001
-                ? `${(analyticalThresholds.criticalDailyIntake * 1000).toFixed(3)} ng/d`
-                : `${analyticalThresholds.criticalDailyIntake.toFixed(5)} µg/d`}
+              {criticalAnalysis.thresholds.criticalDailyIntake < 0.001
+                ? `${(criticalAnalysis.thresholds.criticalDailyIntake * 1000).toFixed(3)} ng/d`
+                : `${criticalAnalysis.thresholds.criticalDailyIntake.toFixed(5)} µg/d`}
             </div>
             <div className="text-[10px] text-slate-500 font-mono">
               <MathView math="BW \times \text{RfD}" />
@@ -558,7 +562,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                       : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">
-                    &gt; {analyticalThresholds.criticalDailyIntake.toFixed(5)} µg/day
+                    &gt; {criticalAnalysis.thresholds.criticalDailyIntake.toFixed(5)} µg/day
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50">
@@ -574,7 +578,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                       : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">
-                    &gt; {analyticalThresholds.criticalBodyBurden.toFixed(3)} µg
+                    &gt; {criticalAnalysis.thresholds.criticalBodyBurden.toFixed(3)} µg
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50">
@@ -592,7 +596,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                       : '-'}
                   </td>
                   <td className="p-2.5 font-mono text-slate-600">
-                    &gt; {analyticalThresholds.criticalSerumConcentration.toFixed(4)} µg/L
+                    &gt; {criticalAnalysis.thresholds.criticalSerumConcentration.toFixed(4)} µg/L
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50">

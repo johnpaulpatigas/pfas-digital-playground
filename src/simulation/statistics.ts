@@ -7,6 +7,7 @@ import type {
   SummaryStatistics,
   WilcoxonOneSampleResult,
 } from '../types';
+import { PARAMETER_KEYS } from './parameters';
 
 export function quantileSorted(sortedValues: number[], q: number): number {
   if (sortedValues.length === 0) return 0;
@@ -17,6 +18,39 @@ export function quantileSorted(sortedValues: number[], q: number): number {
     return sortedValues[base] + rest * (sortedValues[base + 1] - sortedValues[base]);
   }
   return sortedValues[base];
+}
+
+export interface ConvergencePoint {
+  iteration: number;
+  runningMean: number;
+}
+
+/**
+ * Build a downsampled running-mean convergence series for a set of iterations.
+ * The final iteration is always included so the series ends at the full sample mean.
+ */
+export function calculateConvergenceSeries(
+  results: IterationResult[],
+  maxPoints: number = 100,
+): ConvergencePoint[] {
+  const total = results.length;
+  if (total === 0) return [];
+
+  const step = Math.max(1, Math.floor(total / maxPoints));
+  const points: ConvergencePoint[] = [];
+  let runningSum = 0;
+
+  for (let i = 0; i < total; i++) {
+    runningSum += results[i].steadyStateConcentration;
+    if (i % step === 0 || i === total - 1) {
+      points.push({
+        iteration: i + 1,
+        runningMean: parseFloat((runningSum / (i + 1)).toFixed(4)),
+      });
+    }
+  }
+
+  return points;
 }
 
 /**
@@ -268,15 +302,7 @@ export function calculatePRCC(
   parameters: SimulationParameters,
   targetKey: keyof IterationResult = 'steadyStateConcentration',
 ): PRCCResult[] {
-  const paramKeys: Array<keyof SimulationParameters> = [
-    'dailyIntake',
-    'bodyWeight',
-    'age',
-    'waterConsumption',
-    'bioavailability',
-    'eliminationHalfLife',
-    'exposureDuration',
-  ];
+  const paramKeys = PARAMETER_KEYS;
 
   const n = results.length;
   if (n < 5) return [];
@@ -371,15 +397,7 @@ export function calculateSensitivityRanks(
   targetKey: keyof IterationResult = 'steadyStateConcentration',
 ): SensitivityRank[] {
   const targetValues = results.map((r) => r[targetKey] as number);
-  const paramKeys: Array<keyof SimulationParameters> = [
-    'dailyIntake',
-    'bodyWeight',
-    'age',
-    'waterConsumption',
-    'bioavailability',
-    'eliminationHalfLife',
-    'exposureDuration',
-  ];
+  const paramKeys = PARAMETER_KEYS;
 
   // Also calculate PRCC if results are sufficient
   let prccMap: Map<string, PRCCResult> | null = null;

@@ -1,25 +1,22 @@
 import type {
   CompoundSummary,
   IterationResult,
-  SamplingMethod,
+  SamplingConfig,
+  SensitivityRank,
   SimulationParameters,
+  SummaryStatistics,
 } from '../../types';
-import { runLatinHypercubeSimulation } from '../latinHypercube';
-import { runMonteCarloSimulation } from '../monteCarlo';
-import { runMonteCarloLhsSimulation } from '../monteCarloLhs';
-import { calculateSensitivityRanks, calculateSummaryStatistics } from '../statistics';
-import { calculateCompoundSummaries } from '../toxicokinetics';
+import {
+  type ComparisonRunResult,
+  runComparisonPipeline,
+  runSimulationPipeline,
+} from '../simulationRunner';
 
 export interface SimulationWorkerRequest {
   id: string;
   type: 'RUN_SIMULATION' | 'RUN_COMPARISON';
   parameters: SimulationParameters;
-  samplingConfig?: {
-    method: SamplingMethod;
-    iterations: number;
-    seed?: number;
-    compoundId?: string;
-  };
+  samplingConfig?: SamplingConfig;
   iterations?: number;
 }
 
@@ -29,17 +26,10 @@ export interface SimulationWorkerResponse {
   error?: string;
   data?: {
     simResults?: IterationResult[];
-    summaryStats?: ReturnType<typeof calculateSummaryStatistics>;
-    sensitivityRanks?: ReturnType<typeof calculateSensitivityRanks>;
+    summaryStats?: SummaryStatistics;
+    sensitivityRanks?: SensitivityRank[];
     compoundSummaries?: CompoundSummary[];
-    comparisonData?: {
-      mcResults: IterationResult[];
-      lhsResults: IterationResult[];
-      mcLhsResults: IterationResult[];
-      mcRuntimeMs: number;
-      lhsRuntimeMs: number;
-      mcLhsRuntimeMs: number;
-    };
+    comparisonData?: ComparisonRunResult;
   };
 }
 
@@ -48,76 +38,17 @@ self.onmessage = (event: MessageEvent<SimulationWorkerRequest>) => {
 
   try {
     if (type === 'RUN_SIMULATION' && samplingConfig) {
-      let simResults: IterationResult[];
-      const activeCompoundId = samplingConfig.compoundId || 'pfoa';
-      if (samplingConfig.method === 'monte-carlo') {
-        simResults = runMonteCarloSimulation(
-          parameters,
-          samplingConfig.iterations,
-          samplingConfig.seed,
-          activeCompoundId,
-        );
-      } else if (samplingConfig.method === 'latin-hypercube') {
-        simResults = runLatinHypercubeSimulation(
-          parameters,
-          samplingConfig.iterations,
-          samplingConfig.seed,
-          activeCompoundId,
-        );
-      } else {
-        simResults = runMonteCarloLhsSimulation(
-          parameters,
-          samplingConfig.iterations,
-          samplingConfig.seed,
-          activeCompoundId,
-        );
-      }
-
-      const summaryStats = calculateSummaryStatistics(simResults, 'steadyStateConcentration');
-      const sensitivityRanks = calculateSensitivityRanks(
-        simResults,
-        parameters,
-        'steadyStateConcentration',
-      );
-      const compoundSummaries = calculateCompoundSummaries(simResults, parameters);
-
       const response: SimulationWorkerResponse = {
         id,
         type,
-        data: {
-          simResults,
-          summaryStats,
-          sensitivityRanks,
-          compoundSummaries,
-        },
+        data: runSimulationPipeline(parameters, samplingConfig),
       };
       self.postMessage(response);
     } else if (type === 'RUN_COMPARISON') {
-      const t0_mc = performance.now();
-      const mcResults = runMonteCarloSimulation(parameters, iterations, 42);
-      const t1_mc = performance.now();
-
-      const t0_lhs = performance.now();
-      const lhsResults = runLatinHypercubeSimulation(parameters, iterations, 42);
-      const t1_lhs = performance.now();
-
-      const t0_mcLhs = performance.now();
-      const mcLhsResults = runMonteCarloLhsSimulation(parameters, iterations, 42);
-      const t1_mcLhs = performance.now();
-
       const response: SimulationWorkerResponse = {
         id,
         type,
-        data: {
-          comparisonData: {
-            mcResults,
-            lhsResults,
-            mcLhsResults,
-            mcRuntimeMs: parseFloat((t1_mc - t0_mc).toFixed(2)),
-            lhsRuntimeMs: parseFloat((t1_lhs - t0_lhs).toFixed(2)),
-            mcLhsRuntimeMs: parseFloat((t1_mcLhs - t0_mcLhs).toFixed(2)),
-          },
-        },
+        data: { comparisonData: runComparisonPipeline(parameters, iterations) },
       };
       self.postMessage(response);
     }

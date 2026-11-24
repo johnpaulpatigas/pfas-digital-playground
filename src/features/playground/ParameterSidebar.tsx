@@ -4,15 +4,11 @@ import { useMemo } from 'react';
 import { Button } from '../../components/ui/Button';
 import { MathView } from '../../components/ui/MathView';
 import { Tooltip } from '../../components/ui/Tooltip';
+import { PARAMETER_KEYS } from '../../simulation/parameters';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { calculateDetailedCriticalAnalysis } from '../../simulation/toxicokinetics';
 import { useSimulationStore } from '../../stores/useSimulationStore';
-import type {
-  DistributionParams,
-  DistributionType,
-  ParameterCriticalThreshold,
-  SimulationParameters,
-} from '../../types';
+import type { DistributionParams, DistributionType, ParameterCriticalThreshold } from '../../types';
 import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
 import { DistributionSelector } from './DistributionSelector';
 
@@ -37,16 +33,6 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
     loadScenario,
     resetToDefault,
   } = useSimulationStore();
-
-  const parameterKeys: Array<keyof SimulationParameters> = [
-    'dailyIntake',
-    'bodyWeight',
-    'age',
-    'waterConsumption',
-    'bioavailability',
-    'eliminationHalfLife',
-    'exposureDuration',
-  ];
 
   const activeCompound =
     PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
@@ -271,7 +257,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
           )}
         </div>
 
-        {parameterKeys.map((key) => {
+        {PARAMETER_KEYS.map((key) => {
           const param = parameters[key];
           const thresholdInfo = criticalAnalysis.parameterThresholds.find(
             (p: ParameterCriticalThreshold) => p.id === key,

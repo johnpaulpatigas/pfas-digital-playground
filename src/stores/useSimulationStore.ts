@@ -53,14 +53,18 @@ interface SimulationState {
 
 const defaultScenario = DEMOGRAPHIC_PRESETS[0];
 
+const DEFAULT_SAMPLING_CONFIG: SamplingConfig = {
+  method: 'monte-carlo',
+  iterations: 5000,
+  seed: 42,
+  compoundId: 'pfoa',
+};
+
+const cloneDefaultParameters = () => JSON.parse(JSON.stringify(defaultScenario.parameters));
+
 export const useSimulationStore = create<SimulationState>((set, get) => ({
-  parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
-  samplingConfig: {
-    method: 'monte-carlo',
-    iterations: 5000,
-    seed: 42,
-    compoundId: 'pfoa',
-  },
+  parameters: cloneDefaultParameters(),
+  samplingConfig: { ...DEFAULT_SAMPLING_CONFIG },
   activeScenarioId: defaultScenario.id,
 
   isSimulating: false,
@@ -125,21 +129,12 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
           case 'fixed':
             updatedDist = { type: 'fixed', value: compound.halfLifeYears };
             break;
-          case 'normal': {
-            const sdRatio = curDist.mean > 0 ? curDist.sd / curDist.mean : 0.25;
-            updatedDist = {
-              type: 'normal',
-              mean: compound.halfLifeYears,
-              sd: parseFloat(
-                (compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2),
-              ),
-            };
-            break;
-          }
+          case 'normal':
           case 'lognormal': {
+            // Preserve the relative spread of the previous distribution (clamped to 10–50%).
             const sdRatio = curDist.mean > 0 ? curDist.sd / curDist.mean : 0.25;
             updatedDist = {
-              type: 'lognormal',
+              type: curDist.type,
               mean: compound.halfLifeYears,
               sd: parseFloat(
                 (compound.halfLifeYears * Math.min(0.5, Math.max(0.1, sdRatio))).toFixed(2),
@@ -228,14 +223,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
   resetToDefault: () => {
     set({
-      parameters: JSON.parse(JSON.stringify(defaultScenario.parameters)),
+      parameters: cloneDefaultParameters(),
       activeScenarioId: defaultScenario.id,
-      samplingConfig: {
-        method: 'monte-carlo',
-        iterations: 5000,
-        seed: 42,
-        compoundId: 'pfoa',
-      },
+      samplingConfig: { ...DEFAULT_SAMPLING_CONFIG },
       results: null,
       summaryStats: null,
       sensitivityRanks: [],

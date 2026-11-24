@@ -1,6 +1,7 @@
 import type { DistributionParams, IterationResult, SimulationParameters } from '../types';
 import { createPRNG, quantileDistribution } from './distributions';
-import { calculateToxicokinetics } from './toxicokinetics';
+import { PARAMETER_KEYS } from './parameters';
+import { evaluateParameterSample, type ParameterSampleValues } from './sampling';
 
 /**
  * Fisher-Yates Array Shuffle algorithm using PRNG
@@ -45,54 +46,20 @@ export function runLatinHypercubeSimulation(
 ): IterationResult[] {
   const prng = createPRNG(seed);
 
-  const dailyIntakeSamples = generateLHSParameterSamples(
-    parameters.dailyIntake.distribution,
-    iterations,
-    prng,
-  );
-  const bodyWeightSamples = generateLHSParameterSamples(
-    parameters.bodyWeight.distribution,
-    iterations,
-    prng,
-  );
-  const ageSamples = generateLHSParameterSamples(parameters.age.distribution, iterations, prng);
-  const waterConsumptionSamples = generateLHSParameterSamples(
-    parameters.waterConsumption.distribution,
-    iterations,
-    prng,
-  );
-  const bioavailabilitySamples = generateLHSParameterSamples(
-    parameters.bioavailability.distribution,
-    iterations,
-    prng,
-  );
-  const eliminationHalfLifeSamples = generateLHSParameterSamples(
-    parameters.eliminationHalfLife.distribution,
-    iterations,
-    prng,
-  );
-  const exposureDurationSamples = generateLHSParameterSamples(
-    parameters.exposureDuration.distribution,
-    iterations,
-    prng,
-  );
+  // Stratify each parameter independently, then pair strata by iteration index.
+  const sampleArrays = {} as Record<keyof SimulationParameters, number[]>;
+  for (const key of PARAMETER_KEYS) {
+    sampleArrays[key] = generateLHSParameterSamples(parameters[key].distribution, iterations, prng);
+  }
 
   const results: IterationResult[] = new Array(iterations);
 
   for (let i = 0; i < iterations; i++) {
-    results[i] = calculateToxicokinetics(
-      {
-        dailyIntake: Math.max(0.0001, dailyIntakeSamples[i]),
-        bodyWeight: Math.max(20, bodyWeightSamples[i]),
-        age: Math.max(1, ageSamples[i]),
-        waterConsumption: Math.max(0.1, waterConsumptionSamples[i]),
-        bioavailability: Math.max(0.01, Math.min(1.0, bioavailabilitySamples[i])),
-        eliminationHalfLife: Math.max(0.1, eliminationHalfLifeSamples[i]),
-        exposureDuration: Math.max(0.1, exposureDurationSamples[i]),
-        compoundId,
-      },
-      i + 1,
-    );
+    const samples = {} as ParameterSampleValues;
+    for (const key of PARAMETER_KEYS) {
+      samples[key] = sampleArrays[key][i];
+    }
+    results[i] = evaluateParameterSample(samples, i + 1, compoundId);
   }
 
   return results;

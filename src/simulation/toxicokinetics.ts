@@ -9,8 +9,9 @@ import type {
   ParameterCriticalThreshold,
   SimulationParameters,
 } from '../types';
+import { getDistributionMean } from './distributions';
 import { PFAS_COMPOUNDS, type PFASCompound } from './pfasCompounds';
-import { calculateOneSampleWilcoxon } from './statistics';
+import { calculateOneSampleWilcoxon, quantileSorted } from './statistics';
 
 export interface ToxicokineticInput {
   dailyIntake: number; // µg/day
@@ -44,43 +45,23 @@ export function calculateToxicokinetics(
 
   const compound = PFAS_COMPOUNDS.find((c) => c.id === compoundId) || PFAS_COMPOUNDS[0];
 
-  // Half-life in days = T_1/2 (years) * 365.25
-  const halfLifeDays = eliminationHalfLife * 365.25;
-
-  // Elimination rate constant k_e (day^-1)
-  const eliminationRate = Math.LN2 / Math.max(1, halfLifeDays);
-
-  // Volume of Distribution total (L)
-  const volumeOfDistributionTotal = Math.max(1, bodyWeight * compound.volumeOfDistribution);
-
   // Daily absorbed dose (µg/day)
   const absorbedDose = dailyIntake * bioavailability;
 
-  // Steady State Blood Serum Concentration C_ss (µg/L)
-  const steadyStateConcentration = absorbedDose / (volumeOfDistributionTotal * eliminationRate);
-
-  // Cumulative Body Burden B(t) after exposureDuration (µg)
+  // Cumulative exposure window (days)
   const exposureDays = exposureDuration * 365.25;
-  const peakBodyBurden =
-    (absorbedDose / eliminationRate) * (1 - Math.exp(-eliminationRate * exposureDays));
-
-  // Whole Body Clearance Rate CL (L/kg/day)
-  const clearanceRate = eliminationRate * compound.volumeOfDistribution;
 
   // Daily intake per kg body mass (ug/kg/day)
   const dailyDosePerKg = dailyIntake / Math.max(10, bodyWeight);
 
-  // Hazard Quotient HQ = Dose / Reference Dose (RfD)
-  const hazardQuotient = compound.rfdDose > 0 ? dailyDosePerKg / compound.rfdDose : 0;
-
-  // Multi-compound evaluations for all 5 PFAS compounds and mixture Hazard Index (HI)
+  // Multi-compound evaluations for all 5 PFAS compounds and mixture Hazard Index (HI).
+  // The active compound uses the sampled half-life; the others use their reference value.
   const compoundOutputs: Record<string, CompoundIterationOutput> = {};
   let hazardIndex = 0;
   for (let i = 0; i < PFAS_COMPOUNDS.length; i++) {
     const c = PFAS_COMPOUNDS[i];
     const cHalfLife = compoundId === c.id ? eliminationHalfLife : c.halfLifeYears;
-    const cHalfLifeDays = cHalfLife * 365.25;
-    const cEliminationRate = Math.LN2 / Math.max(1, cHalfLifeDays);
+    const cEliminationRate = Math.LN2 / Math.max(1, cHalfLife * 365.25);
     const cVdTotal = Math.max(1, bodyWeight * c.volumeOfDistribution);
     const cCss = absorbedDose / (cVdTotal * cEliminationRate);
     const cBodyBurden =
@@ -99,6 +80,9 @@ export function calculateToxicokinetics(
     };
   }
 
+  // The active compound's output is already part of the multi-compound evaluation.
+  const activeOutput = compoundOutputs[compound.id];
+
   return {
     iteration: iterationIndex,
     dailyIntake,
@@ -108,11 +92,11 @@ export function calculateToxicokinetics(
     bioavailability,
     eliminationHalfLife,
     exposureDuration,
-    eliminationRate,
-    steadyStateConcentration: Math.max(0, steadyStateConcentration),
-    peakBodyBurden: Math.max(0, peakBodyBurden),
-    clearanceRate,
-    hazardQuotient: Math.max(0, hazardQuotient),
+    eliminationRate: activeOutput.eliminationRate,
+    steadyStateConcentration: activeOutput.steadyStateConcentration,
+    peakBodyBurden: activeOutput.peakBodyBurden,
+    clearanceRate: activeOutput.clearanceRate,
+    hazardQuotient: activeOutput.hazardQuotient,
     hazardIndex: Math.max(0, hazardIndex),
     compoundOutputs,
   };
@@ -165,38 +149,40 @@ export function extractDistributionCentralValue(distribution: DistributionParams
   max: number;
   displayRange: string;
 } {
+  const mean = getDistributionMean(distribution);
+
   switch (distribution.type) {
     case 'fixed':
       return {
-        mean: distribution.value,
+        mean,
         min: distribution.value,
         max: distribution.value,
         displayRange: `${distribution.value}`,
       };
     case 'uniform':
       return {
-        mean: (distribution.min + distribution.max) / 2,
+        mean,
         min: distribution.min,
         max: distribution.max,
         displayRange: `[${distribution.min} to ${distribution.max}]`,
       };
     case 'normal':
       return {
-        mean: distribution.mean,
+        mean,
         min: Math.max(0, distribution.mean - 2 * distribution.sd),
         max: distribution.mean + 2 * distribution.sd,
         displayRange: `${distribution.mean} (±${distribution.sd})`,
       };
     case 'lognormal':
       return {
-        mean: distribution.mean,
+        mean,
         min: Math.max(0, distribution.mean - 2 * distribution.sd),
         max: distribution.mean + 2 * distribution.sd,
         displayRange: `${distribution.mean} (σ: ${distribution.sd})`,
       };
     case 'triangular':
       return {
-        mean: (distribution.min + distribution.mode + distribution.max) / 3,
+        mean,
         min: distribution.min,
         max: distribution.max,
         displayRange: `Mode ${distribution.mode} [${distribution.min} to ${distribution.max}]`,
@@ -308,12 +294,12 @@ export function calculateDetailedCriticalAnalysis(
 
   // Critical body burden at current exposure duration & steady state
   const criticalBodyBurden = (criticalAbsorbedDose / eliminationRate) * steadyStateFraction;
-  const criticalSteadyStateBodyBurden = criticalAbsorbedDose / eliminationRate;
+  const criticalSteadyStateBodyBurden = thresholds.criticalBodyBurden;
 
   // Serum Css
   const volumeOfDistributionTotal = Math.max(1, meanBW * compound.volumeOfDistribution);
   const currentSerumCss = currentAbsorbedDose / (volumeOfDistributionTotal * eliminationRate);
-  const criticalSerumCss = criticalAbsorbedDose / (volumeOfDistributionTotal * eliminationRate);
+  const criticalSerumCss = thresholds.criticalSerumConcentration;
 
   // Hazard Quotient
   const dailyDosePerKg = meanIntake / Math.max(1, meanBW);
@@ -525,17 +511,6 @@ export function calculateDetailedCriticalAnalysis(
   };
 }
 
-function quantileSorted(sortedValues: number[], q: number): number {
-  if (sortedValues.length === 0) return 0;
-  const pos = (sortedValues.length - 1) * q;
-  const base = Math.floor(pos);
-  const rest = pos - base;
-  if (sortedValues[base + 1] !== undefined) {
-    return sortedValues[base] + rest * (sortedValues[base + 1] - sortedValues[base]);
-  }
-  return sortedValues[base];
-}
-
 /**
  * Empirical Exceedance Range Breakdown
  * Calculates statistical ranges (min, median, max, P95) for iterations exceeding HQ > 1.0 vs safe
@@ -547,17 +522,15 @@ export function calculateExceedanceRangeStats(
   meanBioavailability: number = 0.9,
   meanHalfLife?: number,
   parameters?: SimulationParameters,
+  precomputedAnalysis?: DetailedCriticalAnalysis,
 ): ExceedanceRangeStats {
   const totalCount = results.length;
-  const thresholds = calculateCriticalThresholds(
-    compound,
-    meanBodyWeight,
-    meanBioavailability,
-    meanHalfLife,
-  );
-  const detailedAnalysis = parameters
-    ? calculateDetailedCriticalAnalysis(compound, parameters)
-    : undefined;
+  const detailedAnalysis =
+    precomputedAnalysis ??
+    (parameters ? calculateDetailedCriticalAnalysis(compound, parameters) : undefined);
+  const thresholds =
+    detailedAnalysis?.thresholds ??
+    calculateCriticalThresholds(compound, meanBodyWeight, meanBioavailability, meanHalfLife);
 
   if (totalCount === 0) {
     return {
@@ -597,13 +570,8 @@ export function calculateExceedanceRangeStats(
   };
 
   const getBasicStats = (arr: IterationResult[], key: keyof IterationResult) => {
-    if (arr.length === 0) return { min: 0, median: 0, max: 0 };
-    const vals = arr.map((r) => r[key] as number).sort((a, b) => a - b);
-    return {
-      min: vals[0],
-      median: quantileSorted(vals, 0.5),
-      max: vals[vals.length - 1],
-    };
+    const { min, median, max } = getStats(arr, key);
+    return { min, median, max };
   };
 
   return {
