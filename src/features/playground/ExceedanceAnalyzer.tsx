@@ -194,7 +194,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
         ))}
       </div>
 
-      {/* 1. Executive Toxicokinetic Baseline & Exceedance Summary */}
+      {/* Baseline and exceedance summary */}
       <div className="card-panel p-5 rounded-xl space-y-4 bg-white border border-slate-200">
         <div className="border-b border-slate-200 pb-3">
           <div className="space-y-0.5">

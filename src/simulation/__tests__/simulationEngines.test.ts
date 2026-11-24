@@ -66,7 +66,7 @@ describe('Simulation Engines', () => {
     expect(results1[0].steadyStateConcentration).toBe(results2[0].steadyStateConcentration);
   });
 
-  it('runMonteCarloLhsSimulation combines MC and LHS seamlessly with multi-compound outputs', () => {
+  it('runMonteCarloLhsSimulation combines MC and LHS with multi-compound outputs', () => {
     const results = runMonteCarloLhsSimulation(defaultParameters, 1000, 42);
 
     expect(results.length).toBe(1000);

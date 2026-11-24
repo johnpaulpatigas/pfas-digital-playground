@@ -131,7 +131,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
             break;
           case 'normal':
           case 'lognormal': {
-            // Preserve the relative spread of the previous distribution (clamped to 10–50%).
+            // Preserve the previous distribution's relative spread, limited to 10% to 50%.
             const sdRatio = curDist.mean > 0 ? curDist.sd / curDist.mean : 0.25;
             updatedDist = {
               type: curDist.type,

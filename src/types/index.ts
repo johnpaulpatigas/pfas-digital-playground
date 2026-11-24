@@ -1,5 +1,5 @@
 /**
- * PFAS Toxicokinetic Modeling Domain Types (Research Grade)
+ * Domain types for PFAS toxicokinetic modeling.
  */
 
 // Supported Probability Distributions

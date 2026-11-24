@@ -60,7 +60,6 @@ export const ScientificGuidePage: React.FC = () => {
           </p>
         </div>
 
-        {/* Quick Topics Pills */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
           <button
             onClick={() => setActiveTab('risk')}
@@ -137,11 +136,8 @@ export const ScientificGuidePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Guide Content with AnimatePresence */}
+      {/* Guide content */}
       <AnimatePresence mode="wait">
-        {/* ========================================================================= */}
-        {/* TAB 1: HEALTH RISK ASSESSMENT */}
-        {/* ========================================================================= */}
         {activeTab === 'risk' && (
           <motion.div
             key="risk-tab"
@@ -151,7 +147,6 @@ export const ScientificGuidePage: React.FC = () => {
             transition={{ duration: 0.12, ease: 'easeOut' }}
             className="space-y-8"
           >
-            {/* Core Section: Hazard Quotient */}
             <section className="card-panel p-6 sm:p-8 rounded-3xl space-y-6 border border-slate-200 bg-white">
               <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
                 <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center text-red-600 flex-shrink-0">
@@ -364,7 +359,6 @@ export const ScientificGuidePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Section on 6 Critical Parameter Thresholds & 25-30 yr Chronic Body Burden */}
               <div className="p-6 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-4 font-sans text-xs">
                 <div className="flex items-center gap-2 text-purple-950 font-bold text-sm font-heading">
                   <Scale className="w-4 h-4 text-purple-700" />
@@ -517,9 +511,6 @@ export const ScientificGuidePage: React.FC = () => {
           </motion.div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TAB 2: SENSITIVITY ANALYSIS */}
-        {/* ========================================================================= */}
         {activeTab === 'sensitivity' && (
           <motion.div
             key="sensitivity-tab"
@@ -689,9 +680,6 @@ export const ScientificGuidePage: React.FC = () => {
           </motion.div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TAB 3: SCENARIO ANALYSIS */}
-        {/* ========================================================================= */}
         {activeTab === 'scenario' && (
           <motion.div
             key="scenario-tab"
@@ -870,9 +858,6 @@ export const ScientificGuidePage: React.FC = () => {
           </motion.div>
         )}
 
-        {/* ========================================================================= */}
-        {/* TAB 4: PARAMETER RANGES & PLAYGROUND USAGE GUIDE */}
-        {/* ========================================================================= */}
         {activeTab === 'parameters' && (
           <motion.div
             key="parameters-tab"
@@ -922,7 +907,6 @@ export const ScientificGuidePage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Bottom CTA Card */}
       <div className="rounded-3xl bg-slate-900 border border-slate-800 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
         <div className="space-y-1.5 text-center sm:text-left">
           <h3 className="text-lg sm:text-xl font-bold text-white font-heading tracking-tight">

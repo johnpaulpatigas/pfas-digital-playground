@@ -77,7 +77,7 @@ export const calculateCriticalSerumCss = (
 };
 
 /**
- * 1-Compartment Pharmacokinetic Model for PFAS (Research Grade)
+ * One-compartment toxicokinetic model for PFAS.
  * Computes outputs for the active compound and populates compoundOutputs for all 5 PFAS types.
  */
 export function calculateToxicokinetics(

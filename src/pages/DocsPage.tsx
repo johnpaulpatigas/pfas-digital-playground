@@ -102,7 +102,7 @@ export const DocsPage: React.FC = () => {
             <p className="text-slate-600 leading-relaxed">
               Symmetric Gaussian distribution defined by mean (<MathView math="\mu" />) and standard
               deviation (<MathView math="\sigma" />
-              ). Generated using the Box-Muller transform:
+              ). The simulator uses the Box-Muller transform:
               <span className="block pt-1 font-mono text-blue-800">
                 <MathView math="Z = \sqrt{-2 \ln(U_1)} \cos(2\pi U_2)" />
               </span>

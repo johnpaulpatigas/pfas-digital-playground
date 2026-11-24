@@ -17,7 +17,6 @@ import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 export const HomePage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-      {/* Hero Section */}
       <section className="relative rounded-2xl p-8 sm:p-10 bg-white border border-slate-200 shadow-xs space-y-6">
         <div className="max-w-3xl space-y-5">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-800 text-xs font-mono font-medium">
@@ -65,7 +64,6 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Target PFAS Compound Library Highlights */}
       <section className="space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
           <div className="flex items-center gap-2">
@@ -99,7 +97,6 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Core Scientific Pillars */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
@@ -140,7 +137,6 @@ export const HomePage: React.FC = () => {
         })}
       </section>
 
-      {/* Demographic Context Section */}
       <section className="card-panel rounded-2xl p-7 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
         <div className="space-y-3">
           <span className="text-xs font-mono text-blue-700 uppercase tracking-widest font-semibold">
