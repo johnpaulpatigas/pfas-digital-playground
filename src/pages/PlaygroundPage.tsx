@@ -73,7 +73,7 @@ export const PlaygroundPage: React.FC = () => {
   }, [results, isSimulating, runSimulation]);
 
   return (
-    <div className="space-y-5">
+    <div className="px-4 sm:px-6 lg:px-8 py-8 space-y-5">
       {/* Top Title Card */}
       <div className="card-panel p-4 sm:p-5 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-1">

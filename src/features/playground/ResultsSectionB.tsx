@@ -1,5 +1,14 @@
-import { AlertTriangle, Award, CheckCircle2, Flame, ShieldAlert } from 'lucide-react';
+import {
+  AlertTriangle,
+  Award,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+  ShieldAlert,
+} from 'lucide-react';
 import type React from 'react';
+import { useState } from 'react';
 import {
   Bar,
   BarChart,
@@ -33,6 +42,15 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
   const hiRow = wilcoxonRows.find((r) => r.id === 'hi');
   const significantCompounds = wilcoxonRows.filter((r) => r.id !== 'hi' && r.isSignificantRisk);
 
+  const [rankingPage, setRankingPage] = useState(0);
+  const rankingPageSize = 8;
+  const rankingPageCount = Math.max(1, Math.ceil(sensitivityRanks.length / rankingPageSize));
+  const currentRankingPage = Math.min(rankingPage, rankingPageCount - 1);
+  const visibleRanks = sensitivityRanks.slice(
+    currentRankingPage * rankingPageSize,
+    (currentRankingPage + 1) * rankingPageSize,
+  );
+
   return (
     <div className="space-y-6">
       {/* 1. Top Exposure Driver */}
@@ -55,8 +73,8 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
             </span>
           </div>
           <div className="divide-y divide-slate-100">
-            {sensitivityRanks.map((item, idx) => {
-              const isTop = idx === 0;
+            {visibleRanks.map((item) => {
+              const isTop = item.rank === 1;
               return (
                 <div
                   key={item.parameterId}
@@ -91,6 +109,35 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
                 </div>
               );
             })}
+          </div>
+
+          <div className="px-3 py-2 border-t border-slate-200 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <span className="text-[10px] font-mono text-slate-500">
+              Showing {sensitivityRanks.length === 0 ? 0 : currentRankingPage * rankingPageSize + 1}{' '}
+              to {Math.min((currentRankingPage + 1) * rankingPageSize, sensitivityRanks.length)} of{' '}
+              {sensitivityRanks.length} drivers
+            </span>
+            <div className="flex items-center gap-1 text-[10px] font-mono">
+              <button
+                type="button"
+                disabled={currentRankingPage === 0}
+                onClick={() => setRankingPage(currentRankingPage - 1)}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-200 text-slate-700 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" /> Previous
+              </button>
+              <span className="px-2 text-slate-600">
+                {currentRankingPage + 1} / {rankingPageCount}
+              </span>
+              <button
+                type="button"
+                disabled={currentRankingPage >= rankingPageCount - 1}
+                onClick={() => setRankingPage(currentRankingPage + 1)}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-200 text-slate-700 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                Next <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 

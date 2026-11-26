@@ -1,4 +1,4 @@
-import { Layers, Scale, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers, Scale, ShieldAlert, ShieldCheck } from 'lucide-react';
 import type React from 'react';
 import { useMemo, useState } from 'react';
 import {
@@ -41,6 +41,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
   const [selectedCompoundId, setSelectedCompoundId] = useState<string>(defaultCompoundId);
   const compound = PFAS_COMPOUNDS.find((c) => c.id === selectedCompoundId) || PFAS_COMPOUNDS[0];
   const [metricView, setMetricView] = useState<'bodyBurden' | 'serum'>('bodyBurden');
+  const [thresholdPage, setThresholdPage] = useState(0);
 
   // One shared summary drives every headline number in this panel and the
   // statistics panel; no mean-input substitute is displayed as a result.
@@ -67,6 +68,15 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
   const criticalAnalysis = useMemo(() => {
     return calculateDetailedCriticalAnalysis(compound, parameters);
   }, [compound, parameters]);
+
+  const parameterThresholds = criticalAnalysis.parameterThresholds;
+  const thresholdPageSize = 3;
+  const thresholdPageCount = Math.max(1, Math.ceil(parameterThresholds.length / thresholdPageSize));
+  const currentThresholdPage = Math.min(thresholdPage, thresholdPageCount - 1);
+  const visibleThresholds = parameterThresholds.slice(
+    currentThresholdPage * thresholdPageSize,
+    (currentThresholdPage + 1) * thresholdPageSize,
+  );
 
   const exceedanceStats = useMemo(() => {
     if (!results || results.length === 0) return null;
@@ -364,7 +374,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-800">
-              {criticalAnalysis.parameterThresholds.map((param: ParameterCriticalThreshold) => {
+              {visibleThresholds.map((param: ParameterCriticalThreshold) => {
                 return (
                   <tr key={param.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="p-2.5">
@@ -403,6 +413,36 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2.5 border-t border-slate-200">
+          <span className="text-[11px] text-slate-500 font-sans">
+            Showing{' '}
+            {parameterThresholds.length === 0 ? 0 : currentThresholdPage * thresholdPageSize + 1} to{' '}
+            {Math.min((currentThresholdPage + 1) * thresholdPageSize, parameterThresholds.length)}{' '}
+            of {parameterThresholds.length} parameters
+          </span>
+          <div className="flex items-center gap-1 text-[11px] font-mono">
+            <button
+              type="button"
+              disabled={currentThresholdPage === 0}
+              onClick={() => setThresholdPage(currentThresholdPage - 1)}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" /> Previous
+            </button>
+            <span className="px-2 text-slate-600">
+              {currentThresholdPage + 1} / {thresholdPageCount}
+            </span>
+            <button
+              type="button"
+              disabled={currentThresholdPage >= thresholdPageCount - 1}
+              onClick={() => setThresholdPage(currentThresholdPage + 1)}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            >
+              Next <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
