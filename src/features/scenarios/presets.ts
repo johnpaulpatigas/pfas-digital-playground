@@ -15,15 +15,22 @@ const intakeConfig = (
   distribution,
 });
 
-const assumedIntakeGroup = (mean: number, sd: number) => ({
-  dailyIntakePfoa: intakeConfig('pfoa', { type: 'lognormal', mean, sd }),
-  dailyIntakePfos: intakeConfig('pfos', { type: 'lognormal', mean, sd }),
-  dailyIntakePfhxs: intakeConfig('pfhxs', { type: 'lognormal', mean, sd }),
-  dailyIntakePfna: intakeConfig('pfna', { type: 'lognormal', mean, sd }),
-  dailyIntakeGenx: intakeConfig('genx', { type: 'lognormal', mean, sd }),
+const assumedIntakeGroup = (
+  pfoa: [number, number],
+  pfos: [number, number],
+  other: [number, number],
+) => ({
+  dailyIntakePfoa: intakeConfig('pfoa', { type: 'lognormal', mean: pfoa[0], sd: pfoa[1] }),
+  dailyIntakePfos: intakeConfig('pfos', { type: 'lognormal', mean: pfos[0], sd: pfos[1] }),
+  dailyIntakePfhxs: intakeConfig('pfhxs', { type: 'lognormal', mean: other[0], sd: other[1] }),
+  dailyIntakePfna: intakeConfig('pfna', { type: 'lognormal', mean: other[0], sd: other[1] }),
+  dailyIntakeGenx: intakeConfig('genx', { type: 'lognormal', mean: other[0], sd: other[1] }),
 });
 
-const mclWaterConcentrationConfig = (compoundId: string): ExposureParameterConfig => {
+const baselineWaterConcentrationConfig = (
+  compoundId: string,
+  value: number,
+): ExposureParameterConfig => {
   const compound = PFAS_COMPOUNDS.find((item) => item.id === compoundId);
   if (!compound) throw new Error(`Unknown PFAS compound: ${compoundId}`);
   return {
@@ -31,44 +38,39 @@ const mclWaterConcentrationConfig = (compoundId: string): ExposureParameterConfi
     name: `${compound.id.toUpperCase()} Water Concentration`,
     unit: 'ng/L',
     description: `Drinking-water concentration for ${compound.id.toUpperCase()}.`,
-    scientificContext: `Scenario assumes water at the 2024 EPA MCL of ${compound.epaMCL} ng/L; replace with measured site concentration.`,
-    distribution: { type: 'fixed', value: compound.epaMCL },
+    scientificContext: `Low-level treated-water baseline (${value} ng/L, below the ${compound.epaMCL} ng/L 2024 EPA MCL); replace with measured site concentration.`,
+    distribution: { type: 'fixed', value },
   };
 };
 
-const mclWaterConcentrationGroup = () => ({
-  waterConcentrationPfoa: mclWaterConcentrationConfig('pfoa'),
-  waterConcentrationPfos: mclWaterConcentrationConfig('pfos'),
-  waterConcentrationPfhxs: mclWaterConcentrationConfig('pfhxs'),
-  waterConcentrationPfna: mclWaterConcentrationConfig('pfna'),
-  waterConcentrationGenx: mclWaterConcentrationConfig('genx'),
+const baselineWaterConcentrationGroup = () => ({
+  waterConcentrationPfoa: baselineWaterConcentrationConfig('pfoa', 0.5),
+  waterConcentrationPfos: baselineWaterConcentrationConfig('pfos', 0.5),
+  waterConcentrationPfhxs: baselineWaterConcentrationConfig('pfhxs', 1.0),
+  waterConcentrationPfna: baselineWaterConcentrationConfig('pfna', 1.0),
+  waterConcentrationGenx: baselineWaterConcentrationConfig('genx', 1.0),
 });
 
 const zeroWaterConcentrationGroup = () => ({
   waterConcentrationPfoa: {
-    ...mclWaterConcentrationConfig('pfoa'),
+    ...baselineWaterConcentrationConfig('pfoa', 0),
     scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
-    distribution: { type: 'fixed' as const, value: 0 },
   },
   waterConcentrationPfos: {
-    ...mclWaterConcentrationConfig('pfos'),
+    ...baselineWaterConcentrationConfig('pfos', 0),
     scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
-    distribution: { type: 'fixed' as const, value: 0 },
   },
   waterConcentrationPfhxs: {
-    ...mclWaterConcentrationConfig('pfhxs'),
+    ...baselineWaterConcentrationConfig('pfhxs', 0),
     scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
-    distribution: { type: 'fixed' as const, value: 0 },
   },
   waterConcentrationPfna: {
-    ...mclWaterConcentrationConfig('pfna'),
+    ...baselineWaterConcentrationConfig('pfna', 0),
     scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
-    distribution: { type: 'fixed' as const, value: 0 },
   },
   waterConcentrationGenx: {
-    ...mclWaterConcentrationConfig('genx'),
+    ...baselineWaterConcentrationConfig('genx', 0),
     scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
-    distribution: { type: 'fixed' as const, value: 0 },
   },
 });
 
@@ -80,9 +82,9 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     description:
       'Baseline physiological scenario for adult women in the Philippines. PFAS-specific intake distributions are provisional assumptions, not survey measurements.',
     parameters: {
-      dailyIntake: intakeConfig('pfoa', { type: 'lognormal', mean: 0.05, sd: 0.02 }),
-      ...assumedIntakeGroup(0.05, 0.02),
-      ...mclWaterConcentrationGroup(),
+      dailyIntake: intakeConfig('pfoa', { type: 'lognormal', mean: 0.0005, sd: 0.0002 }),
+      ...assumedIntakeGroup([0.0005, 0.0002], [0.002, 0.0005], [0.01, 0.003]),
+      ...baselineWaterConcentrationGroup(),
       bodyWeight: {
         id: 'bodyWeight',
         name: 'Body Weight',
@@ -141,9 +143,9 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     description:
       'Pregnancy physiology scenario. PFAS-specific intake distributions are provisional assumptions, not measured maternal exposures.',
     parameters: {
-      dailyIntake: intakeConfig('pfoa', { type: 'lognormal', mean: 0.07, sd: 0.03 }),
-      ...assumedIntakeGroup(0.07, 0.03),
-      ...mclWaterConcentrationGroup(),
+      dailyIntake: intakeConfig('pfoa', { type: 'lognormal', mean: 0.0006, sd: 0.0002 }),
+      ...assumedIntakeGroup([0.0006, 0.0002], [0.0025, 0.0006], [0.012, 0.004]),
+      ...baselineWaterConcentrationGroup(),
       bodyWeight: {
         id: 'bodyWeight',
         name: 'Body Weight',

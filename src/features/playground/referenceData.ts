@@ -33,10 +33,10 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 'C_w',
     unit: 'ng/L',
     min: '0 ng/L',
-    average: 'Scenario starts at each compound MCL',
+    average: 'Scenario starts at low-level treated-water baseline (0.5–1.0 ng/L)',
     max: 'Study/site-specific',
     recommendedDist: 'Set from measured concentration data',
-    source: '2024 EPA NPDWR MCLs; preset values are MCL scenarios, not measured water data',
+    source: '2024 EPA NPDWR MCLs (4–10 ng/L); preset values are low-level baselines, not measured water data',
     description:
       'Concentration of a PFAS in drinking water. Water-derived intake is concentration × daily water consumption, converted from ng to µg.',
     criticalCutoff: 'C_{w,crit} = 1000 × (BW × RfD - I_{nw}) / W',
