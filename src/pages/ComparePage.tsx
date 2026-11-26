@@ -418,76 +418,43 @@ export const ComparePage: React.FC = () => {
                   )
                 }
               >
-                {showFrameworkTransition
-                  ? 'Hide SOP Evolution'
-                  : 'View Old vs New SOP & Hypotheses'}
+                {showFrameworkTransition ? 'Hide SOP & Hypotheses' : 'View SOP & Hypotheses'}
               </Button>
             </div>
 
-            {/* Collapsible Comparison: Old SOP vs New Proposed SOP */}
+            {/* Collapsible Research Framework and Hypotheses */}
             {showFrameworkTransition && (
               <div className="mt-4 p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 font-sans text-xs">
                 <div className="flex items-center gap-2 text-purple-900 font-bold font-heading text-sm border-b border-slate-200 pb-2">
                   <FileText className="w-4 h-4 text-purple-700" />
-                  <span>
-                    Research Framework Evolution: Old SOP & Hypotheses vs. New Proposed Framework
-                  </span>
+                  <span>Research Framework & Hypotheses</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Old SOP Box */}
-                  <div className="p-4 rounded-xl bg-white border border-rose-200 space-y-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-rose-50 text-rose-800 border border-rose-200">
-                      Previous / Initial Framework (Old SOP)
-                    </span>
-                    <ul className="space-y-1.5 text-slate-600 text-[11px] list-disc list-inside">
-                      <li>
-                        <strong>Q1 (Css):</strong> Evaluated against external Human Biomonitoring
-                        guidance values (HBM-I & HBM-II) without direct inferential comparison.
-                      </li>
-                      <li>
-                        <strong>Q2 (Body Burden):</strong> Assumed a generic{' '}
-                        <em>30-year study period</em> rather than demographically calibrated local
-                        exposure durations.
-                      </li>
-                      <li>
-                        <strong>Q3 (Sensitivity):</strong> Evaluated parameter effects on estimated{' '}
-                        <em>body burden</em> rather than steady-state serum concentration.
-                      </li>
-                      <li>
-                        <strong>Q4 (Health Risk):</strong> Generic body burden threshold exceedance
-                        without compound-specific or mixture hazard indices.
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* New Proposed SOP Box */}
-                  <div className="p-4 rounded-xl bg-white border border-emerald-200 space-y-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      New Proposed SOP & Hypotheses (Calibrated)
-                    </span>
-                    <ul className="space-y-1.5 text-slate-600 text-[11px] list-disc list-inside">
-                      <li>
-                        <strong>Q1 & H₀ 1 (Css):</strong> Two-sided Mann-Whitney U test (α = 0.05)
-                        comparing Average vs. Pregnant women across all 5 PFAS.
-                      </li>
-                      <li>
-                        <strong>Q2 & H₀ 2 (Body Burden):</strong> Calibrated modeled exposure
-                        horizons: <strong>22 years</strong> for Average and{' '}
-                        <strong>19 years</strong> for Pregnant women (NDHS data).
-                      </li>
-                      <li>
-                        <strong>Q3 & H₀ 3 (Sensitivity):</strong> Global sensitivity on steady-state
-                        serum concentration (Css) using Partial Rank Correlation Coefficients (PRCC,
-                        |PRCC| ≥ 0.10, p &lt; 0.05).
-                      </li>
-                      <li>
-                        <strong>Q4 & H₀ 4 (Health Risk):</strong> Selected chronic RfD/MRL-based
-                        Hazard Quotients (HQ 4.1 to 4.5), exploratory sum of HQs (4.6), % exceeding
-                        1.0, and one-sided Wilcoxon signed-rank test against 1.0.
-                      </li>
-                    </ul>
-                  </div>
+                <div className="p-4 rounded-xl bg-white border border-emerald-200 space-y-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    SOP & Hypotheses
+                  </span>
+                  <ul className="space-y-1.5 text-slate-600 text-[11px] list-disc list-inside">
+                    <li>
+                      <strong>Q1 & H₀ 1 (Css):</strong> Two-sided Mann-Whitney U test (α = 0.05)
+                      comparing Average vs. Pregnant women across all 5 PFAS.
+                    </li>
+                    <li>
+                      <strong>Q2 & H₀ 2 (Body Burden):</strong> Calibrated modeled exposure
+                      horizons: <strong>22 years</strong> for Average and <strong>19 years</strong>{' '}
+                      for Pregnant women (NDHS data).
+                    </li>
+                    <li>
+                      <strong>Q3 & H₀ 3 (Sensitivity):</strong> Global sensitivity on steady-state
+                      serum concentration (Css) using Partial Rank Correlation Coefficients (PRCC,
+                      |PRCC| ≥ 0.10, p &lt; 0.05).
+                    </li>
+                    <li>
+                      <strong>Q4 & H₀ 4 (Health Risk):</strong> Selected chronic RfD/MRL-based
+                      Hazard Quotients (HQ 4.1 to 4.5), exploratory sum of HQs (4.6), % exceeding
+                      1.0, and one-sided Wilcoxon signed-rank test against 1.0.
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}

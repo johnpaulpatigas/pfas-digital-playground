@@ -703,14 +703,14 @@ export const DocsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 7.3 Methodological Evolution: Old SOP vs New Proposed SOP */}
+        {/* 7.3 Research Framework: SOP & Hypotheses */}
         <div className="space-y-4 pt-2 border-t border-slate-200">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
-              Evolutionary Comparison
+              Research Framework
             </span>
             <h3 className="text-base font-bold text-slate-900 font-heading">
-              Methodological transition: Old SOP & hypotheses vs. New proposed framework
+              Statement of the Problem & hypotheses
             </h3>
           </div>
 
@@ -718,13 +718,8 @@ export const DocsPage: React.FC = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500 text-[11px]">
-                  <th className="py-2 px-3 font-semibold w-1/5">Research Domain</th>
-                  <th className="py-2 px-3 font-semibold w-2/5">
-                    Initial Framework (Old SOP & Hypotheses)
-                  </th>
-                  <th className="py-2 px-3 font-semibold w-2/5">
-                    Calibrated Framework (New Proposed SOP & Hypotheses)
-                  </th>
+                  <th className="py-2 px-3 font-semibold w-1/3">Research Domain</th>
+                  <th className="py-2 px-3 font-semibold w-2/3">Framework (SOP & Hypotheses)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-sans text-[11px] leading-relaxed">
@@ -734,10 +729,6 @@ export const DocsPage: React.FC = () => {
                     <span className="font-mono text-[10px] text-slate-500 font-normal">
                       Serum Concentration (Css)
                     </span>
-                  </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    Estimated Css in relation to external Human Biomonitoring thresholds (HBM-I and
-                    HBM-II). Hypotheses tested whether Css exceeds European HBM guidance values.
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
                     <strong>Direct cohort comparative inferential testing:</strong> Two-sided
@@ -754,11 +745,6 @@ export const DocsPage: React.FC = () => {
                       Accumulated Body Burden
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    Modeled accumulated body burden over an arbitrary generic{' '}
-                    <em>30-year study period</em> in relation to HBM guidance and critical burden
-                    limits.
-                  </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
                     <strong>Demographically calibrated exposure horizons:</strong> Modeled over{' '}
                     <strong>22 years</strong> for Average Filipino Women and{' '}
@@ -774,10 +760,6 @@ export const DocsPage: React.FC = () => {
                       Sensitivity Analysis
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    Tested parameter effects on estimated <em>body burden</em> without controlling
-                    for parameter covariation or specifying non-parametric partial correlation.
-                  </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
                     <strong>PRCC on Steady-State Serum Concentration (Css):</strong> Partial Rank
                     Correlation Coefficients isolate monotonic relationships with serum
@@ -792,11 +774,6 @@ export const DocsPage: React.FC = () => {
                     <span className="font-mono text-[10px] text-slate-500 font-normal">
                       Health Risk & Hazard Indices
                     </span>
-                  </td>
-                  <td className="py-3 px-3 text-slate-600">
-                    Generic health risk evaluation for individuals exceeding normal thresholds
-                    without chemical-specific toxicological benchmark ratios or mixture dose
-                    additivity.
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
                     <strong>

@@ -852,8 +852,8 @@ export const ScientificGuidePage: React.FC = () => {
                       3. Sampling method comparison
                     </strong>
                     <p className="text-slate-600 text-[11px]">
-                      Use the <em>MC vs LHS Compare</em> page to observe how Latin hypercube
-                      sampling achieves lower variance across iterations.
+                      Use the <em>Sampling & Cohort Comparison</em> page to observe how Latin
+                      hypercube sampling achieves lower variance across iterations.
                     </p>
                   </div>
                 </div>
@@ -936,7 +936,7 @@ export const ScientificGuidePage: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs font-sans border border-slate-700 transition-all"
           >
             <Layers className="w-4 h-4 text-slate-300" />
-            <span>Compare MC vs LHS</span>
+            <span>Sampling & Cohort Comparison</span>
           </Link>
         </div>
       </div>

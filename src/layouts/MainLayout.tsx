@@ -24,7 +24,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navItems = [
     { path: '/', label: 'Overview', icon: Compass },
     { path: '/playground', label: 'Playground', icon: Activity },
-    { path: '/compare', label: 'MC vs LHS Compare', icon: Layers },
+    { path: '/compare', label: 'Sampling & Cohort Comparison', icon: Layers },
     { path: '/guide', label: 'Scientific Guide', icon: GraduationCap },
     { path: '/docs', label: 'Methodology & Math', icon: BookOpen },
   ];

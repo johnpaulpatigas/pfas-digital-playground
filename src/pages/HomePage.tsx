@@ -50,7 +50,7 @@ export const HomePage: React.FC = () => {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs border border-slate-200 transition-all"
             >
               <Layers className="w-4 h-4 text-blue-600" />
-              <span>Compare MC vs LHS</span>
+              <span>Sampling & Cohort Comparison</span>
             </Link>
 
             <Link
