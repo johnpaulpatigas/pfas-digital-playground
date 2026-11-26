@@ -18,7 +18,7 @@ interface ParameterGuideModalProps {
 export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'ranges' | 'workflow' | 'presets'>('ranges');
   const [searchQuery, setSearchQuery] = useState('');
-  const { loadScenario } = useSimulationStore();
+  const loadScenario = useSimulationStore((state) => state.loadScenario);
 
   if (!isOpen) return null;
 

@@ -81,18 +81,16 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
   onRunSimulation,
   onOpenGuide,
 }) => {
-  const {
-    parameters,
-    samplingConfig,
-    activeScenarioId,
-    isSimulating,
-    logs,
-    setParameterDistribution,
-    setSamplingConfig,
-    setCompoundId,
-    loadScenario,
-    resetToDefault,
-  } = useSimulationStore();
+  const parameters = useSimulationStore((state) => state.parameters);
+  const samplingConfig = useSimulationStore((state) => state.samplingConfig);
+  const activeScenarioId = useSimulationStore((state) => state.activeScenarioId);
+  const isSimulating = useSimulationStore((state) => state.isSimulating);
+  const logs = useSimulationStore((state) => state.logs);
+  const setParameterDistribution = useSimulationStore((state) => state.setParameterDistribution);
+  const setSamplingConfig = useSimulationStore((state) => state.setSamplingConfig);
+  const setCompoundId = useSimulationStore((state) => state.setCompoundId);
+  const loadScenario = useSimulationStore((state) => state.loadScenario);
+  const resetToDefault = useSimulationStore((state) => state.resetToDefault);
 
   const isCustomMode = activeScenarioId === 'custom';
   const [compoundScope, setCompoundScope] = useState<'all' | string>('all');

@@ -8,9 +8,17 @@ import { HashRouter, Route, Routes, useLocation, useNavigate } from 'react-route
 import { MainLayout } from './layouts/MainLayout';
 import { HomePage } from './pages/HomePage';
 
-const PlaygroundPage = lazy(() =>
-  import('./pages/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage })),
-);
+const loadPlaygroundPage = () =>
+  import('./pages/PlaygroundPage').then((m) => ({ default: m.PlaygroundPage }));
+
+const PlaygroundPage = lazy(loadPlaygroundPage);
+
+function warmPlayground() {
+  void loadPlaygroundPage().catch(() => {});
+  void import('./simulation/runSimulationAsync')
+    .then(({ prewarmSimulationWorker }) => prewarmSimulationWorker())
+    .catch(() => {});
+}
 const ComparePage = lazy(() =>
   import('./pages/ComparePage').then((m) => ({ default: m.ComparePage })),
 );
@@ -53,8 +61,8 @@ function PageWrapper({ children }: { children: React.ReactNode }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.12, ease: 'easeOut' }}
+      exit={{ opacity: 0, transition: { duration: 0.06 } }}
+      transition={{ duration: 0.1, ease: 'easeOut' }}
       className="flex-1 flex flex-col w-full"
     >
       <Suspense fallback={<PageLoadingFallback />}>{children}</Suspense>
@@ -67,6 +75,18 @@ function AnimatedRoutes() {
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname === '/playground') return;
+
+    if (typeof window.requestIdleCallback === 'function') {
+      const handle = window.requestIdleCallback(warmPlayground, { timeout: 1000 });
+      return () => window.cancelIdleCallback(handle);
+    }
+
+    const handle = window.setTimeout(warmPlayground, 250);
+    return () => window.clearTimeout(handle);
   }, [location.pathname]);
 
   return (

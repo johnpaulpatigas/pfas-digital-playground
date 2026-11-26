@@ -16,18 +16,16 @@ import { useSimulationStore } from '../stores/useSimulationStore';
 import { exportToCSV, exportToJSON } from '../utils/exportUtils';
 
 export const PlaygroundPage: React.FC = () => {
-  const {
-    parameters,
-    samplingConfig,
-    activeScenarioId,
-    isSimulating,
-    results,
-    summaryStats,
-    sensitivityRanks,
-    setSimulationResults,
-    setIsSimulating,
-    addLog,
-  } = useSimulationStore();
+  const parameters = useSimulationStore((state) => state.parameters);
+  const samplingConfig = useSimulationStore((state) => state.samplingConfig);
+  const activeScenarioId = useSimulationStore((state) => state.activeScenarioId);
+  const isSimulating = useSimulationStore((state) => state.isSimulating);
+  const results = useSimulationStore((state) => state.results);
+  const summaryStats = useSimulationStore((state) => state.summaryStats);
+  const sensitivityRanks = useSimulationStore((state) => state.sensitivityRanks);
+  const setSimulationResults = useSimulationStore((state) => state.setSimulationResults);
+  const setIsSimulating = useSimulationStore((state) => state.setIsSimulating);
+  const addLog = useSimulationStore((state) => state.addLog);
 
   const [isGuideOpen, setIsGuideOpen] = useState(false);
 

@@ -89,7 +89,7 @@ interface CohortHealthRiskRow {
 }
 
 export const ComparePage: React.FC = () => {
-  const { parameters } = useSimulationStore();
+  const parameters = useSimulationStore((state) => state.parameters);
   const [activeTab, setActiveTab] = useState<'cohorts' | 'sampling'>('cohorts');
   const [showFrameworkTransition, setShowFrameworkTransition] = useState<boolean>(false);
 

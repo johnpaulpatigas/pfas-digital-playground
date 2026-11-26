@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
-import { runSimulationPipeline } from '../../simulation/simulationRunner';
+import { executeSimulationAsync } from '../../simulation/runSimulationAsync';
 import {
   calculateMannWhitneyU,
   calculateOneSampleWilcoxon,
@@ -34,11 +34,74 @@ export interface MannWhitneyTableRow {
   pregValues: number[];
 }
 
+const AVG_PRESET_ID = 'average-filipino-woman';
+const PREG_PRESET_ID = 'pregnant-woman';
+const COHORT_IDS = [AVG_PRESET_ID, PREG_PRESET_ID];
+
+const counterpartCache = new Map<string, Promise<IterationResult[]>>();
+
+/**
+ * Preset cohorts are deterministic for a given sampling config. Caching the
+ * pending run keeps remounts (page navigation) from starting the same work
+ * again, and the worker keeps that work off the main thread.
+ */
+function loadCohortResults(presetId: string, samplingConfig: SamplingConfig) {
+  const preset = DEMOGRAPHIC_PRESETS.find((item) => item.id === presetId);
+  if (!preset) return Promise.resolve([]);
+
+  const { method, iterations, seed, compoundId } = samplingConfig;
+  const key = `${presetId}|${method}|${iterations}|${seed}|${compoundId}`;
+  const cached = counterpartCache.get(key);
+  if (cached) return cached;
+
+  const pending = executeSimulationAsync(preset.parameters, samplingConfig).then(
+    (result) => result.simResults,
+  );
+  counterpartCache.set(key, pending);
+  pending.catch(() => counterpartCache.delete(key));
+
+  if (counterpartCache.size > 6) {
+    const oldestKey = counterpartCache.keys().next().value;
+    if (oldestKey) counterpartCache.delete(oldestKey);
+  }
+
+  return pending;
+}
+
 export function useCohortComparison(
   results: IterationResult[] | null,
   activeScenarioId: string,
   samplingConfig: SamplingConfig,
 ) {
+  const [counterparts, setCounterparts] = useState<Record<string, IterationResult[]>>({});
+
+  const neededPresetIds = useMemo(
+    () =>
+      !results || results.length === 0 || activeScenarioId === 'custom'
+        ? []
+        : COHORT_IDS.filter((id) => id !== activeScenarioId),
+    [results, activeScenarioId],
+  );
+
+  useEffect(() => {
+    if (neededPresetIds.length === 0) return;
+
+    let cancelled = false;
+    void Promise.all(
+      neededPresetIds.map(async (id) => [id, await loadCohortResults(id, samplingConfig)] as const),
+    )
+      .then((entries) => {
+        if (!cancelled) setCounterparts(Object.fromEntries(entries));
+      })
+      .catch(() => {
+        if (!cancelled) setCounterparts({});
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [neededPresetIds, samplingConfig]);
+
   const wilcoxonRows = useMemo<WilcoxonTableRow[]>(() => {
     if (!results || results.length === 0) return [];
 
@@ -94,22 +157,14 @@ export function useCohortComparison(
       return { mannWhitneyCssRows: [], mannWhitneyBurdenRows: [] };
     }
 
-    const avgPreset = DEMOGRAPHIC_PRESETS.find((p) => p.id === 'average-filipino-woman');
-    const pregPreset = DEMOGRAPHIC_PRESETS.find((p) => p.id === 'pregnant-woman');
-    if (!avgPreset || !pregPreset) {
+    // Use existing results for the active preset and wait for the worker-run
+    // counterpart before comparing the two cohorts.
+    const avgResults = activeScenarioId === AVG_PRESET_ID ? results : counterparts[AVG_PRESET_ID];
+    const pregResults =
+      activeScenarioId === PREG_PRESET_ID ? results : counterparts[PREG_PRESET_ID];
+    if (!avgResults || !pregResults) {
       return { mannWhitneyCssRows: [], mannWhitneyBurdenRows: [] };
     }
-
-    // Use existing results for whichever preset is active, and run the counterpart
-    const avgResults =
-      activeScenarioId === avgPreset.id
-        ? results
-        : runSimulationPipeline(avgPreset.parameters, samplingConfig).simResults;
-
-    const pregResults =
-      activeScenarioId === pregPreset.id
-        ? results
-        : runSimulationPipeline(pregPreset.parameters, samplingConfig).simResults;
 
     const cssRows: MannWhitneyTableRow[] = [];
     const burdenRows: MannWhitneyTableRow[] = [];
@@ -169,7 +224,7 @@ export function useCohortComparison(
     }
 
     return { mannWhitneyCssRows: cssRows, mannWhitneyBurdenRows: burdenRows };
-  }, [results, activeScenarioId, samplingConfig]);
+  }, [results, activeScenarioId, counterparts]);
 
   return { wilcoxonRows, mannWhitneyCssRows, mannWhitneyBurdenRows };
 }

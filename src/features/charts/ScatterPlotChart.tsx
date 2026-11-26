@@ -20,7 +20,7 @@ interface ScatterPlotChartProps {
 }
 
 export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) => {
-  const { samplingConfig } = useSimulationStore();
+  const samplingConfig = useSimulationStore((state) => state.samplingConfig);
   const [selectedCompoundId, setSelectedCompoundId] = useState<string | null>(null);
 
   const activeCompoundId = selectedCompoundId ?? samplingConfig.compoundId ?? 'pfoa';
