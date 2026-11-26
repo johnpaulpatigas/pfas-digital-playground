@@ -1,11 +1,10 @@
-import type { DemographicScenario, ExposureParameterConfig } from '../../types';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+import type { DemographicScenario, ExposureParameterConfig } from '../../types';
 
 const intakeConfig = (
   compoundId: string,
   distribution: ExposureParameterConfig['distribution'],
-  scientificContext =
-    'Preset assumption only. Replace with compound-specific intake data appropriate to the study.',
+  scientificContext = 'Preset assumption only. Replace with compound-specific intake data appropriate to the study.',
 ): ExposureParameterConfig => ({
   id: `dailyIntake${compoundId}`,
   name: `Daily ${compoundId.toUpperCase()} Non-Water Intake`,
@@ -54,23 +53,28 @@ const baselineWaterConcentrationGroup = () => ({
 const zeroWaterConcentrationGroup = () => ({
   waterConcentrationPfoa: {
     ...baselineWaterConcentrationConfig('pfoa', 0),
-    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    scientificContext:
+      'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
   },
   waterConcentrationPfos: {
     ...baselineWaterConcentrationConfig('pfos', 0),
-    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    scientificContext:
+      'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
   },
   waterConcentrationPfhxs: {
     ...baselineWaterConcentrationConfig('pfhxs', 0),
-    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    scientificContext:
+      'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
   },
   waterConcentrationPfna: {
     ...baselineWaterConcentrationConfig('pfna', 0),
-    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    scientificContext:
+      'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
   },
   waterConcentrationGenx: {
     ...baselineWaterConcentrationConfig('genx', 0),
-    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    scientificContext:
+      'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
   },
 });
 
@@ -122,7 +126,8 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         name: 'Elimination Half-Life',
         unit: 'years',
         description: 'Biological excretion half-life in human blood serum.',
-        scientificContext: 'Scenario assumption; the 2024 memo reports a 3.52-year PFNA estimate used in MRL derivation.',
+        scientificContext:
+          'Scenario assumption; the 2024 memo reports a 3.52-year PFNA estimate used in MRL derivation.',
         distribution: { type: 'lognormal', mean: 3.2, sd: 0.8 },
       },
       exposureDuration: {
@@ -269,7 +274,8 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         name: 'Elimination Half-Life',
         unit: 'years',
         description: 'Serum retention half-life.',
-        scientificContext: 'Scenario assumption; the 2024 memo reports a 3.52-year PFNA estimate used in MRL derivation.',
+        scientificContext:
+          'Scenario assumption; the 2024 memo reports a 3.52-year PFNA estimate used in MRL derivation.',
         distribution: { type: 'normal', mean: 3.8, sd: 0.4 },
       },
       exposureDuration: {

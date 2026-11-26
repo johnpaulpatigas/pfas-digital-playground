@@ -44,7 +44,8 @@ export function getSimulationParameter(
       name: `Water concentration (${key.replace('waterConcentration', '')})`,
       unit: 'ng/L',
       description: 'Compound-specific water concentration used to calculate water-derived intake.',
-      scientificContext: 'No measurement supplied; legacy fallback assumes zero water concentration.',
+      scientificContext:
+        'No measurement supplied; legacy fallback assumes zero water concentration.',
       distribution: { type: 'fixed', value: 0 },
     };
   }
@@ -77,22 +78,23 @@ export const PARAMETER_KEYS: Array<keyof SimulationParameters> = [
 
 /** Parameters shown for the selected PFAS plus shared physiological inputs. */
 export function getVisibleParameterKeys(compoundId: string): Array<keyof SimulationParameters> {
-  const intakeKey = DAILY_INTAKE_PARAMETER_KEYS[compoundId as keyof typeof DAILY_INTAKE_PARAMETER_KEYS];
+  const intakeKey =
+    DAILY_INTAKE_PARAMETER_KEYS[compoundId as keyof typeof DAILY_INTAKE_PARAMETER_KEYS];
   const concentrationKey =
-    WATER_CONCENTRATION_PARAMETER_KEYS[compoundId as keyof typeof WATER_CONCENTRATION_PARAMETER_KEYS];
+    WATER_CONCENTRATION_PARAMETER_KEYS[
+      compoundId as keyof typeof WATER_CONCENTRATION_PARAMETER_KEYS
+    ];
   if (!intakeKey || !concentrationKey) return PARAMETER_KEYS;
 
   return PARAMETER_KEYS.filter(
     (key) =>
       !Object.values(DAILY_INTAKE_PARAMETER_KEYS).includes(
         key as (typeof DAILY_INTAKE_PARAMETER_KEYS)[keyof typeof DAILY_INTAKE_PARAMETER_KEYS],
-      ) ||
-      key === intakeKey,
+      ) || key === intakeKey,
   ).filter(
     (key) =>
       !Object.values(WATER_CONCENTRATION_PARAMETER_KEYS).includes(
         key as (typeof WATER_CONCENTRATION_PARAMETER_KEYS)[keyof typeof WATER_CONCENTRATION_PARAMETER_KEYS],
-      ) ||
-      key === concentrationKey,
+      ) || key === concentrationKey,
   );
 }

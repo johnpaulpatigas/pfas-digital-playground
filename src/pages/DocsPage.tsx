@@ -59,13 +59,12 @@ export const DocsPage: React.FC = () => {
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               Total daily intake is calculated per compound as non-water intake plus water-derived
-                    intake (<MathView math="I_j = I_{nw,j} + C_{w,j} W / 1000" />, where <MathView math="C_{w,j}" /> is
-              in ng/L and <MathView math="W" /> is in L/day).{' '}
-              <MathView math="I" /> is total intake (&micro;g/day),{' '}
-              <MathView math="f_{abs}" /> is the gastrointestinal absorption fraction,{' '}
-              <MathView math="BW" /> is body weight in kg, and <MathView math="V_d" /> is volume of
-              distribution. The project source documents do not provide a volume of distribution;
-              this remains an explicit model assumption.
+              intake (<MathView math="I_j = I_{nw,j} + C_{w,j} W / 1000" />, where{' '}
+              <MathView math="C_{w,j}" /> is in ng/L and <MathView math="W" /> is in L/day).{' '}
+              <MathView math="I" /> is total intake (&micro;g/day), <MathView math="f_{abs}" /> is
+              the gastrointestinal absorption fraction, <MathView math="BW" /> is body weight in kg,
+              and <MathView math="V_d" /> is volume of distribution. The project source documents do
+              not provide a volume of distribution; this remains an explicit model assumption.
             </p>
           </div>
 
@@ -476,9 +475,9 @@ export const DocsPage: React.FC = () => {
             </h3>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               Uses a pregnant-cohort scenario with hydration demand (<strong>2.8 L/day</strong>) and
-              gestational mass (
-              <strong>65.2 kg</strong>), transplacental clearance dynamics shortening maternal serum
-              half-life supplied as a scenario assumption, and a pre-gestational exposure horizon of
+              gestational mass (<strong>65.2 kg</strong>), transplacental clearance dynamics
+              shortening maternal serum half-life supplied as a scenario assumption, and a
+              pre-gestational exposure horizon of
               <strong>19 years</strong>.
             </p>
           </div>
@@ -566,8 +565,8 @@ export const DocsPage: React.FC = () => {
               <p className="text-slate-600 leading-relaxed text-[11px]">
                 What is the estimated health risk among Average and Pregnant Filipino Women,
                 expressed as compound-specific Hazard Quotients (HQ) and an exploratory sum of HQs
-                derived from selected compound-specific chronic RfD/MRL values, and what percentage of simulated
-                women exceeds an HQ or exploratory HQ sum of 1.0 for:
+                derived from selected compound-specific chronic RfD/MRL values, and what percentage
+                of simulated women exceeds an HQ or exploratory HQ sum of 1.0 for:
               </p>
               <ul className="text-[11px] text-slate-700 font-mono space-y-0.5 pl-2">
                 <li>4.1 PFOA</li>
@@ -800,10 +799,12 @@ export const DocsPage: React.FC = () => {
                     additivity.
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
-                    <strong>Compound-specific RfD/MRL Hazard Quotients (HQ) and exploratory HQ sum:</strong>{' '}
+                    <strong>
+                      Compound-specific RfD/MRL Hazard Quotients (HQ) and exploratory HQ sum:
+                    </strong>{' '}
                     Evaluates 4.1 PFOA, 4.2 PFOS, 4.3 PFHxS, 4.4 PFNA, 4.5 GenX, and 4.6 the
-                    exploratory sum of HQs, with population exceedance percentages (% &gt; 1.0) and one-sided
-                    Wilcoxon signed-rank tests against 1.0.
+                    exploratory sum of HQs, with population exceedance percentages (% &gt; 1.0) and
+                    one-sided Wilcoxon signed-rank tests against 1.0.
                   </td>
                 </tr>
               </tbody>

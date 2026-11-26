@@ -143,364 +143,370 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
       {/* 2. Serum Concentration (Css) */}
       {sectionTab === 'css' && (
         <section className="space-y-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-            Serum Concentration (<MathView math="C_{ss}" />)
-          </h3>
-          <p className="text-xs text-slate-600 leading-relaxed mt-1">
-            Steady-state blood serum concentration (<MathView math="\mu\text{g/L}" />) across all
-            simulated iterations, descriptive distribution plots, and cohort comparisons.
-          </p>
-        </div>
-
-        {/* Table A1: Avg Css of all compounds */}
-        <div className="card-panel rounded-xl overflow-hidden">
-          <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-            <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              Table A1 — Serum Concentration (<MathView math="C_{ss}" />)
-            </span>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
+              Serum Concentration (<MathView math="C_{ss}" />)
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed mt-1">
+              Steady-state blood serum concentration (<MathView math="\mu\text{g/L}" />) across all
+              simulated iterations, descriptive distribution plots, and cohort comparisons.
+            </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left font-mono">
-              <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
-                <tr>
-                  <th className="px-3 py-2">Compound</th>
-                  <th className="px-3 py-2">Mean (µg/L)</th>
-                  <th className="px-3 py-2">Median (µg/L)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {compoundSummaries.map((c) => (
-                  <tr key={c.compoundId} className="hover:bg-slate-50/60">
-                    <td className="px-3 py-2 font-bold text-slate-900">
-                      {c.compoundId.toUpperCase()}
-                    </td>
-                    <td className="px-3 py-2 text-slate-700">{formatNum(c.meanCss)}</td>
-                    <td className="px-3 py-2 text-slate-700">{formatNum(c.medianCss)}</td>
+
+          {/* Table A1: Avg Css of all compounds */}
+          <div className="card-panel rounded-xl overflow-hidden">
+            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                Table A1 — Serum Concentration (<MathView math="C_{ss}" />)
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left font-mono">
+                <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2">Compound</th>
+                    <th className="px-3 py-2">Mean (µg/L)</th>
+                    <th className="px-3 py-2">Median (µg/L)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Tabbed Descriptive Graphs (Histogram -> Convergence) */}
-        <div className="card-panel rounded-xl overflow-hidden">
-          <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-slate-200">
-            {CSS_GRAPH_TABS.map((tab) => {
-              const Icon = tab.icon;
-              const active = cssTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setCssTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-          <div className="p-3">
-            {cssTab === 'histogram' && (
-              <HistogramChart results={results} summaryStats={summaryStats} />
-            )}
-            {cssTab === 'cdf' && <CDFChart results={results} />}
-            {cssTab === 'timecourse' && <TimeCourseChart results={results} />}
-            {cssTab === 'scatter' && <ScatterPlotChart results={results} />}
-            {cssTab === 'convergence' && <ConvergenceChart results={results} />}
-          </div>
-        </div>
-
-        {/* % of limit table Css */}
-        <div className="card-panel rounded-xl overflow-hidden">
-          <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
-            <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              % of Limit — <MathView math="C_{ss}" /> Exceedance
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left font-mono">
-              <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
-                <tr>
-                  <th className="px-3 py-2">Compound</th>
-                  <th className="px-3 py-2">Css Critical Limit (µg/L)</th>
-                  <th className="px-3 py-2">% Simulated Over Limit</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {compoundSummaries.map((c) => {
-                  const pct = c.totalCount > 0 ? (c.exceedanceCount / c.totalCount) * 100 : 0;
-                  return (
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {compoundSummaries.map((c) => (
                     <tr key={c.compoundId} className="hover:bg-slate-50/60">
                       <td className="px-3 py-2 font-bold text-slate-900">
                         {c.compoundId.toUpperCase()}
                       </td>
-                      <td className="px-3 py-2 text-slate-700">{formatNum(c.criticalSerumCss)}</td>
-                      <td
-                        className={`px-3 py-2 font-bold ${
-                          pct > 5 ? 'text-red-600' : 'text-emerald-700'
-                        }`}
-                      >
-                        {pct.toFixed(1)}%
-                      </td>
+                      <td className="px-3 py-2 text-slate-700">{formatNum(c.meanCss)}</td>
+                      <td className="px-3 py-2 text-slate-700">{formatNum(c.medianCss)}</td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        {/* Table B & Mann-Whitney Graph for Css (Hidden in Custom Mode) */}
-        {!isCustomMode && mannWhitneyCssRows.length > 0 && (
-          <div className="space-y-3">
-            <div className="card-panel rounded-xl overflow-hidden">
-              <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
-                <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                  Table B — Mann-Whitney U Comparison (<MathView math="C_{ss}" />: Preg ÷ Avg)
-                </span>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left font-mono">
-                  <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
-                    <tr>
-                      <th className="px-3 py-2">Compound</th>
-                      <th className="px-3 py-2">Median Ratio (Preg ÷ Avg)</th>
-                      <th className="px-3 py-2">U</th>
-                      <th className="px-3 py-2">p</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {mannWhitneyCssRows.map((row) => (
-                      <tr key={row.compoundId} className="hover:bg-slate-50/60">
-                        <td className="px-3 py-2 font-bold text-slate-900">{row.label}</td>
-                        <td className="px-3 py-2 text-slate-700">{row.medianRatio.toFixed(3)}x</td>
+          {/* Tabbed Descriptive Graphs (Histogram -> Convergence) */}
+          <div className="card-panel rounded-xl overflow-hidden">
+            <div className="flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-slate-200">
+              {CSS_GRAPH_TABS.map((tab) => {
+                const Icon = tab.icon;
+                const active = cssTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setCssTab(tab.id)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-semibold transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="p-3">
+              {cssTab === 'histogram' && (
+                <HistogramChart results={results} summaryStats={summaryStats} />
+              )}
+              {cssTab === 'cdf' && <CDFChart results={results} />}
+              {cssTab === 'timecourse' && <TimeCourseChart results={results} />}
+              {cssTab === 'scatter' && <ScatterPlotChart results={results} />}
+              {cssTab === 'convergence' && <ConvergenceChart results={results} />}
+            </div>
+          </div>
+
+          {/* % of limit table Css */}
+          <div className="card-panel rounded-xl overflow-hidden">
+            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+              <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                % of Limit — <MathView math="C_{ss}" /> Exceedance
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left font-mono">
+                <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2">Compound</th>
+                    <th className="px-3 py-2">Css Critical Limit (µg/L)</th>
+                    <th className="px-3 py-2">% Simulated Over Limit</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {compoundSummaries.map((c) => {
+                    const pct = c.totalCount > 0 ? (c.exceedanceCount / c.totalCount) * 100 : 0;
+                    return (
+                      <tr key={c.compoundId} className="hover:bg-slate-50/60">
+                        <td className="px-3 py-2 font-bold text-slate-900">
+                          {c.compoundId.toUpperCase()}
+                        </td>
                         <td className="px-3 py-2 text-slate-700">
-                          {Math.round(row.uStat).toLocaleString()}
+                          {formatNum(c.criticalSerumCss)}
                         </td>
                         <td
-                          className={`px-3 py-2 font-semibold ${
-                            row.isSignificant ? 'text-blue-700' : 'text-slate-500'
+                          className={`px-3 py-2 font-bold ${
+                            pct > 5 ? 'text-red-600' : 'text-emerald-700'
                           }`}
                         >
-                          {formatP(row.pValue)}
+                          {pct.toFixed(1)}%
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="card-panel p-3 rounded-xl space-y-2">
-              <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                Mann-Whitney Cohort Median Comparison (<MathView math="C_{ss}" /> µg/L)
-              </span>
-              <div className="h-52 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={mannWhitneyCssRows.map((r) => ({
-                      name: r.label,
-                      'Avg. Woman': Number(r.avgMedian.toFixed(4)),
-                      'Preg. Woman': Number(r.pregMedian.toFixed(4)),
-                    }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <RechartsTooltip />
-                    <Legend wrapperStyle={{ fontSize: '11px' }} />
-                    <Bar dataKey="Avg. Woman" fill="#0f172a" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Preg. Woman" fill="#0d9488" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
+
+          {/* Table B & Mann-Whitney Graph for Css (Hidden in Custom Mode) */}
+          {!isCustomMode && mannWhitneyCssRows.length > 0 && (
+            <div className="space-y-3">
+              <div className="card-panel rounded-xl overflow-hidden">
+                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+                  <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                    Table B — Mann-Whitney U Comparison (<MathView math="C_{ss}" />: Preg ÷ Avg)
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th className="px-3 py-2">Compound</th>
+                        <th className="px-3 py-2">Median Ratio (Preg ÷ Avg)</th>
+                        <th className="px-3 py-2">U</th>
+                        <th className="px-3 py-2">p</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {mannWhitneyCssRows.map((row) => (
+                        <tr key={row.compoundId} className="hover:bg-slate-50/60">
+                          <td className="px-3 py-2 font-bold text-slate-900">{row.label}</td>
+                          <td className="px-3 py-2 text-slate-700">
+                            {row.medianRatio.toFixed(3)}x
+                          </td>
+                          <td className="px-3 py-2 text-slate-700">
+                            {Math.round(row.uStat).toLocaleString()}
+                          </td>
+                          <td
+                            className={`px-3 py-2 font-semibold ${
+                              row.isSignificant ? 'text-blue-700' : 'text-slate-500'
+                            }`}
+                          >
+                            {formatP(row.pValue)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="card-panel p-3 rounded-xl space-y-2">
+                <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                  Mann-Whitney Cohort Median Comparison (<MathView math="C_{ss}" /> µg/L)
+                </span>
+                <div className="h-52 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={mannWhitneyCssRows.map((r) => ({
+                        name: r.label,
+                        'Avg. Woman': Number(r.avgMedian.toFixed(4)),
+                        'Preg. Woman': Number(r.pregMedian.toFixed(4)),
+                      }))}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} />
+                      <RechartsTooltip />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} />
+                      <Bar dataKey="Avg. Woman" fill="#0f172a" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Preg. Woman" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       )}
 
       {/* 3. Body Burden */}
       {sectionTab === 'burden' && (
         <section className="space-y-4">
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-            Body Burden (<MathView math="B(t)" />)
-          </h3>
-          <p className="text-xs text-slate-600 leading-relaxed mt-1">
-            Total internal PFAS mass (<MathView math="\mu\text{g}" />) accumulated in the body,
-            compared against critical burden limits and across demographic cohorts.
-          </p>
-        </div>
-
-        {/* Table A2: Body Burden of all compounds */}
-        <div className="card-panel rounded-xl overflow-hidden">
-          <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
-            <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              Table A2 — Body Burden (µg)
-            </span>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
+              Body Burden (<MathView math="B(t)" />)
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed mt-1">
+              Total internal PFAS mass (<MathView math="\mu\text{g}" />) accumulated in the body,
+              compared against critical burden limits and across demographic cohorts.
+            </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left font-mono">
-              <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
-                <tr>
-                  <th className="px-3 py-2">Compound</th>
-                  <th className="px-3 py-2">Mean (µg)</th>
-                  <th className="px-3 py-2">Median (µg)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {compoundSummaries.map((c) => (
-                  <tr key={c.compoundId} className="hover:bg-slate-50/60">
-                    <td className="px-3 py-2 font-bold text-slate-900">
-                      {c.compoundId.toUpperCase()}
-                    </td>
-                    <td className="px-3 py-2 text-slate-700">{formatNum(c.meanBodyBurden)}</td>
-                    <td className="px-3 py-2 text-slate-700">{formatNum(c.medianBodyBurden)}</td>
+
+          {/* Table A2: Body Burden of all compounds */}
+          <div className="card-panel rounded-xl overflow-hidden">
+            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+              <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                Table A2 — Body Burden (µg)
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left font-mono">
+                <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2">Compound</th>
+                    <th className="px-3 py-2">Mean (µg)</th>
+                    <th className="px-3 py-2">Median (µg)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Simple Bar Graph Comparing Different Body Burdens */}
-        <div className="card-panel p-3 rounded-xl space-y-2">
-          <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-            Body Burden Comparison Across Compounds (µg)
-          </span>
-          <div className="h-52 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={bodyBurdenBarData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <RechartsTooltip />
-                <Legend wrapperStyle={{ fontSize: '11px' }} />
-                <Bar dataKey="Mean" fill="#1e293b" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Median" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* % of limit table Body Burden */}
-        <div className="card-panel rounded-xl overflow-hidden">
-          <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
-            <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              % of Limit — Critical Body Burden
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left font-mono">
-              <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
-                <tr>
-                  <th className="px-3 py-2">Compound</th>
-                  <th className="px-3 py-2">Critical Body Burden (µg)</th>
-                  <th className="px-3 py-2">% Simulated Over Limit</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {compoundSummaries.map((c) => {
-                  const pct = c.totalCount > 0 ? (c.exceedanceCount / c.totalCount) * 100 : 0;
-                  return (
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {compoundSummaries.map((c) => (
                     <tr key={c.compoundId} className="hover:bg-slate-50/60">
                       <td className="px-3 py-2 font-bold text-slate-900">
                         {c.compoundId.toUpperCase()}
                       </td>
-                      <td className="px-3 py-2 text-slate-700">
-                        {formatNum(c.criticalBodyBurden)}
-                      </td>
-                      <td
-                        className={`px-3 py-2 font-bold ${
-                          pct > 5 ? 'text-red-600' : 'text-emerald-700'
-                        }`}
-                      >
-                        {pct.toFixed(1)}%
-                      </td>
+                      <td className="px-3 py-2 text-slate-700">{formatNum(c.meanBodyBurden)}</td>
+                      <td className="px-3 py-2 text-slate-700">{formatNum(c.medianBodyBurden)}</td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
-        {/* Table B & Mann-Whitney Graph for Body Burden (Hidden in Custom Mode) */}
-        {!isCustomMode && mannWhitneyBurdenRows.length > 0 && (
-          <div className="space-y-3">
-            <div className="card-panel rounded-xl overflow-hidden">
-              <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
-                <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                  Table B — Mann-Whitney U Comparison (Body Burden: Preg ÷ Avg)
-                </span>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left font-mono">
-                  <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
-                    <tr>
-                      <th className="px-3 py-2">Compound</th>
-                      <th className="px-3 py-2">Median Ratio (Preg ÷ Avg)</th>
-                      <th className="px-3 py-2">U</th>
-                      <th className="px-3 py-2">p</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {mannWhitneyBurdenRows.map((row) => (
-                      <tr key={row.compoundId} className="hover:bg-slate-50/60">
-                        <td className="px-3 py-2 font-bold text-slate-900">{row.label}</td>
-                        <td className="px-3 py-2 text-slate-700">{row.medianRatio.toFixed(3)}x</td>
+          {/* Simple Bar Graph Comparing Different Body Burdens */}
+          <div className="card-panel p-3 rounded-xl space-y-2">
+            <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+              Body Burden Comparison Across Compounds (µg)
+            </span>
+            <div className="h-52 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={bodyBurdenBarData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <RechartsTooltip />
+                  <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  <Bar dataKey="Mean" fill="#1e293b" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Median" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* % of limit table Body Burden */}
+          <div className="card-panel rounded-xl overflow-hidden">
+            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+              <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                % of Limit — Critical Body Burden
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left font-mono">
+                <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th className="px-3 py-2">Compound</th>
+                    <th className="px-3 py-2">Critical Body Burden (µg)</th>
+                    <th className="px-3 py-2">% Simulated Over Limit</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {compoundSummaries.map((c) => {
+                    const pct = c.totalCount > 0 ? (c.exceedanceCount / c.totalCount) * 100 : 0;
+                    return (
+                      <tr key={c.compoundId} className="hover:bg-slate-50/60">
+                        <td className="px-3 py-2 font-bold text-slate-900">
+                          {c.compoundId.toUpperCase()}
+                        </td>
                         <td className="px-3 py-2 text-slate-700">
-                          {Math.round(row.uStat).toLocaleString()}
+                          {formatNum(c.criticalBodyBurden)}
                         </td>
                         <td
-                          className={`px-3 py-2 font-semibold ${
-                            row.isSignificant ? 'text-blue-700' : 'text-slate-500'
+                          className={`px-3 py-2 font-bold ${
+                            pct > 5 ? 'text-red-600' : 'text-emerald-700'
                           }`}
                         >
-                          {formatP(row.pValue)}
+                          {pct.toFixed(1)}%
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="card-panel p-3 rounded-xl space-y-2">
-              <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                Mann-Whitney Cohort Median Comparison (Body Burden µg)
-              </span>
-              <div className="h-52 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={mannWhitneyBurdenRows.map((r) => ({
-                      name: r.label,
-                      'Avg. Woman': Number(r.avgMedian.toFixed(3)),
-                      'Preg. Woman': Number(r.pregMedian.toFixed(3)),
-                    }))}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <RechartsTooltip />
-                    <Legend wrapperStyle={{ fontSize: '11px' }} />
-                    <Bar dataKey="Avg. Woman" fill="#0f172a" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Preg. Woman" fill="#0d9488" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
+
+          {/* Table B & Mann-Whitney Graph for Body Burden (Hidden in Custom Mode) */}
+          {!isCustomMode && mannWhitneyBurdenRows.length > 0 && (
+            <div className="space-y-3">
+              <div className="card-panel rounded-xl overflow-hidden">
+                <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
+                  <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                    Table B — Mann-Whitney U Comparison (Body Burden: Preg ÷ Avg)
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left font-mono">
+                    <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th className="px-3 py-2">Compound</th>
+                        <th className="px-3 py-2">Median Ratio (Preg ÷ Avg)</th>
+                        <th className="px-3 py-2">U</th>
+                        <th className="px-3 py-2">p</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {mannWhitneyBurdenRows.map((row) => (
+                        <tr key={row.compoundId} className="hover:bg-slate-50/60">
+                          <td className="px-3 py-2 font-bold text-slate-900">{row.label}</td>
+                          <td className="px-3 py-2 text-slate-700">
+                            {row.medianRatio.toFixed(3)}x
+                          </td>
+                          <td className="px-3 py-2 text-slate-700">
+                            {Math.round(row.uStat).toLocaleString()}
+                          </td>
+                          <td
+                            className={`px-3 py-2 font-semibold ${
+                              row.isSignificant ? 'text-blue-700' : 'text-slate-500'
+                            }`}
+                          >
+                            {formatP(row.pValue)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="card-panel p-3 rounded-xl space-y-2">
+                <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
+                  Mann-Whitney Cohort Median Comparison (Body Burden µg)
+                </span>
+                <div className="h-52 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={mannWhitneyBurdenRows.map((r) => ({
+                        name: r.label,
+                        'Avg. Woman': Number(r.avgMedian.toFixed(3)),
+                        'Preg. Woman': Number(r.pregMedian.toFixed(3)),
+                      }))}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} />
+                      <RechartsTooltip />
+                      <Legend wrapperStyle={{ fontSize: '11px' }} />
+                      <Bar dataKey="Avg. Woman" fill="#0f172a" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Preg. Woman" fill="#0d9488" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </div>

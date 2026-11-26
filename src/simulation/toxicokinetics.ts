@@ -64,7 +64,9 @@ export function calculateCriticalHalfLife(
   );
   const burdenAtHalfLife = (halfLifeYears: number) => {
     const k = getEliminationRate(halfLifeYears);
-    return (dailyIntake * bioavailability / k) * (1 - Math.exp(-k * exposureDurationYears * 365.25));
+    return (
+      ((dailyIntake * bioavailability) / k) * (1 - Math.exp(-k * exposureDurationYears * 365.25))
+    );
   };
 
   const lower = 0.1;
@@ -410,13 +412,15 @@ export function calculateDetailedCriticalAnalysis(
   parameters: SimulationParameters,
 ): DetailedCriticalAnalysis {
   const bwStats = extractDistributionCentralValue(parameters.bodyWeight.distribution);
-  const intakeKey = DAILY_INTAKE_PARAMETER_KEYS[compound.id as keyof typeof DAILY_INTAKE_PARAMETER_KEYS];
+  const intakeKey =
+    DAILY_INTAKE_PARAMETER_KEYS[compound.id as keyof typeof DAILY_INTAKE_PARAMETER_KEYS];
   const intakeStats = extractDistributionCentralValue(
     getSimulationParameter(parameters, intakeKey).distribution,
   );
-  const waterConcentrationKey = WATER_CONCENTRATION_PARAMETER_KEYS[
-    compound.id as keyof typeof WATER_CONCENTRATION_PARAMETER_KEYS
-  ];
+  const waterConcentrationKey =
+    WATER_CONCENTRATION_PARAMETER_KEYS[
+      compound.id as keyof typeof WATER_CONCENTRATION_PARAMETER_KEYS
+    ];
   const waterConcentrationStats = extractDistributionCentralValue(
     getSimulationParameter(parameters, waterConcentrationKey).distribution,
   );
@@ -548,8 +552,7 @@ export function calculateDetailedCriticalAnalysis(
           : 'safe';
 
   // --- Parameter 6: Exposure Duration ---
-  const durationExceeded =
-    timeToExceedanceYears !== null && meanDuration >= timeToExceedanceYears;
+  const durationExceeded = timeToExceedanceYears !== null && meanDuration >= timeToExceedanceYears;
   const durationStatus: 'safe' | 'borderline' | 'exceeded' =
     timeToExceedanceYears === null
       ? 'safe'
@@ -628,7 +631,9 @@ export function calculateDetailedCriticalAnalysis(
       unit: 'years',
       criticalValue: criticalHalfLifeVal ?? Number.POSITIVE_INFINITY,
       criticalRangeDisplay:
-        criticalHalfLifeVal === null ? 'No body-burden crossing' : `≥ ${criticalHalfLifeVal.toFixed(2)} yrs`,
+        criticalHalfLifeVal === null
+          ? 'No body-burden crossing'
+          : `≥ ${criticalHalfLifeVal.toFixed(2)} yrs`,
       currentValue: meanHalfLife,
       currentRangeDisplay: halfLifeStats.displayRange,
       isExceeded: halfLifeExceeded,
@@ -654,7 +659,8 @@ export function calculateDetailedCriticalAnalysis(
       direction: 'range',
       explanation:
         'Time for current total intake to reach the HQ = 1 body-burden threshold under the selected half-life and bioavailability. A crossing is shown only when the current intake exceeds the RfD intake threshold.',
-      formula: 't_{\\text{crit}} = -\\frac{1}{k_e}\\ln\\left(1 - \\frac{B_{\\text{crit}} k_e}{I f_{abs}}\\right)',
+      formula:
+        't_{\\text{crit}} = -\\frac{1}{k_e}\\ln\\left(1 - \\frac{B_{\\text{crit}} k_e}{I f_{abs}}\\right)',
     },
   ];
 

@@ -36,7 +36,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     average: 'Scenario starts at low-level treated-water baseline (0.5–1.0 ng/L)',
     max: 'Study/site-specific',
     recommendedDist: 'Set from measured concentration data',
-    source: '2024 EPA NPDWR MCLs (4–10 ng/L); preset values are low-level baselines, not measured water data',
+    source:
+      '2024 EPA NPDWR MCLs (4–10 ng/L); preset values are low-level baselines, not measured water data',
     description:
       'Concentration of a PFAS in drinking water. Water-derived intake is concentration × daily water consumption, converted from ng to µg.',
     criticalCutoff: 'C_{w,crit} = 1000 × (BW × RfD - I_{nw}) / W',
@@ -95,7 +96,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     source: 'ATSDR Toxicological Profile for Perfluoroalkyls (2021)',
     description:
       'Fraction of ingested PFAS absorbed through the gastrointestinal tract into systemic circulation. Perfluoroalkyl carboxylic and sulfonic acids exhibit high oral bioavailability (>90%).',
-    criticalCutoff: 'No HQ threshold: HQ is based on ingested dose and independent of bioavailability',
+    criticalCutoff:
+      'No HQ threshold: HQ is based on ingested dose and independent of bioavailability',
   },
   {
     id: 'eliminationHalfLife',
@@ -106,7 +108,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     average: 'PFNA: 3.52 yr (DOH value used in modified MRL derivation)',
     max: 'Not established for the modeled compounds',
     recommendedDist: 'No source-backed distribution available',
-    source: 'June 2024 Ecology memo: DOH applied 3.52 yr from Yu et al. (2021) for PFNA; other compounds are not provided',
+    source:
+      'June 2024 Ecology memo: DOH applied 3.52 yr from Yu et al. (2021) for PFNA; other compounds are not provided',
     description:
       'Biological half-life for elimination from human blood serum. The June 2024 Ecology memo reports DOH applied a 3.52-year PFNA estimate from Yu et al. (2021) in its modified MRL derivation. Comparable values for the other modeled compounds are not provided.',
     criticalCutoff:

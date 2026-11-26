@@ -496,8 +496,8 @@ export const ScientificGuidePage: React.FC = () => {
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
                         <strong>Check the exposure-duration threshold:</strong> The cutoff is
-                        calculated from the current intake, bioavailability, and half-life. The
-                        25 to 30 year preset is a scenario assumption, not a universal threshold.
+                        calculated from the current intake, bioavailability, and half-life. The 25
+                        to 30 year preset is a scenario assumption, not a universal threshold.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">

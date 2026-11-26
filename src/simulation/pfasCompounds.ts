@@ -34,8 +34,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFOS (Perfluorooctane Sulfonate)',
     chemicalFormula: 'C_8F_{17}SO_3^-',
     casNumber: '1763-23-1',
-    description:
-      'Per- and polyfluoroalkyl substance included in the 2024 EPA drinking water rule.',
+    description: 'Per- and polyfluoroalkyl substance included in the 2024 EPA drinking water rule.',
     halfLifeYears: 5.4,
     volumeOfDistribution: 0.23,
     epaMCL: 4.0, // 4 ng/L
@@ -59,8 +58,7 @@ export const PFAS_COMPOUNDS: PFASCompound[] = [
     name: 'PFNA (Perfluorononanoic Acid)',
     chemicalFormula: 'C_9HF_{17}O_2',
     casNumber: '375-95-1',
-    description:
-      'Per- and polyfluoroalkyl substance included in the 2024 EPA drinking water rule.',
+    description: 'Per- and polyfluoroalkyl substance included in the 2024 EPA drinking water rule.',
     halfLifeYears: 3.52,
     halfLifeSource: 'DOH used 3.52 years in its modified ATSDR MRL derivation (Yu et al., 2021)',
     volumeOfDistribution: 0.2,
