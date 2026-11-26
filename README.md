@@ -21,7 +21,7 @@ This application lets users simulate chemical exposure, compare Monte Carlo and 
 - Set fixed, uniform, normal, lognormal, and triangular distributions for compound-specific intake and water concentration, body weight, water consumption, bioavailability, elimination half-life, and exposure duration.
 - Look up chemical profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, formulas, 2024 US EPA Maximum Contaminant Levels (MCLs), and compound-specific chronic RfD/MRL selections. Half-life and volume-of-distribution values are model assumptions.
 - Run compute-heavy sampling loops in a Web Worker off the main thread to keep charts and controls responsive.
-- Calculate body burden ($B(t)$), steady-state serum concentration ($C_{ss}$), clearance rate ($CL$), single-substance Hazard Quotients ($HQ$), and an exploratory sum of modeled HQs. The summed HQ is not the EPA NPDWR drinking-water mixture Hazard Index.
+- Calculate body burden $B(t)$, steady-state serum concentration ($C_{ss}$), clearance rate ($CL$), single-substance Hazard Quotients ($HQ$), and an exploratory sum of modeled HQs. The summed HQ is not the EPA NPDWR drinking-water mixture Hazard Index.
 - Inspect the interactive frequency histogram, cumulative distribution (CDF), dynamic 40-year time-course curves, intake versus serum scatter plot, Spearman rank tornado sensitivity plot, and running mean convergence tracking.
 - Benchmark runtime, variance, and convergence rates between MC, LHS, and hybrid MC+LHS.
 - Export a paginated iteration table as CSV or JSON, including calculated Hazard Quotients and the exploratory summed-HQ column.
@@ -116,7 +116,7 @@ npm run build
 
 ### 1-compartment toxicokinetic model
 
-The first-order elimination rate constant ($k_e$), steady-state serum concentration ($C_{ss}$), dynamic serum concentration over time ($C(t)$), and accumulated body burden ($B(t)$) are modeled as follows:
+The first-order elimination rate constant ($k_e$), steady-state serum concentration ($C_{ss}$), dynamic serum concentration over time $C(t)$, and accumulated body burden $B(t)$ are modeled as follows:
 
 $$k_e = \frac{\ln(2)}{T_{1/2} \times 365.25}$$
 
@@ -207,27 +207,27 @@ This study addresses the following research questions:
 
 ### Hypotheses (all tests at $\alpha = 0.05$, run separately for each PFAS)
 
-- **$H_0 1$:** Steady-state serum PFAS concentration ($C_{ss}$) does not differ significantly between Average and Pregnant Filipino Women.
-  **$H_1 1$:** Steady-state serum PFAS concentration ($C_{ss}$) differs significantly between Average and Pregnant Filipino Women.
+- **$H_{01}$:** Steady-state serum PFAS concentration ($C_{ss}$) does not differ significantly between Average and Pregnant Filipino Women.
+  **$H_{11}$:** Steady-state serum PFAS concentration ($C_{ss}$) differs significantly between Average and Pregnant Filipino Women.
   _(Two-sided Mann-Whitney U test)_
 
-- **$H_0 2$:** Cumulative PFAS body burden accumulated over the modeled exposure window does not differ significantly between Average (22 years) and Pregnant (19 years) Filipino Women.
-  **$H_1 2$:** Cumulative PFAS body burden differs significantly between Average and Pregnant Filipino Women.
+- **$H_{02}$:** Cumulative PFAS body burden accumulated over the modeled exposure window does not differ significantly between Average (22 years) and Pregnant (19 years) Filipino Women.
+  **$H_{12}$:** Cumulative PFAS body burden differs significantly between Average and Pregnant Filipino Women.
   _(Two-sided Mann-Whitney U test)_
 
-- **$H_0 3$:** No toxicokinetic model parameter has a significant monotonic effect on estimated steady-state serum concentration ($C_{ss}$).
-  **$H_1 3$:** At least one toxicokinetic model parameter has a significant monotonic effect on estimated steady-state serum concentration ($C_{ss}$).
-  *(Partial Rank Correlation Coefficient, $|PRCC| \ge 0.10$, $p < 0.05$)*
+- **$H_{03}$:** No toxicokinetic model parameter has a significant monotonic effect on estimated steady-state serum concentration ($C_{ss}$).
+  **$H_{13}$:** At least one toxicokinetic model parameter has a significant monotonic effect on estimated steady-state serum concentration ($C_{ss}$).
+  *(Partial Rank Correlation Coefficient, $\lvert PRCC\rvert \ge 0.10$, $p < 0.05$)*
 
-- **$H_0 4$:** The median compound-specific HQ and exploratory sum of HQs do not exceed 1.0 based on the selected chronic RfD/MRL values.
-  **$H_1 4$:** The median compound-specific HQ or exploratory sum of HQs exceeds 1.0 based on the selected chronic RfD/MRL values.
+- **$H_{04}$:** The median compound-specific HQ and exploratory sum of HQs do not exceed 1.0 based on the selected chronic RfD/MRL values.
+  **$H_{14}$:** The median compound-specific HQ or exploratory sum of HQs exceeds 1.0 based on the selected chronic RfD/MRL values.
   _(One-sided one-sample Wilcoxon signed-rank test against 1.0, run for each PFAS and the exploratory HQ sum in each group)_
 
 ### Research framework (SOP & hypotheses)
 
-| Domain                    | Framework (SOP & hypotheses)                                                                                                                       | Rationale                                                                                                                          |
-| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| **Q1 / H1 ($C_{ss}$)**    | Two-sided Mann-Whitney U test between Average and Pregnant cohorts                                                                                 | European HBM guidance lacks thresholds for newer replacements (GenX); direct cohort testing quantifies physiological disparity.    |
-| **Q2 / H2 (Body Burden)** | Demographically calibrated horizons: 22 yrs (Average) vs. 19 yrs (Pregnant)                                                                        | Calibrated to Philippine National Demographic and Health Survey (NDHS) maternal and reproductive age data.                         |
-| **Q3 / H3 (Sensitivity)** | PRCC global sensitivity on steady-state serum concentration ($C_{ss}$)                                                                             | Partial rank correlation isolates independent drivers while controlling for parameter covariation ($\|PRCC\| \ge 0.10, p < 0.05$). |
-| **Q4 / H4 (Health Risk)** | Compound-specific chronic RfD/MRL Hazard Quotients (4.1 to 4.5), exploratory sum of HQs (4.6), % &gt; 1.0, and one-sided Wilcoxon signed-rank test | Uses the selected benchmark for each compound. The summed HQ is not the EPA NPDWR drinking-water HI.                               |
+| Domain                    | Framework (SOP & hypotheses)                                                                                                                       | Rationale                                                                                                                                   |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Q1 / H1 ($C_{ss}$)**    | Two-sided Mann-Whitney U test between Average and Pregnant cohorts                                                                                 | European HBM guidance lacks thresholds for newer replacements (GenX); direct cohort testing quantifies physiological disparity.             |
+| **Q2 / H2 (Body Burden)** | Demographically calibrated horizons: 22 yrs (Average) vs. 19 yrs (Pregnant)                                                                        | Calibrated to Philippine National Demographic and Health Survey (NDHS) maternal and reproductive age data.                                  |
+| **Q3 / H3 (Sensitivity)** | PRCC global sensitivity on steady-state serum concentration ($C_{ss}$)                                                                             | Partial rank correlation isolates independent drivers while controlling for parameter covariation ($\lvert PRCC\rvert \ge 0.10, p < 0.05$). |
+| **Q4 / H4 (Health Risk)** | Compound-specific chronic RfD/MRL Hazard Quotients (4.1 to 4.5), exploratory sum of HQs (4.6), % &gt; 1.0, and one-sided Wilcoxon signed-rank test | Uses the selected benchmark for each compound. The summed HQ is not the EPA NPDWR drinking-water HI.                                        |
