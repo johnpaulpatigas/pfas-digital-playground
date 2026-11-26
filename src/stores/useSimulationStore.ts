@@ -55,7 +55,7 @@ interface SimulationState {
 const defaultScenario = DEMOGRAPHIC_PRESETS[0];
 
 const DEFAULT_SAMPLING_CONFIG: SamplingConfig = {
-  method: 'monte-carlo',
+  method: 'monte-carlo-lhs',
   iterations: 5000,
   seed: 42,
   compoundId: 'pfoa',

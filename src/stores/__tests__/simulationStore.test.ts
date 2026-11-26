@@ -9,7 +9,7 @@ describe('useSimulationStore demographic scenario synchronization', () => {
   it('initializes with the default Average Filipino Woman scenario', () => {
     const state = useSimulationStore.getState();
     expect(state.activeScenarioId).toBe('average-filipino-woman');
-    expect(state.samplingConfig.method).toBe('monte-carlo');
+    expect(state.samplingConfig.method).toBe('monte-carlo-lhs');
     expect(state.samplingConfig.iterations).toBe(5000);
     expect(state.parameters.bodyWeight.distribution.type).toBe('normal');
   });
@@ -48,7 +48,7 @@ describe('useSimulationStore demographic scenario synchronization', () => {
     store.resetToDefault();
     const state = useSimulationStore.getState();
     expect(state.activeScenarioId).toBe('average-filipino-woman');
-    expect(state.samplingConfig.method).toBe('monte-carlo');
+    expect(state.samplingConfig.method).toBe('monte-carlo-lhs');
     expect(state.samplingConfig.iterations).toBe(5000);
   });
 
