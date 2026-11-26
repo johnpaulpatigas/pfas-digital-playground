@@ -42,8 +42,11 @@ export const DocsPage: React.FC = () => {
               <MathView math="k_e = \frac{\ln(2)}{T_{1/2} \times 365.25}" block />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-              Where <MathView math="T_{1/2}" /> is biological excretion half-life in years. For PFOA
-              and PFOS, human half-lives average 2.7 to 5.4 years due to renal tubular reabsorption.
+              Where <MathView math="T_{1/2}" /> is a model input for biological elimination
+              half-life in years. The June 2024 Ecology memo reports DOH applied a 3.52-year PFNA
+              estimate from Yu et al. (2021) in its modified MRL derivation. Comparable values for
+              the other modeled compounds are not provided; treat those as model assumptions and set
+              them for the study being modeled.
             </p>
           </div>
 
@@ -55,10 +58,14 @@ export const DocsPage: React.FC = () => {
               <MathView math="C_{ss} = \frac{I \times f_{abs}}{BW \times V_d \times k_e}" block />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-              Where <MathView math="I" /> is daily intake (&micro;g/day),{' '}
+              Total daily intake is calculated per compound as non-water intake plus water-derived
+                    intake (<MathView math="I_j = I_{nw,j} + C_{w,j} W / 1000" />, where <MathView math="C_{w,j}" /> is
+              in ng/L and <MathView math="W" /> is in L/day).{' '}
+              <MathView math="I" /> is total intake (&micro;g/day),{' '}
               <MathView math="f_{abs}" /> is the gastrointestinal absorption fraction,{' '}
               <MathView math="BW" /> is body weight in kg, and <MathView math="V_d" /> is volume of
-              distribution (~0.17 L/kg for PFOA).
+              distribution. The project source documents do not provide a volume of distribution;
+              this remains an explicit model assumption.
             </p>
           </div>
 
@@ -331,7 +338,9 @@ export const DocsPage: React.FC = () => {
         <p className="text-slate-600 text-sm leading-relaxed font-sans">
           Predicted steady-state serum concentrations (<MathView math="C_{ss}" />) and dynamic body
           burdens (<MathView math="B(t)" />) are compared against drinking water Maximum Contaminant
-          Levels (MCL) and oral Reference Doses (RfD).
+          Levels (MCL) and compound-specific chronic RfD/MRL values. The selected values are EPA
+          Office of Water 2024 for PFOA/PFOS, Ecology-selected MDH for PFHxS, Ecology-selected
+          modified ATSDR MRL for PFNA, and EPA Office of Water 2021 for HFPO-DA (GenX).
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 font-mono text-xs">
@@ -340,7 +349,7 @@ export const DocsPage: React.FC = () => {
               Hazard Quotient (HQ) formula
             </h3>
             <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
-              <MathView math="HQ = \frac{I / BW}{\text{RfD}}" block />
+              <MathView math="HQ_j = \frac{I_j / BW}{\text{RfD}_j}" block />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
               An <MathView math="HQ \le 1.0" /> indicates exposures within established toxicological
@@ -370,20 +379,23 @@ export const DocsPage: React.FC = () => {
 
           <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5 col-span-1 md:col-span-2">
             <h3 className="text-teal-900 font-bold text-sm font-heading">
-              Cumulative PFAS mixture Hazard Index (HI)
+              Exploratory sum of hazard quotients
             </h3>
             <div className="text-slate-900 bg-white p-3.5 rounded-lg border border-slate-300 text-center font-semibold text-sm">
               <MathView
-                math="HI = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}"
+                math="\text{HQ sum} = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}"
                 block
               />
             </div>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-              Under US EPA and ATSDR guidelines for PFAS mixtures, cumulative risk is evaluated by
-              summing individual hazard quotients across target chemicals. An{' '}
-              <MathView math="HI \le 1.0" /> indicates that combined mixture exposure remains within
-              non-cancer safety benchmarks, while an <MathView math="HI > 1.0" /> indicates elevated
-              cumulative risk.
+              This model sums HQs across its five modeled compounds under an assumed dose-additivity
+              approach. It is an exploratory index, not the EPA NPDWR drinking-water Hazard Index:
+              that regulatory HI uses measured water concentrations relative to health-based water
+              concentrations and includes PFBS, which this model does not currently include. In this
+              model, each compound has its own sampled daily-intake distribution. Preset intake
+              distributions are provisional assumptions because compound-specific intake data are
+              not available in the supplied assessments. Do not interpret this sum as an EPA
+              regulatory determination.
             </p>
           </div>
         </div>
@@ -463,11 +475,11 @@ export const DocsPage: React.FC = () => {
               Pregnant female profile
             </h3>
             <p className="text-slate-600 text-[11px] leading-relaxed font-sans">
-              Models gestational hemodilution (+40 to 50% blood plasma volume expansion), increased
-              hydration demands (<strong>2.8 L/day</strong>), gestational mass (
+              Uses a pregnant-cohort scenario with hydration demand (<strong>2.8 L/day</strong>) and
+              gestational mass (
               <strong>65.2 kg</strong>), transplacental clearance dynamics shortening maternal serum
-              half-life (<strong>2.4 yrs</strong>), and a pre-gestational chronic exposure horizon
-              of <strong>19 years</strong> based on NDHS median maternal age.
+              half-life supplied as a scenario assumption, and a pre-gestational exposure horizon of
+              <strong>19 years</strong>.
             </p>
           </div>
         </div>
@@ -553,9 +565,9 @@ export const DocsPage: React.FC = () => {
               </span>
               <p className="text-slate-600 leading-relaxed text-[11px]">
                 What is the estimated health risk among Average and Pregnant Filipino Women,
-                expressed as compound-specific Hazard Quotients (HQ) and a mixture Hazard Index (HI)
-                derived from U.S. EPA oral reference doses (RfD), and what percentage of simulated
-                women exceeds an HQ or HI of 1.0 for:
+                expressed as compound-specific Hazard Quotients (HQ) and an exploratory sum of HQs
+                derived from selected compound-specific chronic RfD/MRL values, and what percentage of simulated
+                women exceeds an HQ or exploratory HQ sum of 1.0 for:
               </p>
               <ul className="text-[11px] text-slate-700 font-mono space-y-0.5 pl-2">
                 <li>4.1 PFOA</li>
@@ -563,7 +575,7 @@ export const DocsPage: React.FC = () => {
                 <li>4.3 PFHxS</li>
                 <li>4.4 PFNA</li>
                 <li>4.5 GenX</li>
-                <li>4.6 Combined PFAS mixture (Hazard Index)</li>
+                <li>4.6 Exploratory sum of HQs across the five modeled compounds</li>
               </ul>
             </div>
           </div>
@@ -675,11 +687,12 @@ export const DocsPage: React.FC = () => {
               </div>
               <p>
                 <strong>H₀ 4:</strong> Exposure risk is not significant: the median Hazard Quotient
-                for each PFAS and the median mixture Hazard Index do not exceed 1.0 based on the EPA
-                oral RfD.
+                for each PFAS and the median exploratory sum of HQs do not exceed 1.0 based on the
+                selected compound-specific chronic RfD/MRL values.
                 <br />
                 <strong>H₁ 4:</strong> Exposure risk is significant: the median Hazard Quotient for
-                a PFAS, or the median mixture Hazard Index, exceeds 1.0 based on the EPA oral RfD.
+                a PFAS, or the median exploratory sum of HQs, exceeds 1.0 based on the selected
+                compound-specific chronic RfD/MRL values.
               </p>
               <div className="text-slate-900 bg-white p-3 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs">
                 <MathView
@@ -787,9 +800,9 @@ export const DocsPage: React.FC = () => {
                     additivity.
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
-                    <strong>EPA RfD Hazard Quotients (HQ) & Mixture Hazard Index (HI):</strong>{' '}
-                    Evaluates 4.1 PFOA, 4.2 PFOS, 4.3 PFHxS, 4.4 PFNA, 4.5 GenX, and 4.6 Combined
-                    PFAS (HI), with population exceedance percentages (% &gt; 1.0) and one-sided
+                    <strong>Compound-specific RfD/MRL Hazard Quotients (HQ) and exploratory HQ sum:</strong>{' '}
+                    Evaluates 4.1 PFOA, 4.2 PFOS, 4.3 PFHxS, 4.4 PFNA, 4.5 GenX, and 4.6 the
+                    exploratory sum of HQs, with population exceedance percentages (% &gt; 1.0) and one-sided
                     Wilcoxon signed-rank tests against 1.0.
                   </td>
                 </tr>

@@ -1,5 +1,10 @@
 import type { DistributionParams, IterationResult, SimulationParameters } from '../types';
-import { PARAMETER_KEYS } from './parameters';
+import {
+  DAILY_INTAKE_PARAMETER_KEYS,
+  getSimulationParameter,
+  PARAMETER_KEYS,
+  WATER_CONCENTRATION_PARAMETER_KEYS,
+} from './parameters';
 import { calculateToxicokinetics } from './toxicokinetics';
 
 export type ParameterSampleValues = Record<keyof SimulationParameters, number>;
@@ -13,7 +18,7 @@ export function sampleParameterSet(
 ): ParameterSampleValues {
   const samples = {} as ParameterSampleValues;
   for (const key of PARAMETER_KEYS) {
-    samples[key] = draw(parameters[key].distribution);
+    samples[key] = draw(getSimulationParameter(parameters, key).distribution);
   }
   return samples;
 }
@@ -26,9 +31,17 @@ export function evaluateParameterSample(
   iteration: number,
   compoundId: string,
 ): IterationResult {
+  const compoundDailyIntakes = Object.fromEntries(
+    Object.entries(DAILY_INTAKE_PARAMETER_KEYS).map(([id, key]) => [id, samples[key]]),
+  ) as Record<string, number>;
+  const compoundWaterConcentrations = Object.fromEntries(
+    Object.entries(WATER_CONCENTRATION_PARAMETER_KEYS).map(([id, key]) => [id, samples[key]]),
+  ) as Record<string, number>;
   return calculateToxicokinetics(
     {
-      dailyIntake: Math.max(0.0001, samples.dailyIntake),
+      dailyIntake: compoundDailyIntakes[compoundId] ?? 0,
+      compoundDailyIntakes,
+      compoundWaterConcentrations,
       bodyWeight: Math.max(20, samples.bodyWeight),
       age: Math.max(1, samples.age),
       waterConsumption: Math.max(0.1, samples.waterConsumption),

@@ -4,7 +4,8 @@ import { useMemo } from 'react';
 import { Button } from '../../components/ui/Button';
 import { MathView } from '../../components/ui/MathView';
 import { Tooltip } from '../../components/ui/Tooltip';
-import { PARAMETER_KEYS } from '../../simulation/parameters';
+import { getDistributionMean } from '../../simulation/distributions';
+import { getSimulationParameter, getVisibleParameterKeys } from '../../simulation/parameters';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { calculateDetailedCriticalAnalysis } from '../../simulation/toxicokinetics';
 import { useSimulationStore } from '../../stores/useSimulationStore';
@@ -40,6 +41,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
   const criticalAnalysis = useMemo(() => {
     return calculateDetailedCriticalAnalysis(activeCompound, parameters);
   }, [activeCompound, parameters]);
+  const visibleParameterKeys = getVisibleParameterKeys(activeCompound.id);
 
   const getMethodName = () => {
     switch (samplingConfig.method) {
@@ -52,18 +54,22 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
     }
   };
 
-  const createDefaultDistribution = (type: DistributionType): DistributionParams => {
+  const createDefaultDistribution = (
+    type: DistributionType,
+    mean: number,
+  ): DistributionParams => {
+    const spread = Math.max(Math.abs(mean) * 0.2, 0.000001);
     switch (type) {
       case 'fixed':
-        return { type: 'fixed', value: 1.0 };
+        return { type: 'fixed', value: mean };
       case 'uniform':
-        return { type: 'uniform', min: 0.5, max: 2.0 };
+        return { type: 'uniform', min: Math.max(0, mean - spread), max: mean + spread };
       case 'normal':
-        return { type: 'normal', mean: 1.0, sd: 0.2 };
+        return { type: 'normal', mean, sd: spread };
       case 'lognormal':
-        return { type: 'lognormal', mean: 1.0, sd: 0.3 };
+        return { type: 'lognormal', mean, sd: spread };
       case 'triangular':
-        return { type: 'triangular', min: 0.5, mode: 1.0, max: 2.0 };
+        return { type: 'triangular', min: Math.max(0, mean - spread), mode: mean, max: mean + spread };
     }
   };
 
@@ -129,7 +135,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
         >
           {PFAS_COMPOUNDS.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name} ({c.id.toUpperCase()}), T½: {c.halfLifeYears}y
+              {c.name} ({c.id.toUpperCase()}), T½ model default: {c.halfLifeYears}y
             </option>
           ))}
         </select>
@@ -254,12 +260,20 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
               <BookOpen className="w-3 h-3" />
             </button>
           ) : (
-            <span className="text-slate-500 font-mono text-[10px]">7 Parameters</span>
+            <span className="text-slate-500 font-mono text-[10px]">
+              {visibleParameterKeys.length} Parameters
+            </span>
           )}
         </div>
 
-        {PARAMETER_KEYS.map((key) => {
-          const param = parameters[key];
+        <p className="px-1 text-[11px] text-amber-800 leading-relaxed">
+          Showing {activeCompound.id.toUpperCase()} inputs and shared physiology. Preset intakes are
+          provisional assumptions; water starts at the MCL as a scenario value, not a measured
+          concentration. Replace both with study-specific data for research analyses.
+        </p>
+
+        {visibleParameterKeys.map((key) => {
+          const param = getSimulationParameter(parameters, key);
           const thresholdInfo = criticalAnalysis.parameterThresholds.find(
             (p: ParameterCriticalThreshold) => p.id === key,
           );
@@ -313,7 +327,13 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
               <DistributionSelector
                 distribution={param.distribution}
                 onChangeDistributionType={(type) =>
-                  setParameterDistribution(key, createDefaultDistribution(type))
+                  setParameterDistribution(
+                    key,
+                    createDefaultDistribution(
+                      type,
+                      getDistributionMean(param.distribution),
+                    ),
+                  )
                 }
                 onChangeValue={(valKey, val) => updateParameterValue(key, valKey, val)}
                 unit={param.unit}

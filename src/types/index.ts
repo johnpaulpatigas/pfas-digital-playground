@@ -58,7 +58,18 @@ export interface ExposureParameterConfig {
 
 // Complete Input Parameters Set
 export interface SimulationParameters {
-  dailyIntake: ExposureParameterConfig; // ug/day
+  dailyIntakePfoa?: ExposureParameterConfig; // µg/day, separate PFOA intake distribution
+  dailyIntakePfos?: ExposureParameterConfig;
+  dailyIntakePfhxs?: ExposureParameterConfig;
+  dailyIntakePfna?: ExposureParameterConfig;
+  dailyIntakeGenx?: ExposureParameterConfig;
+  waterConcentrationPfoa?: ExposureParameterConfig; // ng/L, compound-specific
+  waterConcentrationPfos?: ExposureParameterConfig;
+  waterConcentrationPfhxs?: ExposureParameterConfig;
+  waterConcentrationPfna?: ExposureParameterConfig;
+  waterConcentrationGenx?: ExposureParameterConfig;
+  /** Legacy compatibility field; current presets and sampling use the five compound-specific inputs. */
+  dailyIntake: ExposureParameterConfig;
   bodyWeight: ExposureParameterConfig; // kg
   age: ExposureParameterConfig; // years
   waterConsumption: ExposureParameterConfig; // L/day
@@ -80,6 +91,10 @@ export interface SamplingConfig {
 // Single Compound Output within an Iteration
 export interface CompoundIterationOutput {
   compoundId: string;
+  dietaryIntake: number; // non-water intake, µg/day
+  waterConcentration: number; // ng/L
+  waterIntake: number; // water-derived intake, µg/day
+  dailyIntake: number; // total compound intake, dietary + water, µg/day
   eliminationRate: number; // day^-1
   steadyStateConcentration: number; // ug/L (ng/mL) in blood serum
   peakBodyBurden: number; // ug
@@ -94,7 +109,9 @@ export interface CompoundIterationOutput {
 // Single Sample Iteration Output
 export interface IterationResult {
   iteration: number;
-  dailyIntake: number;
+  dailyIntake: number; // total active-compound intake, dietary + water, µg/day
+  dietaryIntake?: number;
+  waterIntake?: number;
   bodyWeight: number;
   age: number;
   waterConsumption: number;
@@ -108,7 +125,7 @@ export interface IterationResult {
   peakBodyBurden: number; // ug
   clearanceRate: number; // L/kg/day
   hazardQuotient: number; // HQ = Dose / RfD
-  hazardIndex?: number; // Cumulative mixture Hazard Index HI = sum(HQ_j)
+  hazardIndex?: number; // Exploratory sum of modeled compound HQs; not EPA NPDWR mixture HI
   criticalBodyBurden?: number; // active-compound limit at HQ = 1 (ug)
   isExceeded?: boolean; // active-compound exceedance (HQ > 1.0)
 
@@ -184,7 +201,7 @@ export interface SummaryStatistics {
   meanHazardQuotient: number;
   medianHazardQuotient?: number;
   riskExceedancePercent: number; // Percentage of population exceeding HQ > 1.0
-  meanHazardIndex?: number; // Mean Cumulative Mixture Hazard Index HI = sum(HQ_j)
+  meanHazardIndex?: number; // Mean exploratory sum of modeled compound HQs
   medianHazardIndex?: number;
   mixtureExceedancePercent?: number; // Percentage of population exceeding HI > 1.0
   wilcoxonHQ?: WilcoxonOneSampleResult;

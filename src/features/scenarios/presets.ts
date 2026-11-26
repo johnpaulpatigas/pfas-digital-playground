@@ -1,4 +1,76 @@
-import type { DemographicScenario } from '../../types';
+import type { DemographicScenario, ExposureParameterConfig } from '../../types';
+import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
+
+const intakeConfig = (
+  compoundId: string,
+  distribution: ExposureParameterConfig['distribution'],
+  scientificContext =
+    'Preset assumption only. Replace with compound-specific intake data appropriate to the study.',
+): ExposureParameterConfig => ({
+  id: `dailyIntake${compoundId}`,
+  name: `Daily ${compoundId.toUpperCase()} Non-Water Intake`,
+  unit: 'µg/day',
+  description: `Compound-specific non-water daily intake for ${compoundId.toUpperCase()}.`,
+  scientificContext,
+  distribution,
+});
+
+const assumedIntakeGroup = (mean: number, sd: number) => ({
+  dailyIntakePfoa: intakeConfig('pfoa', { type: 'lognormal', mean, sd }),
+  dailyIntakePfos: intakeConfig('pfos', { type: 'lognormal', mean, sd }),
+  dailyIntakePfhxs: intakeConfig('pfhxs', { type: 'lognormal', mean, sd }),
+  dailyIntakePfna: intakeConfig('pfna', { type: 'lognormal', mean, sd }),
+  dailyIntakeGenx: intakeConfig('genx', { type: 'lognormal', mean, sd }),
+});
+
+const mclWaterConcentrationConfig = (compoundId: string): ExposureParameterConfig => {
+  const compound = PFAS_COMPOUNDS.find((item) => item.id === compoundId);
+  if (!compound) throw new Error(`Unknown PFAS compound: ${compoundId}`);
+  return {
+    id: `waterConcentration${compound.id}`,
+    name: `${compound.id.toUpperCase()} Water Concentration`,
+    unit: 'ng/L',
+    description: `Drinking-water concentration for ${compound.id.toUpperCase()}.`,
+    scientificContext: `Scenario assumes water at the 2024 EPA MCL of ${compound.epaMCL} ng/L; replace with measured site concentration.`,
+    distribution: { type: 'fixed', value: compound.epaMCL },
+  };
+};
+
+const mclWaterConcentrationGroup = () => ({
+  waterConcentrationPfoa: mclWaterConcentrationConfig('pfoa'),
+  waterConcentrationPfos: mclWaterConcentrationConfig('pfos'),
+  waterConcentrationPfhxs: mclWaterConcentrationConfig('pfhxs'),
+  waterConcentrationPfna: mclWaterConcentrationConfig('pfna'),
+  waterConcentrationGenx: mclWaterConcentrationConfig('genx'),
+});
+
+const zeroWaterConcentrationGroup = () => ({
+  waterConcentrationPfoa: {
+    ...mclWaterConcentrationConfig('pfoa'),
+    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    distribution: { type: 'fixed' as const, value: 0 },
+  },
+  waterConcentrationPfos: {
+    ...mclWaterConcentrationConfig('pfos'),
+    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    distribution: { type: 'fixed' as const, value: 0 },
+  },
+  waterConcentrationPfhxs: {
+    ...mclWaterConcentrationConfig('pfhxs'),
+    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    distribution: { type: 'fixed' as const, value: 0 },
+  },
+  waterConcentrationPfna: {
+    ...mclWaterConcentrationConfig('pfna'),
+    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    distribution: { type: 'fixed' as const, value: 0 },
+  },
+  waterConcentrationGenx: {
+    ...mclWaterConcentrationConfig('genx'),
+    scientificContext: 'Critical-dose scenario sets water concentration to zero to isolate non-water intake.',
+    distribution: { type: 'fixed' as const, value: 0 },
+  },
+});
 
 export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
   {
@@ -6,16 +78,11 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     name: 'Average Filipino Woman',
     targetGroup: 'General Adult Female Cohort',
     description:
-      'Baseline physiological and exposure values for adult women in the Philippines, derived from national health and nutrition surveys.',
+      'Baseline physiological scenario for adult women in the Philippines. PFAS-specific intake distributions are provisional assumptions, not survey measurements.',
     parameters: {
-      dailyIntake: {
-        id: 'dailyIntake',
-        name: 'Daily PFAS Intake',
-        unit: 'µg/day',
-        description: 'Estimated daily ingestion of PFAS from food and drinking water.',
-        scientificContext: 'Combines estimates from drinking water and dietary sources.',
-        distribution: { type: 'lognormal', mean: 0.05, sd: 0.02 },
-      },
+      dailyIntake: intakeConfig('pfoa', { type: 'lognormal', mean: 0.05, sd: 0.02 }),
+      ...assumedIntakeGroup(0.05, 0.02),
+      ...mclWaterConcentrationGroup(),
       bodyWeight: {
         id: 'bodyWeight',
         name: 'Body Weight',
@@ -53,7 +120,7 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         name: 'Elimination Half-Life',
         unit: 'years',
         description: 'Biological excretion half-life in human blood serum.',
-        scientificContext: 'PFOA half-life in humans averages 2.7 to 3.8 years.',
+        scientificContext: 'Scenario assumption; the 2024 memo reports a 3.52-year PFNA estimate used in MRL derivation.',
         distribution: { type: 'lognormal', mean: 3.2, sd: 0.8 },
       },
       exposureDuration: {
@@ -72,16 +139,11 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     name: 'Pregnant Female Profile',
     targetGroup: 'Maternal Physiology Cohort',
     description:
-      'Adjusted for plasma volume expansion and maternal physiological changes during pregnancy.',
+      'Pregnancy physiology scenario. PFAS-specific intake distributions are provisional assumptions, not measured maternal exposures.',
     parameters: {
-      dailyIntake: {
-        id: 'dailyIntake',
-        name: 'Daily PFAS Intake',
-        unit: 'µg/day',
-        description: 'Maternal dietary and fluid intake.',
-        scientificContext: 'Includes prenatal fluid intake recommendations.',
-        distribution: { type: 'lognormal', mean: 0.07, sd: 0.03 },
-      },
+      dailyIntake: intakeConfig('pfoa', { type: 'lognormal', mean: 0.07, sd: 0.03 }),
+      ...assumedIntakeGroup(0.07, 0.03),
+      ...mclWaterConcentrationGroup(),
       bodyWeight: {
         id: 'bodyWeight',
         name: 'Body Weight',
@@ -120,7 +182,7 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         unit: 'years',
         description: 'Apparent serum clearance half-life.',
         scientificContext:
-          'Transplacental transfer and plasma expansion increase maternal clearance rate.',
+          'Pregnancy scenario assumption; the cited PFNA estimate is not pregnancy-specific.',
         distribution: { type: 'lognormal', mean: 2.4, sd: 0.6 },
       },
       exposureDuration: {
@@ -141,16 +203,33 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
     description:
       'Configures a 25 to 30 year exposure period with baseline threshold parameters to evaluate steady-state PFAS body burden and exceedance.',
     parameters: {
-      dailyIntake: {
-        id: 'dailyIntake',
-        name: 'Daily PFAS Intake',
-        unit: 'µg/day',
-        description:
-          'Critical daily intake exceeding the toxicological Reference Dose (RfD) threshold.',
-        scientificContext:
-          'Intake at or above the reference dose threshold for a 55.4 kg individual (0.0831 µg/day for PFOA).',
-        distribution: { type: 'uniform', min: 0.085, max: 0.12 },
-      },
+      dailyIntake: intakeConfig('pfoa', { type: 'uniform', min: 0.0017, max: 0.003 }),
+      ...zeroWaterConcentrationGroup(),
+      dailyIntakePfoa: intakeConfig(
+        'pfoa',
+        { type: 'uniform', min: 0.0017, max: 0.003 },
+        'Benchmark scenario around the PFOA RfD-derived intake threshold for a 55.4 kg adult; not an exposure estimate.',
+      ),
+      dailyIntakePfos: intakeConfig(
+        'pfos',
+        { type: 'uniform', min: 0.0055, max: 0.01 },
+        'Benchmark scenario around the PFOS RfD-derived intake threshold for a 55.4 kg adult; not an exposure estimate.',
+      ),
+      dailyIntakePfhxs: intakeConfig(
+        'pfhxs',
+        { type: 'uniform', min: 0.53, max: 0.8 },
+        'Benchmark scenario around the PFHxS RfD-derived intake threshold for a 55.4 kg adult; not an exposure estimate.',
+      ),
+      dailyIntakePfna: intakeConfig(
+        'pfna',
+        { type: 'uniform', min: 0.14, max: 0.2 },
+        'Benchmark scenario around the PFNA MRL-derived intake threshold for a 55.4 kg adult; not an exposure estimate.',
+      ),
+      dailyIntakeGenx: intakeConfig(
+        'genx',
+        { type: 'uniform', min: 0.16, max: 0.25 },
+        'Benchmark scenario around the GenX RfD-derived intake threshold for a 55.4 kg adult; not an exposure estimate.',
+      ),
       bodyWeight: {
         id: 'bodyWeight',
         name: 'Body Weight',
@@ -188,7 +267,7 @@ export const DEMOGRAPHIC_PRESETS: DemographicScenario[] = [
         name: 'Elimination Half-Life',
         unit: 'years',
         description: 'Serum retention half-life.',
-        scientificContext: 'Baseline PFOA human elimination half-life averaging 3.8 years.',
+        scientificContext: 'Scenario assumption; the 2024 memo reports a 3.52-year PFNA estimate used in MRL derivation.',
         distribution: { type: 'normal', mean: 3.8, sd: 0.4 },
       },
       exposureDuration: {

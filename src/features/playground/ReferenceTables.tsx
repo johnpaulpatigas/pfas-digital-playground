@@ -8,7 +8,7 @@ interface ParameterReferenceTableProps {
 }
 
 /**
- * Literature-backed parameter ranges table shared by the guide modal and the
+ * Source-backed parameter ranges table shared by the guide modal and the
  * scientific guide page.
  */
 export const ParameterReferenceTable: React.FC<ParameterReferenceTableProps> = ({ rows }) => (
@@ -53,7 +53,8 @@ interface CompoundBenchmarkTableProps {
 }
 
 /**
- * PFAS pharmacokinetic and US EPA regulatory benchmark table.
+ * PFAS regulatory benchmarks. Half-life and distribution volume are omitted
+ * because the project source documents do not establish those model inputs.
  */
 export const CompoundBenchmarkTable: React.FC<CompoundBenchmarkTableProps> = ({
   cellPadding = 'p-2',
@@ -62,15 +63,9 @@ export const CompoundBenchmarkTable: React.FC<CompoundBenchmarkTableProps> = ({
     <thead>
       <tr className="border-b border-slate-200 text-slate-600 bg-white font-mono">
         <th className={`${cellPadding} font-semibold`}>Compound</th>
+        <th className={`${cellPadding} font-semibold`}>MCL (ng/L)</th>
         <th className={`${cellPadding} font-semibold`}>
-          Half-Life (<MathView math="T_{1/2}" />)
-        </th>
-        <th className={`${cellPadding} font-semibold`}>
-          Volume of Distribution (<MathView math="V_d" />)
-        </th>
-        <th className={`${cellPadding} font-semibold`}>EPA MCL (ng/L)</th>
-        <th className={`${cellPadding} font-semibold`}>
-          Reference Dose (<MathView math="\text{RfD}" />)
+          Selected RfD / MRL (<MathView math="\text{RfD}" />; mg/kg/day)
         </th>
       </tr>
     </thead>
@@ -81,10 +76,12 @@ export const CompoundBenchmarkTable: React.FC<CompoundBenchmarkTableProps> = ({
             {c.name}{' '}
             <span className="text-slate-500 font-mono text-[10px]">(CAS {c.casNumber})</span>
           </td>
-          <td className={`${cellPadding} font-mono`}>{c.halfLifeYears} years</td>
-          <td className={`${cellPadding} font-mono`}>{c.volumeOfDistribution} L/kg</td>
           <td className={`${cellPadding} font-mono font-bold text-blue-700`}>{c.epaMCL} ng/L</td>
-          <td className={`${cellPadding} font-mono text-slate-700`}>{c.rfdDose} µg/kg/day</td>
+          <td className={`${cellPadding} font-mono text-slate-700`}>
+            <div>{(c.rfdDose / 1000).toExponential()} mg/kg/day</div>
+            <div>{c.rfdDose} µg/kg/day</div>
+            <div className="text-[9px] text-slate-500 font-sans">{c.rfdSource}</div>
+          </td>
         </tr>
       ))}
     </tbody>

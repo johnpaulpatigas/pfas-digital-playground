@@ -74,7 +74,7 @@ export const ScientificGuidePage: React.FC = () => {
               <span>Risk assessment</span>
             </div>
             <p className="text-slate-600 text-xs mt-1 font-sans">
-              Hazard Quotient (HQ), Mixture Hazard Index (HI), and population tail risk (
+              Hazard Quotient (HQ), exploratory sum of HQs, and population tail risk (
               <MathView math="P_{95}" />, <MathView math="P_{99}" />
               ).
             </p>
@@ -154,7 +154,7 @@ export const ScientificGuidePage: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-heading">
-                    1. Health risk assessment: Hazard Quotient (HQ) and Hazard Index (HI)
+                    1. Health risk assessment: Hazard Quotient (HQ) and exploratory HQ sum
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
                     Evaluating predicted exposure against regulatory benchmarks and oral reference
@@ -191,7 +191,7 @@ export const ScientificGuidePage: React.FC = () => {
                     </span>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
-                    <MathView math="HQ = \frac{I / BW}{\text{RfD}}" block />
+                    <MathView math="HQ_j = \frac{I_j / BW}{\text{RfD}_j}" block />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
                     Ratio of estimated daily chemical intake per kilogram (
@@ -204,7 +204,7 @@ export const ScientificGuidePage: React.FC = () => {
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-900 text-sm font-heading">
-                      Mixture Hazard Index (HI)
+                      Exploratory sum of HQs
                     </span>
                     <span className="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
                       Equation 2
@@ -212,13 +212,14 @@ export const ScientificGuidePage: React.FC = () => {
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-slate-300 text-center font-bold text-base">
                     <MathView
-                      math="HI = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}"
+                      math="\text{HQ sum} = \sum_{j=1}^M HQ_j = \sum_{j=1}^M \frac{I_j / BW}{\text{RfD}_j}"
                       block
                     />
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
-                    Cumulative risk metric summing individual hazard quotients across target PFAS
-                    compounds under an assumption of dose additivity.
+                    Exploratory sum across the five modeled compounds under an assumption of dose
+                    additivity. This is not the EPA NPDWR drinking-water HI, which uses
+                    concentration-to-HBWC ratios and includes PFBS.
                   </p>
                 </div>
 
@@ -239,8 +240,7 @@ export const ScientificGuidePage: React.FC = () => {
                   </div>
                   <p className="text-slate-600 text-xs font-sans leading-relaxed">
                     Proportion of sampled iterations where individual exposure (
-                    <MathView math="HQ > 1.0" />) or cumulative mixture exposure (
-                    <MathView math="HI > 1.0" />) crosses the safety benchmark.
+                    <MathView math="HQ > 1.0" />) or the exploratory HQ sum exceeds 1.0.
                   </p>
                 </div>
               </div>
@@ -248,20 +248,19 @@ export const ScientificGuidePage: React.FC = () => {
               {/* Decision Benchmark Table */}
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <h3 className="font-bold text-slate-900 font-heading text-sm">
-                  Hazard Quotient (HQ) and Hazard Index (HI) decision benchmarks
+                  Hazard Quotient (HQ) and exploratory HQ sum benchmarks
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
                   <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-1.5">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                       <span className="font-bold font-mono text-emerald-900">
-                        HQ &le; 1.0 and HI &le; 1.0: within acceptable safety benchmark
+                        HQ &le; 1.0: at or below that compound&apos;s selected benchmark
                       </span>
                     </div>
                     <p className="text-emerald-800 leading-relaxed text-[11px]">
-                      Predicted intake and cumulative mixture exposure remain below non-cancer
-                      toxicological safety thresholds. No adverse effect is anticipated under
-                      chronic baseline conditions.
+                      Predicted intake and exploratory summed HQ remain below the selected
+                      compound-specific benchmarks. This is not a regulatory mixture determination.
                     </p>
                   </div>
 
@@ -269,7 +268,7 @@ export const ScientificGuidePage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
                       <span className="font-bold font-mono text-rose-900">
-                        HQ &gt; 1.0 or HI &gt; 1.0: elevated risk threshold
+                        HQ &gt; 1.0: selected benchmark exceeded; summed HQ is exploratory only
                       </span>
                     </div>
                     <p className="text-rose-800 leading-relaxed text-[11px]">
@@ -362,7 +361,7 @@ export const ScientificGuidePage: React.FC = () => {
               <div className="p-6 rounded-2xl bg-purple-50/50 border border-purple-200 space-y-4 font-sans text-xs">
                 <div className="flex items-center gap-2 text-purple-950 font-bold text-sm font-heading">
                   <Scale className="w-4 h-4 text-purple-700" />
-                  <span>Critical parameter limits and 25 to 30 year equilibrium</span>
+                  <span>Critical parameter limits and exposure-duration thresholds</span>
                 </div>
                 <p className="text-slate-700 leading-relaxed">
                   Each parameter in the 1-compartment model has a threshold where predicted internal
@@ -415,11 +414,11 @@ export const ScientificGuidePage: React.FC = () => {
                       4. Bioavailability (<MathView math="f_{abs}" />)
                     </strong>
                     <div className="text-purple-900 font-bold">
-                      <MathView math="f_{\text{abs, crit}} = \frac{BW \times \text{RfD}}{I}" />
+                      <MathView math="HQ = \frac{I / BW}{\text{RfD}} \text{ (independent of } f_{abs}\text{)}" />
                     </div>
                     <p className="text-slate-600 text-[10px] font-sans">
-                      GI absorption fraction required for absorbed mass to cross the safety
-                      threshold.
+                      Bioavailability affects estimated absorbed dose and body burden, but not this
+                      model&apos;s intake-based HQ benchmark.
                     </p>
                   </div>
 
@@ -428,10 +427,11 @@ export const ScientificGuidePage: React.FC = () => {
                       5. Half-life (<MathView math="T_{1/2}" />)
                     </strong>
                     <div className="text-purple-900 font-bold">
-                      <MathView math="T_{1/2, \text{crit}} = \frac{BW \times \text{RfD}}{I} \times T_{1/2}" />
+                      <MathView math="B(T_{1/2,\text{crit}}) = B_{\text{crit}}" />
                     </div>
                     <p className="text-slate-600 text-[10px] font-sans">
-                      Slower excretion prolongs residence time, elevating steady-state mass.
+                      Half-life threshold is solved from the finite-exposure body-burden equation
+                      for the current dose and exposure duration.
                     </p>
                   </div>
 
@@ -439,10 +439,13 @@ export const ScientificGuidePage: React.FC = () => {
                     <strong className="text-purple-950 block">
                       6. Exposure duration (<MathView math="t" />)
                     </strong>
-                    <div className="text-purple-900 font-bold">25 to 30 years (equilibrium)</div>
+                    <div className="text-purple-900 font-bold">
+                      <MathView math="t_{\\text{crit}} = -\\frac{1}{k_e} \\ln\\left(1 - \\frac{B_{\\text{crit}} k_e}{I f_{abs}}\\right)" />
+                    </div>
                     <p className="text-slate-600 text-[10px] font-sans">
-                      Corresponds to 6.5 to 8.0 half-lives for PFOA/PFNA, reaching over 99% of
-                      steady-state body burden (&gt;87% for PFHxS).
+                      Solves for when current exposure reaches the HQ = 1 body-burden threshold
+                      using the selected dose and elimination half-life. No crossing is shown when
+                      intake is at or below the RfD threshold.
                     </p>
                   </div>
                 </div>
@@ -461,7 +464,8 @@ export const ScientificGuidePage: React.FC = () => {
                         US EPA NPDWR (2024):
                       </strong>
                       Maximum Contaminant Levels of <strong>4.0 ng/L (ppt)</strong> for PFOA and
-                      PFOS, and <strong>10.0 ng/L</strong> for PFNA, PFHxS, and GenX (HFPO-DA).
+                      PFOS, and <strong>10.0 ng/L</strong> for PFNA, PFHxS, and GenX (HFPO-DA),
+                      based on the 2024 final regulation described in the June 2024 memo.
                     </div>
                     <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
                       <strong className="text-slate-900 font-mono block">
@@ -491,9 +495,9 @@ export const ScientificGuidePage: React.FC = () => {
                     <li className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-1.5 flex-shrink-0" />
                       <span>
-                        <strong>Test 25 to 30 year exposure:</strong> Loading the{' '}
-                        <em>Critical Baseline Threshold</em> scenario preset configures the 25 to 30
-                        year exposure range to evaluate steady-state equilibrium.
+                        <strong>Check the exposure-duration threshold:</strong> The cutoff is
+                        calculated from the current intake, bioavailability, and half-life. The
+                        25 to 30 year preset is a scenario assumption, not a universal threshold.
                       </span>
                     </li>
                     <li className="flex items-start gap-2">
@@ -754,7 +758,7 @@ export const ScientificGuidePage: React.FC = () => {
                     </div>
                     <div className="flex justify-between p-2 rounded bg-white border border-slate-200">
                       <span>Elimination half-life:</span>
-                      <strong>3.2 to 5.4 yrs (PFOA, PFOS, PFNA)</strong>
+                      <strong>Model input; PFNA estimate: 3.52 yr</strong>
                     </div>
                   </div>
                 </div>
@@ -798,7 +802,7 @@ export const ScientificGuidePage: React.FC = () => {
                     </div>
                     <div className="flex justify-between p-2 rounded bg-white border border-purple-200">
                       <span>Apparent half-life:</span>
-                      <strong>Mean 2.4 yrs (transplacental clearance)</strong>
+                      <strong>Pregnancy assumption; PFNA estimate is not pregnancy-specific</strong>
                     </div>
                   </div>
                 </div>
@@ -878,7 +882,8 @@ export const ScientificGuidePage: React.FC = () => {
                   </div>
                   <p className="text-slate-600 text-xs sm:text-sm font-sans">
                     Recommended baseline values, biological bounds, and literature sources for all
-                    seven simulation inputs.
+                    simulation inputs, including separate non-water intake and drinking-water
+                    concentration distributions for each compound.
                   </p>
                 </div>
               </div>

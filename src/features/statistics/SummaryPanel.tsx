@@ -170,12 +170,12 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             </span>
             <GuidanceTooltip
               title="Health Risk Quotient (HQ) & Mixture Risk"
-              summary="Toxicological comparison of simulated daily intake against EPA reference doses."
+              summary="Toxicological comparison of each compound's simulated intake against its selected chronic benchmark."
               items={[
                 'Hazard Quotient (HQ): Ratio of daily intake to the compound Reference Dose (RfD). HQ ≤ 1.0 is within benchmark limits; HQ > 1.0 indicates the RfD is exceeded.',
                 'Target HQ > 1.0 %: Percentage of simulated iterations where daily intake per kg body weight exceeds the RfD for this compound.',
-                'Mixture Hazard Index (HI): Sum of Hazard Quotients across all 5 PFAS compounds (∑ HQ_i). HI > 1.0 indicates combined exposure exceeds the cumulative threshold even if individual compounds are below 1.0.',
-                'Hypothesis 4 (H₀ 4): One-sided one-sample Wilcoxon signed-rank test evaluates whether the population median HQ or median HI exceeds 1.0 based on the EPA oral RfD (tested at α = 0.05).',
+                'Exploratory sum of HQs: Sum of Hazard Quotients across the 5 modeled compounds under an assumed dose-additivity approach. This is not the EPA NPDWR drinking-water HI; the model does not include PFBS and does not calculate concentration-to-HBWC ratios.',
+                'Hypothesis 4 (H₀ 4): One-sided one-sample Wilcoxon signed-rank test evaluates whether the population median HQ or exploratory HQ sum exceeds 1.0 (tested at α = 0.05).',
               ]}
               align="right"
             />
@@ -240,7 +240,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
         {summaryStats.meanHazardIndex !== undefined && (
           <div className="pt-2 border-t border-slate-200/60 space-y-1">
             <div className="flex items-center justify-between gap-2 text-[11px] text-slate-700">
-              <span className="text-slate-600">PFAS Mixture Hazard Index:</span>
+              <span className="text-slate-600">Exploratory sum of PFAS HQs:</span>
               <span className="font-mono font-bold text-slate-800 shrink-0 whitespace-nowrap">
                 Median ={' '}
                 {(summaryStats.medianHazardIndex ?? summaryStats.meanHazardIndex).toFixed(2)}{' '}
@@ -253,7 +253,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
             </div>
             {summaryStats.wilcoxonHI && (
               <div className="flex items-center justify-between gap-2 text-[10px] text-slate-500 pt-0.5">
-                <span>Mixture HI Test (Median ≤ 1.0):</span>
+                <span>Exploratory HQ-sum test (Median ≤ 1.0):</span>
                 <span
                   className={`font-semibold text-[9px] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap border ${
                     summaryStats.wilcoxonHI.isSignificantRisk

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
 import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
+import { getSimulationParameter } from '../simulation/parameters';
 import type {
   ComparisonResult,
   CompoundSummary,
@@ -81,7 +82,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       parameters: {
         ...state.parameters,
         [paramId]: {
-          ...state.parameters[paramId],
+          ...getSimulationParameter(state.parameters, paramId),
           distribution,
         },
       },
@@ -93,7 +94,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
   updateParameterValue: (paramId, key, value) => {
     set((state) => {
-      const currentParam = state.parameters[paramId];
+      const currentParam = getSimulationParameter(state.parameters, paramId);
       return {
         parameters: {
           ...state.parameters,

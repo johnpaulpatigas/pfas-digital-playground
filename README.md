@@ -17,14 +17,14 @@ This application lets users simulate chemical exposure, compare Monte Carlo and 
 
 ## Features
 
-- Granular parameter controls: Configure demographic presets and all seven exposure and physiological parameters across five distribution types.
-- Interactive parameter distributions: Configure fixed, uniform, normal, lognormal, and triangular distributions for daily intake, body weight, water intake, bioavailability, elimination half-life, and exposure duration.
-- PFAS compound database: Chemical profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, formulas, half-lives, volumes of distribution, and US EPA Maximum Contaminant Levels (MCL).
+- Granular parameter controls: Configure demographic presets and sixteen exposure and physiological parameters, including separate non-water intake and drinking-water concentration distributions for each modeled PFAS.
+- Interactive parameter distributions: Configure fixed, uniform, normal, lognormal, and triangular distributions for compound-specific intake and water concentration, body weight, water consumption, bioavailability, elimination half-life, and exposure duration.
+- PFAS compound database: Chemical profiles for PFOA, PFOS, PFHxS, PFNA, and GenX with CAS numbers, formulas, 2024 US EPA Maximum Contaminant Levels (MCLs), and compound-specific chronic RfD/MRL selections. Half-life and volume-of-distribution values are model assumptions.
 - Asynchronous Web Worker engine: Runs compute-heavy sampling loops off the main thread to keep charts and controls responsive.
-- Toxicokinetics and risk metrics: Calculate body burden ($B(t)$), steady-state serum concentration ($C_{ss}$), clearance rate ($CL$), single-substance Hazard Quotient ($HQ$), and cumulative PFAS mixture Hazard Index ($HI$) with threshold exceedance percentages ($HQ > 1.0$, $HI > 1.0$).
+- Toxicokinetics and risk metrics: Calculate body burden ($B(t)$), steady-state serum concentration ($C_{ss}$), clearance rate ($CL$), single-substance Hazard Quotients ($HQ$), and an exploratory sum of modeled HQs. The summed HQ is not the EPA NPDWR drinking-water mixture Hazard Index.
 - Visualizations: Interactive frequency histogram, cumulative distribution (CDF), dynamic 40-year time-course curves, intake versus serum scatter plot, Spearman rank tornado sensitivity plot, and running mean convergence tracking.
 - Method comparison view: Head-to-head benchmarking of runtime, variance, and convergence rates between MC, LHS, and hybrid MC+LHS.
-- Data export: Paginated iteration table with CSV and JSON exports, including calculated Hazard Quotient and mixture Hazard Index columns.
+- Data export: Paginated iteration table with CSV and JSON exports, including calculated Hazard Quotients and exploratory summed-HQ column.
 
 ---
 
@@ -130,7 +130,10 @@ $$CL = k_e \times V_d$$
 
 where:
 
-- $I$: Daily PFAS intake ($\mu\text{g/day}$)
+- $I_j$: Total daily intake for compound $j$ ($\mu\text{g/day}$), non-water plus water-derived intake
+- $I_{nw,j}$: Compound-specific non-water daily intake ($\mu\text{g/day}$)
+- $C_{w,j}$: Compound-specific drinking-water concentration ($\text{ng/L}$)
+- $W$: Daily drinking-water consumption ($\text{L/day}$)
 - $f_{\text{abs}}$: Bioavailability or gastrointestinal absorption fraction (unitless)
 - $BW$: Body weight ($\text{kg}$)
 - $V_d$: Volume of distribution ($\text{L/kg}$)
@@ -141,13 +144,21 @@ where:
 
 ### Risk assessment metrics
 
-Individual and mixture health risks are evaluated using oral Reference Doses (RfD):
+Individual health risks are evaluated using the compound-specific chronic RfD/MRL values selected for this model (see `src/simulation/pfasCompounds.ts` and the cited EPA, MDH, ATSDR, and Ecology assessments). Each compound has its own non-water intake and water-concentration inputs. Preset intakes are provisional assumptions; water concentrations start at each compound's EPA MCL as an upper-bound scenario. Replace both with study-specific measurements for exposure analyses. The app's exploratory sum of HQs is not the EPA NPDWR drinking-water mixture HI.
 
-$$HQ = \frac{\text{Daily Dose}}{\text{RfD}} = \frac{I / BW}{\text{RfD}}$$
+$$I_j = I_{nw,j} + \frac{C_{w,j} \times W}{1000}$$
 
-$$HI = \sum_{j=1}^{M} HQ_j = \sum_{j=1}^{M} \frac{I_j / BW}{\text{RfD}_j}$$
+Concentration is in ng/L, water consumption is in L/day, and total intake is in µg/day.
 
-An $HQ \le 1.0$ or $HI \le 1.0$ indicates that estimated intake remains within established toxicological thresholds. Values exceeding $1.0$ indicate potential non-cancer adverse health risks.
+$$HQ_j = \frac{\text{Daily Dose}_j}{\text{RfD}_j} = \frac{I_j / BW}{\text{RfD}_j}$$
+
+$$\text{HQ sum} = \sum_{j=1}^{M} HQ_j = \sum_{j=1}^{M} \frac{I_j / BW}{\text{RfD}_j}$$
+
+An individual $HQ \le 1.0$ indicates that the estimated intake is at or below that compound's selected benchmark. The exploratory sum is not a regulatory mixture threshold; values above 1.0 warrant follow-up, not a direct health determination.
+
+Bioavailability affects absorbed dose, body burden, and serum concentration in the toxicokinetic model. The selected HQ uses ingested dose and is independent of bioavailability, so the app does not assign bioavailability an HQ = 1 critical threshold.
+
+The critical exposure duration is calculated from the finite-exposure body-burden equation using current total intake, bioavailability, and half-life. It is shown only when intake exceeds the selected RfD intake threshold and the modeled burden reaches the HQ = 1 body-burden benchmark. The 25 to 30 year preset is a scenario assumption, not a universal critical duration.
 
 ### Population quantiles and variance metrics
 
@@ -186,13 +197,13 @@ This study addresses the following research questions:
    - 2.4 PFNA
    - 2.5 GenX
 3. **How do individual physiological and behavioral input parameters influence predicted steady-state serum concentrations ($C_{ss}$) in global sensitivity analysis, and which parameters serve as the primary drivers of internal dose?**
-4. **What is the estimated health risk among Average and Pregnant Filipino Women, expressed as compound-specific Hazard Quotients (HQ) and a mixture Hazard Index (HI) derived from U.S. EPA oral reference doses (RfD), and what percentage of simulated women exceeds an HQ or HI of 1.0 for:**
+4. **What are the compound-specific Hazard Quotients (HQs) and exploratory sum of HQs among Average and Pregnant Filipino Women, derived from the selected chronic RfD/MRL for each PFAS, and what percentage of simulations exceeds 1.0 for:**
    - 4.1 PFOA
    - 4.2 PFOS
    - 4.3 PFHxS
    - 4.4 PFNA
    - 4.5 GenX
-   - 4.6 Combined PFAS mixture (Hazard Index)
+   - 4.6 Exploratory sum of HQs across the five modeled compounds (not the EPA NPDWR mixture HI)
 
 ### Hypotheses (all tests at $\alpha = 0.05$, run separately for each PFAS)
 
@@ -208,9 +219,9 @@ This study addresses the following research questions:
   **$H_1 3$:** At least one toxicokinetic model parameter has a significant monotonic effect on estimated steady-state serum concentration ($C_{ss}$).
   *(Partial Rank Correlation Coefficient, $|PRCC| \ge 0.10$, $p < 0.05$)*
 
-- **$H_0 4$:** Exposure risk is not significant: the median Hazard Quotient for each compound and the median mixture Hazard Index do not exceed 1.0 based on the EPA oral RfD.
-  **$H_1 4$:** Exposure risk is significant: the median Hazard Quotient for a compound, or the median mixture Hazard Index, exceeds 1.0 based on the EPA oral RfD.
-  _(One-sided one-sample Wilcoxon signed-rank test against 1.0, run for each PFAS and the HI in each group)_
+- **$H_0 4$:** The median compound-specific HQ and exploratory sum of HQs do not exceed 1.0 based on the selected chronic RfD/MRL values.
+  **$H_1 4$:** The median compound-specific HQ or exploratory sum of HQs exceeds 1.0 based on the selected chronic RfD/MRL values.
+  _(One-sided one-sample Wilcoxon signed-rank test against 1.0, run for each PFAS and the exploratory HQ sum in each group)_
 
 ### Methodological Evolution (Old SOP vs. New Proposed SOP)
 
@@ -219,4 +230,4 @@ This study addresses the following research questions:
 | **Q1 / H1 ($C_{ss}$)**    | Comparison against European HBM guidance values (HBM-I & HBM-II) | Two-sided Mann-Whitney U test between Average and Pregnant cohorts                                                               | European HBM guidance lacks thresholds for newer replacements (GenX); direct cohort testing quantifies physiological disparity. |
 | **Q2 / H2 (Body Burden)** | Arbitrary generic 30-year exposure period                        | Demographically calibrated horizons: 22 yrs (Average) vs. 19 yrs (Pregnant)                                                      | Calibrated to Philippine National Demographic and Health Survey (NDHS) maternal and reproductive age data.                      |
 | **Q3 / H3 (Sensitivity)** | Parameter sensitivity on body burden                             | PRCC global sensitivity on steady-state serum concentration ($C_{ss}$)                                                           | Partial rank correlation isolates independent drivers while controlling for parameter covariation ($                            | PRCC | \ge 0.10, p < 0.05$). |
-| **Q4 / H4 (Health Risk)** | Generic body burden threshold exceedance                         | U.S. EPA oral RfD Hazard Quotients (4.1 to 4.5), Mixture Hazard Index (4.6), % &gt; 1.0, and one-sided Wilcoxon signed-rank test | Follows EPA and ATSDR mixture guidance. Using the median avoids distortion from skewed distributions.                           |
+| **Q4 / H4 (Health Risk)** | Generic body burden threshold exceedance                         | Compound-specific chronic RfD/MRL Hazard Quotients (4.1 to 4.5), exploratory sum of HQs (4.6), % &gt; 1.0, and one-sided Wilcoxon signed-rank test | Uses the selected benchmark for each compound. The summed HQ is not the EPA NPDWR drinking-water HI.                           |

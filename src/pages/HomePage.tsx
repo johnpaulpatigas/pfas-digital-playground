@@ -84,10 +84,6 @@ export const HomePage: React.FC = () => {
               </div>
               <div className="pt-2 border-t border-slate-100 space-y-1 text-[11px] text-slate-700">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Half-life:</span>
-                  <span className="font-bold text-teal-700">{c.halfLifeYears} yrs</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-slate-500">EPA MCL:</span>
                   <span className="font-bold text-blue-700">{c.epaMCL} ng/L</span>
                 </div>
@@ -205,7 +201,7 @@ export const HomePage: React.FC = () => {
             <span>
               Half-life (<MathView math="T_{1/2}" />)
             </span>
-            <span className="text-purple-800 font-semibold">Lognormal (3.8 yrs)</span>
+            <span className="text-purple-800 font-semibold">Lognormal (scenario assumption)</span>
           </div>
         </div>
       </section>

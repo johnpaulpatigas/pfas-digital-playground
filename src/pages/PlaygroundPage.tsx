@@ -59,7 +59,7 @@ const TAB_METADATA: Record<TabId, TabMeta> = {
     icon: Zap,
     title: 'Toxicokinetic Exceedance & Safety Thresholds',
     description:
-      'Compares simulated internal exposure against toxicological reference limits (EPA RfD) to determine whether body burden or serum concentration exceeds safe benchmark limits (HQ > 1.0).',
+      'Compares simulated intake against selected compound-specific chronic RfD/MRL values to calculate Hazard Quotients (HQ > 1.0).',
     whatToLookFor: [
       'The red area marks iterations with HQ > 1.0; the dashed line marks the cohort-mean limit for context.',
       'Use the toggle buttons to switch between Body Burden (µg) and Serum Concentration (µg/L) views.',

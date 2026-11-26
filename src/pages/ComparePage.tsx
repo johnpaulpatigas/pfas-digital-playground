@@ -260,7 +260,7 @@ export const ComparePage: React.FC = () => {
           });
         });
 
-        // 4.6 Cumulative Mixture Hazard Index (HI)
+        // 4.6 Exploratory sum of HQs across the five modeled compounds
         const avgHIs = simAvg.map((r) => r.hazardIndex ?? 0);
         const pregHIs = simPreg.map((r) => r.hazardIndex ?? 0);
         const sortedAvgHI = [...avgHIs].sort((a, b) => a - b);
@@ -275,8 +275,8 @@ export const ComparePage: React.FC = () => {
         h4Rows.push({
           id: 'mixture-hi',
           sopId: '4.6',
-          name: 'Combined 5-PFAS Mixture (Hazard Index)',
-          benchmark: 'Cumulative Additive Limit (HI = 1.0)',
+          name: 'Exploratory sum of HQs (5 modeled PFAS)',
+          benchmark: 'Exploratory threshold (sum = 1.0)',
           avgMedianHQ: parseFloat(quantileSorted(sortedAvgHI, 0.5).toFixed(3)),
           avgMeanHQ: parseFloat(avgMeanHI.toFixed(3)),
           avgExceedancePercent: avgWilcoxonHI.exceedancePercent,
@@ -299,7 +299,7 @@ export const ComparePage: React.FC = () => {
         const prccMapPreg = new Map(pregPRCCs.map((p) => [p.parameterId, p]));
 
         const paramOrder = [
-          'dailyIntake',
+          'dailyIntakePfoa',
           'bodyWeight',
           'waterConsumption',
           'eliminationHalfLife',
@@ -482,9 +482,9 @@ export const ComparePage: React.FC = () => {
                         |PRCC| ≥ 0.10, p &lt; 0.05).
                       </li>
                       <li>
-                        <strong>Q4 & H₀ 4 (Health Risk):</strong> EPA RfD-based Hazard Quotient (HQ
-                        4.1 to 4.5), combined Hazard Index (HI 4.6), % exceeding 1.0, and one-sided
-                        Wilcoxon signed-rank test against 1.0.
+                        <strong>Q4 & H₀ 4 (Health Risk):</strong> Selected chronic RfD/MRL-based
+                        Hazard Quotients (HQ 4.1 to 4.5), exploratory sum of HQs (4.6), % exceeding
+                        1.0, and one-sided Wilcoxon signed-rank test against 1.0.
                       </li>
                     </ul>
                   </div>
@@ -908,12 +908,12 @@ export const ComparePage: React.FC = () => {
                   </h2>
                 </div>
                 <p className="text-slate-500 text-xs mt-0.5">
-                  H₀ 4: Median HQ of each PFAS and median mixture HI do not exceed 1.0 based on EPA
-                  RfD | One-Sided Wilcoxon Signed-Rank Test (α = 0.05 against 1.0)
+                  H₀ 4: Median compound HQ and exploratory HQ sum do not exceed 1.0 based on the
+                  selected chronic benchmark | One-Sided Wilcoxon Signed-Rank Test (α = 0.05)
                 </p>
               </div>
               <span className="text-[11px] text-slate-500 font-mono">
-                Threshold: HQ &gt; 1.0 / HI &gt; 1.0
+                Threshold: HQ &gt; 1.0 / exploratory HQ sum &gt; 1.0
               </span>
             </div>
 

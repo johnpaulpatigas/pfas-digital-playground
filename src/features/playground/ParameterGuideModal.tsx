@@ -8,6 +8,7 @@ import { useSimulationStore } from '../../stores/useSimulationStore';
 import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
 import { CompoundBenchmarkTable, ParameterReferenceTable } from './ReferenceTables';
 import { PARAMETER_REFERENCES } from './referenceData';
+import { getSimulationParameter } from '../../simulation/parameters';
 
 interface ParameterGuideModalProps {
   isOpen: boolean;
@@ -254,8 +255,8 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
                     <li>
                       <strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient{' '}
-                      <MathView math="HQ = 1.0" /> and cumulative mixture Hazard Index{' '}
-                      <MathView math="HI = 1.0" />.
+                      <MathView math="HQ = 1.0" /> and exploratory sum of HQs{' '}
+                      exploratory HQ sum = 1.0 (not a regulatory mixture threshold).
                     </li>
                     <li>
                       <strong>Histogram and CDF:</strong> Population serum concentration density and
@@ -308,7 +309,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
 
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between">
                       <div className="text-[10px] font-mono text-slate-500">
-                        Intake: {preset.parameters.dailyIntake.distribution.type} • BW:{' '}
+                        Intake: {getSimulationParameter(preset.parameters, 'dailyIntakePfoa').distribution.type} • BW:{' '}
                         {preset.parameters.bodyWeight.distribution.type}
                       </div>
                       <Button

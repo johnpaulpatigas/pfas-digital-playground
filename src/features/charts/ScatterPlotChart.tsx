@@ -43,7 +43,7 @@ export const ScatterPlotChart: React.FC<ScatterPlotChartProps> = ({ results }) =
       const bb = out ? out.peakBodyBurden : r.peakBodyBurden;
 
       const pt = {
-        x: parseFloat(r.dailyIntake.toFixed(4)),
+        x: parseFloat((out?.dailyIntake ?? r.dailyIntake).toFixed(4)),
         y: parseFloat(y.toFixed(4)),
         bw: parseFloat(r.bodyWeight.toFixed(1)),
         hq: parseFloat(hq.toFixed(2)),

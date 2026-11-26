@@ -7,7 +7,35 @@ import type {
   SummaryStatistics,
   WilcoxonOneSampleResult,
 } from '../types';
-import { PARAMETER_KEYS } from './parameters';
+import {
+  DAILY_INTAKE_PARAMETER_KEYS,
+  getSimulationParameter,
+  PARAMETER_KEYS,
+  WATER_CONCENTRATION_PARAMETER_KEYS,
+} from './parameters';
+
+const getSampledParameterValue = (
+  result: IterationResult,
+  key: keyof SimulationParameters,
+): number => {
+  const intakeCompoundId = Object.entries(DAILY_INTAKE_PARAMETER_KEYS).find(
+    ([, intakeKey]) => intakeKey === key,
+  )?.[0];
+  if (intakeCompoundId) {
+    return (
+      result.compoundOutputs?.[intakeCompoundId]?.dietaryIntake ??
+      result.dietaryIntake ??
+      result.dailyIntake
+    );
+  }
+  const waterCompoundId = Object.entries(WATER_CONCENTRATION_PARAMETER_KEYS).find(
+    ([, concentrationKey]) => concentrationKey === key,
+  )?.[0];
+  if (waterCompoundId) {
+    return result.compoundOutputs?.[waterCompoundId]?.waterConcentration ?? 0;
+  }
+  return result[key as keyof IterationResult] as number;
+};
 
 export function quantileSorted(sortedValues: number[], q: number): number {
   if (sortedValues.length === 0) return 0;
@@ -167,7 +195,7 @@ export function calculateSummaryStatistics(
   const riskExceedancePercent = (exceedanceCount / count) * 100;
   const wilcoxonHQ = calculateOneSampleWilcoxon(hqValues, 1.0);
 
-  // Cumulative Mixture Hazard Index (HI = sum(HQ_j))
+  // Exploratory sum of HQs across modeled compounds (not the EPA NPDWR mixture HI).
   const hiValues = results.map((r) =>
     r.hazardIndex !== undefined ? r.hazardIndex : r.hazardQuotient,
   );
@@ -312,7 +340,7 @@ export function calculatePRCC(
   const nonVaryingParamKeys: Array<keyof SimulationParameters> = [];
 
   for (const key of paramKeys) {
-    const vals = results.map((r) => r[key] as number);
+    const vals = results.map((r) => getSampledParameterValue(r, key));
     const min = Math.min(...vals);
     const max = Math.max(...vals);
     if (max - min > 1e-9) {
@@ -328,7 +356,7 @@ export function calculatePRCC(
   for (const key of nonVaryingParamKeys) {
     resultsPRCC.push({
       parameterId: key,
-      parameterName: parameters[key].name,
+      parameterName: getSimulationParameter(parameters, key).name,
       prcc: 0,
       tStatistic: 0,
       pValue: 1,
@@ -346,7 +374,7 @@ export function calculatePRCC(
   }
 
   const rankedInputs = varyingParamKeys.map((key) =>
-    getRanks(results.map((r) => r[key] as number)),
+    getRanks(results.map((r) => getSampledParameterValue(r, key))),
   );
   const rankedTarget = getRanks(results.map((r) => r[targetKey] as number));
 
@@ -375,7 +403,7 @@ export function calculatePRCC(
 
     resultsPRCC.push({
       parameterId: paramId,
-      parameterName: parameters[paramId].name,
+      parameterName: getSimulationParameter(parameters, paramId).name,
       prcc: parseFloat(prcc.toFixed(4)),
       tStatistic: parseFloat(tStat.toFixed(3)),
       pValue: Number.isNaN(pValue) ? 1 : pValue,
@@ -407,13 +435,13 @@ export function calculateSensitivityRanks(
   }
 
   const ranks: SensitivityRank[] = paramKeys.map((paramId) => {
-    const paramValues = results.map((r) => r[paramId] as number);
+    const paramValues = results.map((r) => getSampledParameterValue(r, paramId));
     const corr = calculateSpearmanRank(paramValues, targetValues);
     const prccData = prccMap?.get(paramId);
 
     return {
       parameterId: paramId,
-      parameterName: parameters[paramId].name,
+      parameterName: getSimulationParameter(parameters, paramId).name,
       correlationCoefficient: Number.isNaN(corr) ? 0 : corr,
       rank: 0,
       prcc: prccData?.prcc,

@@ -1,6 +1,6 @@
 import type { DistributionParams, IterationResult, SimulationParameters } from '../types';
 import { createPRNG, quantileDistribution } from './distributions';
-import { PARAMETER_KEYS } from './parameters';
+import { getSimulationParameter, PARAMETER_KEYS } from './parameters';
 import { evaluateParameterSample, type ParameterSampleValues } from './sampling';
 
 /**
@@ -49,7 +49,11 @@ export function runLatinHypercubeSimulation(
   // Stratify each parameter independently, then pair strata by iteration index.
   const sampleArrays = {} as Record<keyof SimulationParameters, number[]>;
   for (const key of PARAMETER_KEYS) {
-    sampleArrays[key] = generateLHSParameterSamples(parameters[key].distribution, iterations, prng);
+    sampleArrays[key] = generateLHSParameterSamples(
+      getSimulationParameter(parameters, key).distribution,
+      iterations,
+      prng,
+    );
   }
 
   const results: IterationResult[] = new Array(iterations);

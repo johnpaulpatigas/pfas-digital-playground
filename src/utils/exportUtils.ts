@@ -21,6 +21,14 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 export function exportToCSV(results: IterationResult[], filename = 'pfas_simulation_results.csv') {
   if (!results || results.length === 0) return;
 
+  const compoundIds = ['pfoa', 'pfos', 'pfhxs', 'pfna', 'genx'] as const;
+  const compoundExposureHeaders = compoundIds.flatMap((id) => [
+    `${id.toUpperCase()}_NonWater_Intake_ug_day`,
+    `${id.toUpperCase()}_Water_Concentration_ng_L`,
+    `${id.toUpperCase()}_Water_Intake_ug_day`,
+    `${id.toUpperCase()}_Total_Intake_ug_day`,
+  ]);
+
   const headers = [
     'Iteration',
     'Daily_Intake_ug_day',
@@ -35,7 +43,8 @@ export function exportToCSV(results: IterationResult[], filename = 'pfas_simulat
     'Peak_Body_Burden_ug',
     'Clearance_Rate_L_kg_day',
     'Hazard_Quotient_HQ',
-    'Mixture_Hazard_Index_HI',
+    'Exploratory_Sum_of_Modeled_HQs_not_EPA_NPDWR_HI',
+    ...compoundExposureHeaders,
   ];
 
   const rows = results.map((r) => [
@@ -53,6 +62,15 @@ export function exportToCSV(results: IterationResult[], filename = 'pfas_simulat
     r.clearanceRate,
     parseFloat(r.hazardQuotient.toFixed(4)),
     parseFloat((r.hazardIndex ?? r.hazardQuotient).toFixed(4)),
+    ...compoundIds.flatMap((id) => {
+      const exposure = r.compoundOutputs?.[id];
+      return [
+        exposure?.dietaryIntake ?? r.dietaryIntake ?? r.dailyIntake,
+        exposure?.waterConcentration ?? 0,
+        exposure?.waterIntake ?? r.waterIntake ?? 0,
+        exposure?.dailyIntake ?? r.dailyIntake,
+      ];
+    }),
   ]);
 
   const csvContent = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');

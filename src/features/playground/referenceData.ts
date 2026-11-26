@@ -15,17 +15,31 @@ export interface ParameterReferenceRow {
 export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
   {
     id: 'dailyIntake',
-    name: 'Estimated PFAS Daily Intake',
-    symbol: 'I',
+    name: 'Compound-Specific Non-Water Intake',
+    symbol: 'I_{nw}',
     unit: 'µg/day',
-    min: '0.001 µg/day',
-    average: '0.050 to 0.080 µg/day',
-    max: '0.250 to 0.500 µg/day',
-    recommendedDist: 'Lognormal (µ: 0.05, σ: 0.40) or Triangular',
-    source: 'US EPA Exposure Factors Handbook (2019), EFSA Contam Panel (2020)',
+    min: 'Study-specific',
+    average: 'Enter separately for each PFAS',
+    max: 'Study-specific',
+    recommendedDist: 'Set from study-specific exposure evidence',
+    source: 'No compound-specific intake values are provided in the supplied assessments',
     description:
-      'Total daily ingested mass of target PFAS from drinking water, food (such as seafood and dairy), consumer products, and dust.',
-    criticalCutoff: 'I_{crit} = BW × RfD (e.g. 0.0831 µg/day for 55.4 kg with PFOA)',
+      'Non-water daily intake for one PFAS. Configure separate distributions for PFOA, PFOS, PFHxS, PFNA, and GenX using study-specific exposure data.',
+    criticalCutoff: 'I_{nw,crit} = BW × RfD - (C_w × W / 1000)',
+  },
+  {
+    id: 'waterConcentration',
+    name: 'Compound-Specific Drinking-Water Concentration',
+    symbol: 'C_w',
+    unit: 'ng/L',
+    min: '0 ng/L',
+    average: 'Scenario starts at each compound MCL',
+    max: 'Study/site-specific',
+    recommendedDist: 'Set from measured concentration data',
+    source: '2024 EPA NPDWR MCLs; preset values are MCL scenarios, not measured water data',
+    description:
+      'Concentration of a PFAS in drinking water. Water-derived intake is concentration × daily water consumption, converted from ng to µg.',
+    criticalCutoff: 'C_{w,crit} = 1000 × (BW × RfD - I_{nw}) / W',
   },
   {
     id: 'bodyWeight',
@@ -67,7 +81,7 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     source: 'WHO Guidelines for Drinking-Water Quality, EPA Exposure Factors Handbook',
     description:
       'Direct drinking water intake per day. Higher water intake increases total chemical ingestion when water contains detectable PFAS.',
-    criticalCutoff: 'W_{crit} = (BW × RfD) / EPA_MCL (e.g. 20.8 L/day at 4 ng/L for PFOA)',
+    criticalCutoff: 'W_{crit} = 1000 × (BW × RfD - I_{nw}) / C_w',
   },
   {
     id: 'bioavailability',
@@ -81,22 +95,22 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     source: 'ATSDR Toxicological Profile for Perfluoroalkyls (2021)',
     description:
       'Fraction of ingested PFAS absorbed through the gastrointestinal tract into systemic circulation. Perfluoroalkyl carboxylic and sulfonic acids exhibit high oral bioavailability (>90%).',
-    criticalCutoff: 'f_{abs, crit} = (BW × RfD) / I (Fraction required to reach reference dose)',
+    criticalCutoff: 'No HQ threshold: HQ is based on ingested dose and independent of bioavailability',
   },
   {
     id: 'eliminationHalfLife',
     name: 'Elimination Half-Life',
     symbol: 'T_{1/2}',
     unit: 'years',
-    min: '0.1 yr (GenX)',
-    average: '3.8 yr (PFOA), 5.4 yr (PFOS), 8.5 yr (PFHxS)',
-    max: '12.0 yr (PFHxS)',
-    recommendedDist: 'Fixed or Normal around target compound empirical mean',
-    source: 'Olsen et al. (2007), Li et al. (2018), US EPA Health Advisory Reviews',
+    min: 'Not established for the modeled compounds',
+    average: 'PFNA: 3.52 yr (DOH value used in modified MRL derivation)',
+    max: 'Not established for the modeled compounds',
+    recommendedDist: 'No source-backed distribution available',
+    source: 'June 2024 Ecology memo: DOH applied 3.52 yr from Yu et al. (2021) for PFNA; other compounds are not provided',
     description:
-      'Biological half-life for elimination from human blood serum. Long-chain PFAS undergo renal tubular reabsorption via organic anion transporters (such as OAT4 and URAT1).',
+      'Biological half-life for elimination from human blood serum. The June 2024 Ecology memo reports DOH applied a 3.52-year PFNA estimate from Yu et al. (2021) in its modified MRL derivation. Comparable values for the other modeled compounds are not provided.',
     criticalCutoff:
-      'T_{1/2, crit} = (BW × RfD / I) × T_{1/2} (Slower clearance elevates steady-state mass)',
+      'Numerical solution of B(T½) = Bcrit using current intake, bioavailability, body weight, and exposure duration',
   },
   {
     id: 'exposureDuration',
@@ -109,8 +123,8 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     recommendedDist: 'Uniform (25 to 30) for baseline average, or Fixed (30)',
     source: 'US EPA Superfund Standard Default Exposure Factors (30-yr residential)',
     description:
-      'Duration of chronic exposure. For PFOA and PFNA (half-lives approximately 3.2 to 3.8 years), 25 to 30 years represents 6.5 to 9 half-lives, reaching over 99% of steady-state accumulation (and 87% to 91% for longer-lived PFHxS).',
+      'Duration of chronic exposure. The source documents do not establish compound-specific half-lives, so steady-state fractions depend on the user-supplied model assumption.',
     criticalCutoff:
-      't \\ge 25\\text{ to }30\\text{ years}: \\text{Achieves } (1 - e^{-k_e t}) \\ge 0.99 \\text{ of steady state}',
+      'tcrit = -(1/ke) ln(1 - Bcrit × ke / (I × fabs)); no crossing when intake is at or below the RfD threshold',
   },
 ];
