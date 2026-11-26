@@ -1,22 +1,81 @@
-import { BookOpen, Cpu, GitMerge, Layers, Play, RefreshCw, Users } from 'lucide-react';
+import {
+  BookOpen,
+  Cpu,
+  GitMerge,
+  Layers,
+  Lock,
+  Play,
+  RefreshCw,
+  Terminal,
+  Users,
+} from 'lucide-react';
 import type React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '../../components/ui/Button';
+import { DualRangeSlider } from '../../components/ui/DualRangeSlider';
 import { MathView } from '../../components/ui/MathView';
 import { Tooltip } from '../../components/ui/Tooltip';
-import { getDistributionMean } from '../../simulation/distributions';
 import { getSimulationParameter, getVisibleParameterKeys } from '../../simulation/parameters';
 import { PFAS_COMPOUNDS } from '../../simulation/pfasCompounds';
 import { calculateDetailedCriticalAnalysis } from '../../simulation/toxicokinetics';
 import { useSimulationStore } from '../../stores/useSimulationStore';
-import type { DistributionParams, DistributionType, ParameterCriticalThreshold } from '../../types';
-import { DEMOGRAPHIC_PRESETS } from '../scenarios/presets';
-import { DistributionSelector } from './DistributionSelector';
+import type {
+  DistributionParams,
+  ParameterCriticalThreshold,
+  SimulationParameters,
+} from '../../types';
 
 interface ParameterSidebarProps {
   onRunSimulation: () => void;
   onOpenGuide?: () => void;
 }
+
+const ITERATION_PRESETS = [1000, 5000, 10000, 25000];
+
+const getParamBounds = (
+  key: keyof SimulationParameters,
+  dist: DistributionParams,
+): { minBound: number; maxBound: number; step: number } => {
+  switch (key) {
+    case 'bodyWeight':
+      return { minBound: 30, maxBound: 120, step: 0.5 };
+    case 'age':
+      return { minBound: 10, maxBound: 80, step: 1 };
+    case 'waterConsumption':
+      return { minBound: 0.2, maxBound: 6.0, step: 0.1 };
+    case 'bioavailability':
+      return { minBound: 0.1, maxBound: 1.0, step: 0.01 };
+    case 'eliminationHalfLife':
+      return { minBound: 0.05, maxBound: 15.0, step: 0.05 };
+    case 'exposureDuration':
+      return { minBound: 1, maxBound: 60, step: 1 };
+    default: {
+      // Intake or water concentration
+      const currentHigh =
+        dist.type === 'fixed'
+          ? dist.value
+          : dist.type === 'uniform' || dist.type === 'triangular'
+            ? dist.max
+            : dist.mean + 2 * dist.sd;
+      const maxBound = Math.max(currentHigh * 3, key.startsWith('waterConcentration') ? 20 : 0.05);
+      const step = maxBound / 100;
+      return { minBound: 0, maxBound, step };
+    }
+  }
+};
+
+const getRangeFromDistribution = (dist: DistributionParams): [number, number] => {
+  switch (dist.type) {
+    case 'fixed':
+      return [dist.value, dist.value];
+    case 'uniform':
+    case 'triangular':
+      return [dist.min, dist.max];
+    case 'normal':
+    case 'lognormal':
+      return [Math.max(0, dist.mean - 2 * dist.sd), dist.mean + 2 * dist.sd];
+  }
+};
 
 export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
   onRunSimulation,
@@ -27,56 +86,81 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
     samplingConfig,
     activeScenarioId,
     isSimulating,
+    logs,
     setParameterDistribution,
-    updateParameterValue,
     setSamplingConfig,
     setCompoundId,
     loadScenario,
     resetToDefault,
   } = useSimulationStore();
 
+  const isCustomMode = activeScenarioId === 'custom';
+  const [compoundScope, setCompoundScope] = useState<'all' | string>('all');
+  const [showLog, setShowLog] = useState(false);
+
+  const effectiveScope = isCustomMode ? compoundScope : 'all';
   const activeCompound =
     PFAS_COMPOUNDS.find((c) => c.id === samplingConfig.compoundId) || PFAS_COMPOUNDS[0];
 
   const criticalAnalysis = useMemo(() => {
     return calculateDetailedCriticalAnalysis(activeCompound, parameters);
   }, [activeCompound, parameters]);
+
   const visibleParameterKeys = getVisibleParameterKeys(activeCompound.id);
 
   const getMethodName = () => {
     switch (samplingConfig.method) {
       case 'monte-carlo':
-        return 'Monte Carlo';
+        return 'MCS';
       case 'latin-hypercube':
-        return 'Latin Hypercube';
+        return 'LHS';
       case 'monte-carlo-lhs':
-        return 'MC + LHS';
+        return 'LHS + MCS';
     }
   };
 
-  const createDefaultDistribution = (
-    type: DistributionType,
-    mean: number,
-  ): DistributionParams => {
-    const spread = Math.max(Math.abs(mean) * 0.2, 0.000001);
-    switch (type) {
+  const handleRangeChange = (
+    key: keyof SimulationParameters,
+    dist: DistributionParams,
+    newLow: number,
+    newHigh: number,
+  ) => {
+    if (!isCustomMode) return;
+    let updated: DistributionParams;
+    switch (dist.type) {
       case 'fixed':
-        return { type: 'fixed', value: mean };
+        updated = { type: 'fixed', value: (newLow + newHigh) / 2 };
+        break;
       case 'uniform':
-        return { type: 'uniform', min: Math.max(0, mean - spread), max: mean + spread };
+        updated = { type: 'uniform', min: newLow, max: newHigh };
+        break;
+      case 'triangular': {
+        const span = Math.max(dist.max - dist.min, 1e-9);
+        const modeRatio = Math.max(0, Math.min(1, (dist.mode - dist.min) / span));
+        updated = {
+          type: 'triangular',
+          min: newLow,
+          mode: newLow + modeRatio * (newHigh - newLow),
+          max: newHigh,
+        };
+        break;
+      }
       case 'normal':
-        return { type: 'normal', mean, sd: spread };
       case 'lognormal':
-        return { type: 'lognormal', mean, sd: spread };
-      case 'triangular':
-        return { type: 'triangular', min: Math.max(0, mean - spread), mode: mean, max: mean + spread };
+        updated = {
+          type: dist.type,
+          mean: (newLow + newHigh) / 2,
+          sd: Math.max((newHigh - newLow) / 4, 1e-6),
+        };
+        break;
     }
+    setParameterDistribution(key, updated);
   };
 
   return (
     <div className="w-full space-y-4 text-xs font-sans">
-      {/* Demographic Presets & Reset Toolbar */}
-      <div className="space-y-1.5 px-1">
+      {/* 1. Demographic Presets */}
+      <div className="card-panel p-3 rounded-xl space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-slate-600" />
@@ -86,7 +170,10 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
           </div>
           <button
             type="button"
-            onClick={resetToDefault}
+            onClick={() => {
+              resetToDefault();
+              setCompoundScope('all');
+            }}
             className="flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             title="Reset to Baseline Defaults"
           >
@@ -95,59 +182,89 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5 py-0.5">
-          {DEMOGRAPHIC_PRESETS.map((preset) => {
-            const isActive = activeScenarioId === preset.id;
+        <div className="grid grid-cols-3 gap-1.5">
+          {[
+            { id: 'average-filipino-woman', label: 'Avg. W', title: 'Average Filipino Woman' },
+            { id: 'pregnant-woman', label: 'P.W.', title: 'Pregnant Woman' },
+            { id: 'custom', label: 'Custom', title: 'Custom Parameters & Compound Selection' },
+          ].map((item) => {
+            const isActive = activeScenarioId === item.id;
             return (
               <button
-                key={preset.id}
+                key={item.id}
                 type="button"
-                onClick={() => loadScenario(preset.id)}
-                className={`last:col-span-2 p-2 rounded text-[11px] font-mono leading-tight text-left transition-all cursor-pointer border ${
+                onClick={() => {
+                  loadScenario(item.id);
+                  if (item.id !== 'custom') setCompoundScope('all');
+                }}
+                title={item.title}
+                className={`p-2 rounded-lg text-[11px] font-mono text-center transition-all cursor-pointer border ${
                   isActive
                     ? 'bg-slate-900 text-white border-slate-900 font-bold shadow-2xs'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                 }`}
-                title={preset.description}
               >
-                {preset.name}
+                {item.label}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Chemical Compound Selection */}
+      {/* 2. PFAS Compound */}
       <div className="card-panel p-3 rounded-xl space-y-2">
         <div className="flex items-center justify-between">
           <span className="font-bold text-slate-700 uppercase font-mono tracking-wider text-[11px]">
-            PFAS Chemical
+            PFAS Compound
           </span>
-          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono text-[10px] font-bold border border-blue-200">
-            EPA MCL: {activeCompound.epaMCL} ng/L
-          </span>
+          {!isCustomMode && (
+            <span className="flex items-center gap-1 text-[10px] font-mono text-slate-500">
+              <Lock className="w-3 h-3" /> All PFAS Locked
+            </span>
+          )}
         </div>
 
-        <select
-          value={samplingConfig.compoundId}
-          onChange={(e) => setCompoundId(e.target.value)}
-          className="w-full bg-white border border-slate-300 text-slate-900 rounded-lg p-2 text-xs font-mono font-bold focus:outline-none focus:border-slate-900"
-        >
-          {PFAS_COMPOUNDS.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name} ({c.id.toUpperCase()}), T½ model default: {c.halfLifeYears}y
-            </option>
-          ))}
-        </select>
-
-        <p className="text-[11px] text-slate-500 leading-relaxed font-mono">
-          Formula: <MathView math={activeCompound.chemicalFormula} /> &bull; CAS:{' '}
-          {activeCompound.casNumber}
-        </p>
+        <div className="grid grid-cols-3 gap-1.5 font-mono">
+          {PFAS_COMPOUNDS.map((c) => {
+            const isSelected = effectiveScope === c.id;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                disabled={!isCustomMode}
+                onClick={() => {
+                  setCompoundScope(c.id);
+                  setCompoundId(c.id);
+                }}
+                className={`p-1.5 rounded-md border text-[11px] font-semibold transition-all ${
+                  !isCustomMode
+                    ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed'
+                    : isSelected
+                      ? 'bg-slate-900 text-white border-slate-900 cursor-pointer'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 cursor-pointer'
+                }`}
+              >
+                {c.id.toUpperCase()}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            disabled={!isCustomMode}
+            onClick={() => setCompoundScope('all')}
+            className={`p-1.5 rounded-md border text-[11px] font-semibold transition-all ${
+              effectiveScope === 'all'
+                ? 'bg-slate-900 text-white border-slate-900'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            } ${!isCustomMode ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'}`}
+          >
+            All
+          </button>
+        </div>
       </div>
 
-      {/* Sampling Engine & Iterations Controls */}
-      <div className="card-panel p-3.5 rounded-xl space-y-3">
+      {/* 3. Sampling Engine */}
+      <div className="card-panel p-3 rounded-xl space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="font-bold text-slate-700 uppercase font-mono tracking-wider text-[11px]">
             Sampling Engine
@@ -155,20 +272,21 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
           <span className="text-slate-500 font-mono text-[10px]">{getMethodName()}</span>
         </div>
 
-        {/* Sampling Method Selector */}
-        <div className="grid grid-cols-3 gap-1 font-mono">
+        <div className="grid grid-cols-3 gap-1.5 font-mono">
           <button
             type="button"
-            onClick={() => setSamplingConfig({ method: 'monte-carlo' })}
-            className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight cursor-pointer ${
-              samplingConfig.method === 'monte-carlo'
-                ? 'bg-blue-900 text-white border-blue-900 shadow-xs'
+            onClick={() => setSamplingConfig({ method: 'monte-carlo-lhs' })}
+            className={`relative flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight cursor-pointer ${
+              samplingConfig.method === 'monte-carlo-lhs'
+                ? 'bg-teal-900 text-white border-teal-900 shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
-            title="Standard Monte Carlo Simulation"
           >
-            <Cpu className="w-3.5 h-3.5 mb-1" />
-            <span className="text-center">Monte Carlo</span>
+            <span className="text-[8px] uppercase tracking-wider px-1 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold mb-1">
+              Recommended
+            </span>
+            <GitMerge className="w-3.5 h-3.5 mb-0.5" />
+            <span>LHS+MCS</span>
           </button>
 
           <button
@@ -179,50 +297,66 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
                 ? 'bg-purple-900 text-white border-purple-900 shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
-            title="Latin Hypercube Sampling"
           >
             <Layers className="w-3.5 h-3.5 mb-1" />
-            <span className="text-center">Latin Hypercube</span>
+            <span>LHS</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setSamplingConfig({ method: 'monte-carlo-lhs' })}
+            onClick={() => setSamplingConfig({ method: 'monte-carlo' })}
             className={`flex flex-col items-center justify-center p-2 rounded-md border transition-all font-semibold text-[11px] leading-tight cursor-pointer ${
-              samplingConfig.method === 'monte-carlo-lhs'
-                ? 'bg-teal-900 text-white border-teal-900 shadow-xs'
+              samplingConfig.method === 'monte-carlo'
+                ? 'bg-blue-900 text-white border-blue-900 shadow-xs'
                 : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
             }`}
-            title="Combined Monte Carlo + Latin Hypercube Hybrid"
           >
-            <GitMerge className="w-3.5 h-3.5 mb-1" />
-            <span className="text-center">MC + LHS</span>
+            <Cpu className="w-3.5 h-3.5 mb-1" />
+            <span>MCS</span>
           </button>
         </div>
+      </div>
 
-        <div className="space-y-2 font-mono">
-          <div className="flex items-center justify-between text-slate-700">
-            <span>
-              Iterations (<MathView math="N" />)
-            </span>
-            <span className="text-slate-900 font-bold">
-              {samplingConfig.iterations.toLocaleString()}
-            </span>
-          </div>
-
-          <input
-            type="range"
-            min="1000"
-            max="50000"
-            step="1000"
-            value={samplingConfig.iterations}
-            onChange={(e) => setSamplingConfig({ iterations: parseInt(e.target.value, 10) })}
-            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
-          />
+      {/* 4. No. of Iteration & PRNG Seed */}
+      <div className="card-panel p-3 rounded-xl space-y-2.5 font-mono">
+        <div className="flex items-center justify-between text-slate-700">
+          <span className="font-bold uppercase tracking-wider text-[11px]">
+            No. of Iteration (<MathView math="N" />)
+          </span>
+          <span className="text-slate-900 font-bold">
+            {samplingConfig.iterations.toLocaleString()}
+          </span>
         </div>
 
-        <div className="flex items-center justify-between gap-3 font-mono">
-          <span className="text-slate-600 text-[11px]">PRNG Seed</span>
+        <input
+          type="range"
+          min="1000"
+          max="50000"
+          step="1000"
+          value={samplingConfig.iterations}
+          onChange={(e) => setSamplingConfig({ iterations: parseInt(e.target.value, 10) })}
+          className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
+        />
+
+        <div className="grid grid-cols-4 gap-1">
+          {ITERATION_PRESETS.map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setSamplingConfig({ iterations: n })}
+              className={`py-1 rounded text-[10px] border transition-colors cursor-pointer ${
+                samplingConfig.iterations === n
+                  ? 'bg-slate-900 text-white border-slate-900 font-bold'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              {(n / 1000).toFixed(0)}k
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <span className="text-slate-600 text-[11px]">PRNG SEED</span>
           <input
             type="number"
             value={samplingConfig.seed || 42}
@@ -230,117 +364,111 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
             className="w-24 bg-white border border-slate-300 text-slate-900 rounded-md px-2 py-1 text-center text-xs focus:outline-none focus:border-slate-900"
           />
         </div>
-
-        <Button
-          onClick={onRunSimulation}
-          loading={isSimulating}
-          variant="primary"
-          size="lg"
-          className="w-full mt-1 font-mono uppercase tracking-wider text-xs"
-          icon={<Play className="w-4 h-4 fill-current" />}
-        >
-          {isSimulating ? 'Simulating...' : `Execute ${getMethodName()}`}
-        </Button>
       </div>
 
-      {/* Physiological & Exposure Input Section */}
+      {/* 5. Physiological & Exposure Inputs */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between px-1">
           <span className="font-bold text-slate-700 uppercase font-mono tracking-wider text-[11px]">
             Physiological &amp; Exposure Inputs
           </span>
-          {onOpenGuide ? (
+          {onOpenGuide && (
             <button
               type="button"
               onClick={onOpenGuide}
               className="text-[11px] font-sans font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer"
-              title="Open Parameter & Range Guide"
             >
               <span>Range Guide</span>
               <BookOpen className="w-3 h-3" />
             </button>
-          ) : (
-            <span className="text-slate-500 font-mono text-[10px]">
-              {visibleParameterKeys.length} Parameters
-            </span>
           )}
         </div>
 
-        <p className="px-1 text-[11px] text-amber-800 leading-relaxed">
-          Showing {activeCompound.id.toUpperCase()} inputs and shared physiology. Preset intakes are
-          provisional assumptions; water starts at the MCL as a scenario value, not a measured
-          concentration. Replace both with study-specific data for research analyses.
-        </p>
+        {!isCustomMode && (
+          <p className="px-1 text-[11px] text-slate-500 leading-relaxed">
+            Preset ranges are locked to scientific guide distributions. Switch to{' '}
+            <strong>Custom</strong> above to adjust individual parameter ranges.
+          </p>
+        )}
 
         {visibleParameterKeys.map((key) => {
           const param = getSimulationParameter(parameters, key);
           const thresholdInfo = criticalAnalysis.parameterThresholds.find(
             (p: ParameterCriticalThreshold) => p.id === key,
           );
+          const [low, high] = getRangeFromDistribution(param.distribution);
+          const { minBound, maxBound, step } = getParamBounds(key, param.distribution);
 
           return (
             <div
               key={key}
-              className={`card-panel p-3 rounded-xl space-y-2 hover:border-slate-300 transition-colors ${
+              className={`card-panel p-3 rounded-xl space-y-2 transition-colors ${
                 thresholdInfo?.isExceeded ? 'border-red-200/80' : ''
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-800 text-xs">{param.name}</span>
-                  <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 font-medium">
-                    {param.unit}
+                  <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                    {param.distribution.type}
                   </span>
                 </div>
                 <Tooltip content={param.scientificContext} />
               </div>
 
-              {/* Critical Threshold Reference Indicator */}
-              {thresholdInfo && (
-                <div className="flex items-center justify-between text-[10px] font-mono pt-0.5">
-                  <span className="text-slate-500">
-                    Critical cutoff:{' '}
-                    <span className="font-semibold text-slate-700">
-                      {thresholdInfo.criticalRangeDisplay}
-                    </span>
-                  </span>
-                  <span
-                    className={`px-1.5 py-0.2 rounded text-[9px] font-semibold border ${
-                      thresholdInfo.isExceeded
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : thresholdInfo.status === 'borderline'
-                          ? 'bg-amber-50 text-amber-700 border-amber-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    }`}
-                  >
-                    {thresholdInfo.isExceeded
-                      ? 'Exceeds cutoff'
-                      : thresholdInfo.status === 'borderline'
-                        ? 'Elevated'
-                        : 'Within cutoff'}
-                  </span>
-                </div>
-              )}
-
-              <p className="text-[11px] text-slate-500 leading-relaxed">{param.description}</p>
-
-              <DistributionSelector
-                distribution={param.distribution}
-                onChangeDistributionType={(type) =>
-                  setParameterDistribution(
-                    key,
-                    createDefaultDistribution(
-                      type,
-                      getDistributionMean(param.distribution),
-                    ),
-                  )
-                }
-                onChangeValue={(valKey, val) => updateParameterValue(key, valKey, val)}
+              <DualRangeSlider
+                minBound={minBound}
+                maxBound={maxBound}
+                step={step}
+                low={low}
+                high={high}
+                disabled={!isCustomMode}
                 unit={param.unit}
+                onChange={(newLow, newHigh) =>
+                  handleRangeChange(key, param.distribution, newLow, newHigh)
+                }
               />
             </div>
           );
         })}
+      </div>
+
+      {/* 6. Sticky Execute Button & Simulation Log */}
+      <div className="sticky bottom-3 z-20 space-y-2 pt-2">
+        <div className="bg-white/95 backdrop-blur-sm p-2 rounded-xl border border-slate-200 shadow-lg space-y-2">
+          <Button
+            onClick={onRunSimulation}
+            loading={isSimulating}
+            variant="primary"
+            size="lg"
+            className="w-full font-mono uppercase tracking-wider text-xs"
+            icon={<Play className="w-4 h-4 fill-current" />}
+          >
+            {isSimulating ? 'Simulating...' : `Execute ${getMethodName()}`}
+          </Button>
+
+          <button
+            type="button"
+            onClick={() => setShowLog((prev) => !prev)}
+            className="w-full flex items-center justify-between px-2 py-1 text-[11px] font-mono text-slate-600 hover:text-slate-900 cursor-pointer"
+          >
+            <span className="flex items-center gap-1.5">
+              <Terminal className="w-3 h-3" />
+              <span>&gt; Simulation Log ({logs.length})</span>
+            </span>
+            <span>{showLog ? 'Hide' : 'Show'}</span>
+          </button>
+
+          {showLog && (
+            <div className="max-h-32 overflow-y-auto bg-slate-900 text-slate-100 rounded-lg p-2 font-mono text-[10px] space-y-1">
+              {logs.slice(-15).map((log, idx) => (
+                <div key={`${idx}-${log.slice(0, 12)}`} className="leading-snug">
+                  {log}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

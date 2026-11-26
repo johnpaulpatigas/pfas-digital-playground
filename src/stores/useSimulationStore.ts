@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { DEMOGRAPHIC_PRESETS } from '../features/scenarios/presets';
-import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 import { getSimulationParameter } from '../simulation/parameters';
+import { PFAS_COMPOUNDS } from '../simulation/pfasCompounds';
 import type {
   ComparisonResult,
   CompoundSummary,
@@ -180,6 +180,11 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   },
 
   loadScenario: (scenarioId) => {
+    if (scenarioId === 'custom') {
+      set({ activeScenarioId: 'custom' });
+      get().addLog(`[Preset] Switched to Custom mode (parameters & compound unlocked).`);
+      return;
+    }
     const scenario = DEMOGRAPHIC_PRESETS.find((s) => s.id === scenarioId);
     if (scenario) {
       set({
