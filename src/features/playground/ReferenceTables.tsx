@@ -15,10 +15,10 @@ export const ParameterReferenceTable: React.FC<ParameterReferenceTableProps> = (
   <table className="w-full text-left border-collapse text-[11px]">
     <thead>
       <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 font-mono">
-        <th className="p-3 font-semibold">Parameter / Symbol</th>
+        <th className="p-3 font-semibold">Parameter / symbol</th>
         <th className="p-3 font-semibold">Unit</th>
         <th className="p-3 font-semibold text-emerald-800 bg-emerald-50/40">Minimum bound</th>
-        <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">Baseline / Average</th>
+        <th className="p-3 font-semibold text-blue-900 bg-blue-50/50">Baseline / average</th>
         <th className="p-3 font-semibold text-rose-800 bg-rose-50/40">Upper bound</th>
         <th className="p-3 font-semibold">Recommended distribution</th>
         <th className="p-3 font-semibold">Literature source</th>

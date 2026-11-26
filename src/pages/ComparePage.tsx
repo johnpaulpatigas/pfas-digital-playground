@@ -359,7 +359,7 @@ export const ComparePage: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-xs font-mono font-medium">
             <Scale className="w-3.5 h-3.5" />
-            <span>Comparative Research & Hypothesis Testing</span>
+            <span>Comparative research & hypothesis testing</span>
           </div>
 
           {/* Mode Switcher Tabs */}
@@ -374,7 +374,7 @@ export const ComparePage: React.FC = () => {
               }`}
             >
               <Users className="w-3.5 h-3.5" />
-              <span>Demographic Cohorts (SOP & Hypotheses)</span>
+              <span>Demographic cohorts (SOP & hypotheses)</span>
             </button>
             <button
               type="button"
@@ -386,7 +386,7 @@ export const ComparePage: React.FC = () => {
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
-              <span>Sampling Algorithms (MC vs LHS)</span>
+              <span>Sampling algorithms (MC vs LHS)</span>
             </button>
           </div>
         </div>
@@ -396,7 +396,7 @@ export const ComparePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
-                  Cohort Comparison & Study Hypotheses Evaluation
+                  Cohort comparison and study hypotheses evaluation
                 </h1>
                 <p className="text-slate-600 text-sm max-w-4xl leading-relaxed mt-1">
                   Tests the study&apos;s <strong>Statement of the Problem (SOP 1 to 4)</strong> and{' '}
@@ -427,7 +427,7 @@ export const ComparePage: React.FC = () => {
               <div className="mt-4 p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4 font-sans text-xs">
                 <div className="flex items-center gap-2 text-purple-900 font-bold font-heading text-sm border-b border-slate-200 pb-2">
                   <FileText className="w-4 h-4 text-purple-700" />
-                  <span>Research Framework & Hypotheses</span>
+                  <span>Research framework & hypotheses</span>
                 </div>
 
                 <div className="p-4 rounded-xl bg-white border border-emerald-200 space-y-2">
@@ -488,7 +488,7 @@ export const ComparePage: React.FC = () => {
         ) : (
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 font-heading">
-              Monte Carlo, Latin Hypercube, and Hybrid Sampling Comparison
+              Monte Carlo, Latin hypercube, and hybrid sampling comparison
             </h1>
             <p className="text-slate-600 text-sm max-w-4xl leading-relaxed mt-2">
               Benchmarks runtime, variance reduction, and running mean convergence rates across{' '}
@@ -533,32 +533,32 @@ export const ComparePage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Scale className="w-4 h-4 text-purple-700" />
               <h2 className="text-sm font-bold text-slate-900 font-heading">
-                Cohort Toxicokinetic Baseline Summary
+                Cohort toxicokinetic baseline summary
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-700">
               <div className="bg-white p-3 rounded-lg border border-purple-100">
                 <span className="font-bold text-purple-900 block mb-1">
-                  Average Filipino Woman Profile
+                  Average Filipino woman profile
                 </span>
                 <ul className="space-y-0.5 text-[11px] text-slate-600">
                   <li>
-                    • Chronic Exposure Horizon: <strong>22 years</strong>
+                    Chronic exposure horizon: <strong>22 years</strong>
                   </li>
-                  <li>• Baseline Body Mass: 55.4 kg (±8.2 kg)</li>
-                  <li>• Daily Water Intake: 2.0 L/day (mode)</li>
+                  <li>Baseline body mass: 55.4 kg (±8.2 kg)</li>
+                  <li>Daily water intake: 2.0 L/day (mode)</li>
                 </ul>
               </div>
               <div className="bg-white p-3 rounded-lg border border-purple-100">
                 <span className="font-bold text-purple-900 block mb-1">
-                  Pregnant Female Cohort Profile
+                  Pregnant female cohort profile
                 </span>
                 <ul className="space-y-0.5 text-[11px] text-slate-600">
                   <li>
-                    • Pre-Gestational Exposure: <strong>19 years</strong>
+                    Pre-gestational exposure: <strong>19 years</strong>
                   </li>
-                  <li>• Baseline Body Mass: 65.2 kg (plasma volume expansion)</li>
-                  <li>• Daily Water Intake: 2.8 L/day (increased fluid demands)</li>
+                  <li>Baseline body mass: 65.2 kg (plasma volume expansion)</li>
+                  <li>Daily water intake: 2.8 L/day (increased fluid demands)</li>
                 </ul>
               </div>
             </div>
@@ -569,8 +569,8 @@ export const ComparePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
               <div>
                 <h2 className="text-base font-bold text-slate-900 font-heading">
-                  Hypothesis 1: Steady-State Serum Concentration (<MathView math="C_{ss}" />)
-                  Differences
+                  Hypothesis 1: Steady-state serum concentration (<MathView math="C_{ss}" />)
+                  differences
                 </h2>
                 <p className="text-slate-500 text-xs">
                   H₀ 1: No significant difference in Css between cohorts | Two-Sided Mann-Whitney U
@@ -661,7 +661,7 @@ export const ComparePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
               <div>
                 <h2 className="text-base font-bold text-slate-900 font-heading">
-                  Hypothesis 2: Cumulative Body Burden (<MathView math="B(t)" />) Differences
+                  Hypothesis 2: Cumulative body burden (<MathView math="B(t)" />) differences
                 </h2>
                 <p className="text-slate-500 text-xs">
                   H₀ 2: Cumulative body burden does not differ significantly between cohorts over
@@ -754,7 +754,7 @@ export const ComparePage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-amber-600" />
                   <h2 className="text-base font-bold text-slate-900 font-heading">
-                    Hypothesis 3: Parameter Sensitivity Analysis (PRCC on <MathView math="C_{ss}" />
+                    Hypothesis 3: Parameter sensitivity analysis (PRCC on <MathView math="C_{ss}" />
                     )
                   </h2>
                 </div>
@@ -870,7 +870,7 @@ export const ComparePage: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-red-600" />
                   <h2 className="text-base font-bold text-slate-900 font-heading">
-                    Hypothesis 4 & SOP Question 4: Health Risk Level & Population Exceedance (% &gt;
+                    Hypothesis 4 & SOP question 4: Health risk level & population exceedance (% &gt;
                     1.0)
                   </h2>
                 </div>
@@ -1197,7 +1197,7 @@ export const ComparePage: React.FC = () => {
           {/* Running Mean Convergence Chart */}
           <div className="card-panel p-6 sm:p-8 rounded-2xl space-y-4">
             <h2 className="text-base font-bold text-slate-900 font-heading">
-              Running Mean Convergence across Iterations
+              Running mean convergence across iterations
             </h2>
             <div className="w-full h-80 pt-2 font-mono">
               <ResponsiveContainer width="100%" height="100%">

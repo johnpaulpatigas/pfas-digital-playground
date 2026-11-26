@@ -36,11 +36,11 @@ export const DistributionSelector: React.FC<DistributionSelectorProps> = ({
           onChange={handleTypeChange}
           className="bg-white border border-slate-300 text-slate-800 text-xs rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
         >
-          <option value="fixed">Fixed Value</option>
-          <option value="uniform">Uniform (Min - Max)</option>
-          <option value="normal">Normal (Mean, SD)</option>
-          <option value="lognormal">Lognormal (Mean, SD)</option>
-          <option value="triangular">Triangular (Min, Mode, Max)</option>
+          <option value="fixed">Fixed value</option>
+          <option value="uniform">Uniform (min, max)</option>
+          <option value="normal">Normal (mean, SD)</option>
+          <option value="lognormal">Lognormal (mean, SD)</option>
+          <option value="triangular">Triangular (min, mode, max)</option>
         </select>
       </div>
 
@@ -97,7 +97,7 @@ export const DistributionSelector: React.FC<DistributionSelectorProps> = ({
               />
             </div>
             <div className="space-y-1">
-              <span className="text-[11px] text-slate-500">Std Dev (SD)</span>
+              <span className="text-[11px] text-slate-500">Std. dev. (SD)</span>
               <input
                 type="number"
                 step="any"

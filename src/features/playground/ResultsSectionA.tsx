@@ -48,9 +48,9 @@ type SectionATab = 'exceedance' | 'css' | 'burden';
 type CssGraphTab = 'histogram' | 'cdf' | 'timecourse' | 'scatter' | 'convergence';
 
 const SECTION_A_TABS: { id: SectionATab; label: string }[] = [
-  { id: 'exceedance', label: 'Exceedance Analyzer' },
+  { id: 'exceedance', label: 'Exceedance analyzer' },
   { id: 'css', label: 'Serum Conc. (Css)' },
-  { id: 'burden', label: 'Body Burden' },
+  { id: 'burden', label: 'Body burden' },
 ];
 
 const CSS_GRAPH_TABS: {
@@ -66,7 +66,7 @@ const CSS_GRAPH_TABS: {
 ];
 
 const formatNum = (n: number) => {
-  if (!Number.isFinite(n)) return '—';
+  if (!Number.isFinite(n)) return 'n/a';
   if (n === 0) return '0';
   if (Math.abs(n) < 0.001) return n.toExponential(2);
   if (Math.abs(n) < 1) return n.toFixed(4);
@@ -127,7 +127,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-slate-800" />
             <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-              Exceedance Analyzer
+              Exceedance analyzer
             </h3>
           </div>
           <p className="text-xs text-slate-600 leading-relaxed">
@@ -145,7 +145,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
         <section className="space-y-4">
           <div>
             <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-              Serum Concentration (<MathView math="C_{ss}" />)
+              Serum concentration (<MathView math="C_{ss}" />)
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed mt-1">
               Steady-state blood serum concentration (<MathView math="\mu\text{g/L}" />) across all
@@ -157,7 +157,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
           <div className="card-panel rounded-xl overflow-hidden">
             <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                Table A1 — Serum Concentration (<MathView math="C_{ss}" />)
+                Table A1: Serum concentration (<MathView math="C_{ss}" />)
               </span>
             </div>
             <div className="overflow-x-auto">
@@ -222,7 +222,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
           <div className="card-panel rounded-xl overflow-hidden">
             <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
               <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                % of Limit — <MathView math="C_{ss}" /> Exceedance
+                % of limit: <MathView math="C_{ss}" /> exceedance
               </span>
             </div>
             <div className="overflow-x-auto">
@@ -230,8 +230,8 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
                 <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
                   <tr>
                     <th className="px-3 py-2">Compound</th>
-                    <th className="px-3 py-2">Css Critical Limit (µg/L)</th>
-                    <th className="px-3 py-2">% Simulated Over Limit</th>
+                    <th className="px-3 py-2">Css critical limit (µg/L)</th>
+                    <th className="px-3 py-2">% simulated over limit</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -266,7 +266,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
               <div className="card-panel rounded-xl overflow-hidden">
                 <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
                   <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                    Table B — Mann-Whitney U Comparison (<MathView math="C_{ss}" />: Preg ÷ Avg)
+                    Table B: Mann-Whitney U comparison (<MathView math="C_{ss}" />: Preg ÷ Avg)
                   </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -274,7 +274,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
                     <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
                       <tr>
                         <th className="px-3 py-2">Compound</th>
-                        <th className="px-3 py-2">Median Ratio (Preg ÷ Avg)</th>
+                        <th className="px-3 py-2">Median ratio (Preg ÷ Avg)</th>
                         <th className="px-3 py-2">U</th>
                         <th className="px-3 py-2">p</th>
                       </tr>
@@ -305,7 +305,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
 
               <div className="card-panel p-3 rounded-xl space-y-2">
                 <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                  Mann-Whitney Cohort Median Comparison (<MathView math="C_{ss}" /> µg/L)
+                  Mann-Whitney cohort median comparison (<MathView math="C_{ss}" /> µg/L)
                 </span>
                 <div className="h-52 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -337,7 +337,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
         <section className="space-y-4">
           <div>
             <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-              Body Burden (<MathView math="B(t)" />)
+              Body burden (<MathView math="B(t)" />)
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed mt-1">
               Total internal PFAS mass (<MathView math="\mu\text{g}" />) accumulated in the body,
@@ -349,7 +349,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
           <div className="card-panel rounded-xl overflow-hidden">
             <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
               <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                Table A2 — Body Burden (µg)
+                Table A2: Body burden (µg)
               </span>
             </div>
             <div className="overflow-x-auto">
@@ -379,7 +379,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
           {/* Simple Bar Graph Comparing Different Body Burdens */}
           <div className="card-panel p-3 rounded-xl space-y-2">
             <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              Body Burden Comparison Across Compounds (µg)
+              Body burden comparison across compounds (µg)
             </span>
             <div className="h-52 w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -400,7 +400,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
           <div className="card-panel rounded-xl overflow-hidden">
             <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
               <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                % of Limit — Critical Body Burden
+                % of limit: Critical body burden
               </span>
             </div>
             <div className="overflow-x-auto">
@@ -408,8 +408,8 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
                 <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
                   <tr>
                     <th className="px-3 py-2">Compound</th>
-                    <th className="px-3 py-2">Critical Body Burden (µg)</th>
-                    <th className="px-3 py-2">% Simulated Over Limit</th>
+                    <th className="px-3 py-2">Critical body burden (µg)</th>
+                    <th className="px-3 py-2">% simulated over limit</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -444,7 +444,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
               <div className="card-panel rounded-xl overflow-hidden">
                 <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
                   <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                    Table B — Mann-Whitney U Comparison (Body Burden: Preg ÷ Avg)
+                    Table B: Mann-Whitney U comparison (Body burden: Preg ÷ Avg)
                   </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -452,7 +452,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
                     <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
                       <tr>
                         <th className="px-3 py-2">Compound</th>
-                        <th className="px-3 py-2">Median Ratio (Preg ÷ Avg)</th>
+                        <th className="px-3 py-2">Median ratio (Preg ÷ Avg)</th>
                         <th className="px-3 py-2">U</th>
                         <th className="px-3 py-2">p</th>
                       </tr>
@@ -483,7 +483,7 @@ export const ResultsSectionA: React.FC<ResultsSectionAProps> = ({
 
               <div className="card-panel p-3 rounded-xl space-y-2">
                 <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-                  Mann-Whitney Cohort Median Comparison (Body Burden µg)
+                  Mann-Whitney cohort median comparison (Body burden µg)
                 </span>
                 <div className="h-52 w-full">
                   <ResponsiveContainer width="100%" height="100%">

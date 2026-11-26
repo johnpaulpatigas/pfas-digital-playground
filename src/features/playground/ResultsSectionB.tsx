@@ -40,7 +40,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
         <div className="flex items-center gap-2">
           <Flame className="w-4 h-4 text-slate-800" />
           <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-            Top Exposure Driver
+            Top exposure driver
           </h3>
         </div>
 
@@ -48,10 +48,10 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
         <div className="card-panel rounded-xl overflow-hidden">
           <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
             <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              Complete Sensitivity Ranking
+              Complete sensitivity ranking
             </span>
             <span className="text-[10px] font-mono text-slate-500">
-              {sensitivityRanks.length} Drivers
+              {sensitivityRanks.length} drivers
             </span>
           </div>
           <div className="divide-y divide-slate-100">
@@ -75,7 +75,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
                     <span className="font-semibold text-slate-800">{item.parameterName}</span>
                     {isTop && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-mono font-bold">
-                        <Award className="w-3 h-3" /> Top Driver
+                        <Award className="w-3 h-3" /> Top driver
                       </span>
                     )}
                   </div>
@@ -102,12 +102,12 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
 
       <hr className="border-slate-200" />
 
-      {/* 2. Are We At Risk? */}
+      {/* 2. Risk assessment */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 text-slate-800" />
           <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-            Are We At Risk?
+            Risk assessment
           </h3>
         </div>
 
@@ -115,7 +115,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
         <div className="card-panel rounded-xl overflow-hidden">
           <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
             <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              One-Sample Wilcoxon Signed-Rank Test (vs. HQ = 1.0)
+              One-sample Wilcoxon signed-rank test (vs. HQ = 1.0)
             </span>
           </div>
           <div className="overflow-x-auto">
@@ -176,7 +176,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
         {/* Wilcoxon Graph */}
         <div className="card-panel p-3 rounded-xl space-y-2">
           <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-            Median Hazard Quotient (HQ) &amp; Hazard Index (HI) vs. Safety Threshold (1.0)
+            Median hazard quotient (HQ) &amp; hazard index (HI) vs. safety threshold (1.0)
           </span>
           <div className="h-52 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -205,7 +205,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
         {/* Summary of Wilcoxon Test */}
         <div className="card-panel p-3.5 rounded-xl bg-slate-50/80 space-y-1.5">
           <span className="text-[11px] font-bold font-mono uppercase text-slate-800">
-            Summary of Wilcoxon Test
+            Summary of Wilcoxon test
           </span>
           <p className="text-xs text-slate-700 leading-relaxed">
             {significantCompounds.length > 0 ? (
@@ -217,12 +217,12 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
             ) : (
               <>
                 None of the individual PFAS compounds showed a statistically significant median
-                Hazard Quotient above the 1.0 safety threshold.
+                hazard quotient above the 1.0 safety threshold.
               </>
             )}{' '}
             {hiRow && (
               <>
-                When evaluating cumulative mixture risk, the{' '}
+                For cumulative mixture risk, the{' '}
                 <strong>Hazard Index (HI = {hiRow.median.toFixed(3)} median)</strong>{' '}
                 {hiRow.isSignificantRisk
                   ? `significantly exceeds 1.0 (${hiRow.exceedancePercent.toFixed(1)}% of simulated iterations above 1.0, p = ${formatP(hiRow.pValue)}), indicating potential cumulative non-cancer health risk.`
@@ -236,7 +236,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
         <div className="card-panel rounded-xl overflow-hidden">
           <div className="px-3 py-2 bg-slate-50 border-b border-slate-200">
             <span className="text-[11px] font-bold font-mono uppercase text-slate-700">
-              Reference Dose (RfD) Values
+              Reference dose (RfD) values
             </span>
           </div>
           <div className="overflow-x-auto">
@@ -244,7 +244,7 @@ export const ResultsSectionB: React.FC<ResultsSectionBProps> = ({
               <thead className="bg-slate-50/70 text-slate-600 border-b border-slate-200">
                 <tr>
                   <th className="px-2.5 py-2">Compound</th>
-                  <th className="px-2.5 py-2">RfD Value</th>
+                  <th className="px-2.5 py-2">RfD value</th>
                   <th className="px-2.5 py-2">Unit</th>
                   <th className="px-2.5 py-2">Source</th>
                 </tr>

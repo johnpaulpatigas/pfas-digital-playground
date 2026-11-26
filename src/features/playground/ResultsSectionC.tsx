@@ -18,7 +18,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
           <div className="flex items-center gap-2">
             <TableIcon className="w-4 h-4 text-slate-800" />
             <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-              Data Table
+              Data table
             </h3>
           </div>
           <span className="text-[11px] font-mono text-slate-500">
@@ -33,7 +33,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
                 <tr>
                   <th className="px-3 py-2">#</th>
                   <th className="px-3 py-2">Intake (µg/d)</th>
-                  <th className="px-3 py-2">Body Wt (kg)</th>
+                  <th className="px-3 py-2">Body wt (kg)</th>
                   <th className="px-3 py-2">T½ (yr)</th>
                   <th className="px-3 py-2">Css (µg/L)</th>
                   <th className="px-3 py-2">Burden (µg)</th>
@@ -75,7 +75,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
         <div className="flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-slate-800" />
           <h3 className="text-sm font-bold text-slate-900 uppercase font-mono tracking-wider">
-            Variance and Population Quantiles
+            Variance and population quantiles
           </h3>
         </div>
 
@@ -83,7 +83,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
           {/* Variance Metrics */}
           <div className="card-panel p-4 rounded-xl space-y-2.5">
             <h4 className="text-xs font-bold font-mono uppercase text-slate-700 border-b border-slate-100 pb-1.5">
-              Variance Metrics (<span className="normal-case">Css µg/L</span>)
+              Variance metrics (<span className="normal-case">Css µg/L</span>)
             </h4>
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <div className="p-2 rounded bg-slate-50 border border-slate-100">
@@ -91,7 +91,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
                 <div className="font-bold text-slate-900">{summaryStats.mean.toFixed(4)}</div>
               </div>
               <div className="p-2 rounded bg-slate-50 border border-slate-100">
-                <div className="text-[10px] text-slate-500">Std. Dev (SD)</div>
+                <div className="text-[10px] text-slate-500">Std. dev. (SD)</div>
                 <div className="font-bold text-slate-900">{summaryStats.stdDev.toFixed(4)}</div>
               </div>
               <div className="p-2 rounded bg-slate-50 border border-slate-100">
@@ -108,7 +108,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
           {/* Population Quantiles */}
           <div className="card-panel p-4 rounded-xl space-y-2.5">
             <h4 className="text-xs font-bold font-mono uppercase text-slate-700 border-b border-slate-100 pb-1.5">
-              Population Quantiles (<span className="normal-case">Css µg/L</span>)
+              Population quantiles (<span className="normal-case">Css µg/L</span>)
             </h4>
             <div className="grid grid-cols-3 gap-2 text-xs font-mono">
               <div className="p-2 rounded bg-slate-50 border border-slate-100">
@@ -120,7 +120,7 @@ export const ResultsSectionC: React.FC<ResultsSectionCProps> = ({ results, summa
                 <div className="font-bold text-slate-900">{summaryStats.p25.toFixed(4)}</div>
               </div>
               <div className="p-2 rounded bg-slate-50 border border-slate-100">
-                <div className="text-[10px] text-slate-500">P50 (Median)</div>
+                <div className="text-[10px] text-slate-500">P50 (median)</div>
                 <div className="font-bold text-slate-900">{summaryStats.median.toFixed(4)}</div>
               </div>
               <div className="p-2 rounded bg-slate-50 border border-slate-100">

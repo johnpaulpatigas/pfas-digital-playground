@@ -207,8 +207,8 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-slate-500 font-sans">
-              Evaluates whether physiological inputs lead to internal exposures above reference
-              limits (<MathView math="\text{RfD}" />, <MathView math="\text{EPA MCL}" />
+              Checks whether physiological inputs lead to internal exposures above reference limits
+              (<MathView math="\text{RfD}" />, <MathView math="\text{EPA MCL}" />
               ).
             </p>
           </div>
@@ -280,7 +280,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
             <div className="text-slate-500 text-[10px]">
-              Average Body Burden <MathView math="B(t)" />
+              Average body burden <MathView math="B(t)" />
             </div>
             <div className="text-base font-bold text-slate-900 font-mono">
               {meanBodyBurden.toFixed(3)}{' '}
@@ -293,7 +293,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
 
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
             <div className="text-slate-500 text-[10px]">
-              Critical Burden Limit <MathView math="B_{\text{crit}}" />
+              Critical burden limit <MathView math="B_{\text{crit}}" />
             </div>
             <div className="text-base font-bold text-slate-900 font-mono">
               {criticalBodyBurden.toFixed(3)}{' '}
@@ -304,7 +304,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
 
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
             <div className="text-slate-500 text-[10px]">
-              Critical Daily Intake <MathView math="I_{\text{crit}}" />
+              Critical daily intake <MathView math="I_{\text{crit}}" />
             </div>
             <div className="text-base font-bold text-slate-900 font-mono">
               {criticalDailyIntake < 0.001
@@ -317,7 +317,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
           </div>
 
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-            <div className="text-slate-500 text-[10px]">Cohort Exceedance Rate</div>
+            <div className="text-slate-500 text-[10px]">Cohort exceedance rate</div>
             <div
               className={`text-base font-bold font-mono ${
                 (selectedSummary?.riskExceedancePercent ?? 0) > 5
@@ -355,11 +355,11 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
             <thead>
               <tr className="border-b border-slate-200 text-slate-600 bg-slate-50 font-mono">
                 <th className="p-2.5 font-semibold">Parameter</th>
-                <th className="p-2.5 font-semibold">Current Input</th>
+                <th className="p-2.5 font-semibold">Current input</th>
                 <th className="p-2.5 font-semibold">
-                  Critical Limit (<MathView math="HQ = 1.0" />)
+                  Critical limit (<MathView math="HQ = 1.0" />)
                 </th>
-                <th className="p-2.5 font-semibold">Analytical Derivation</th>
+                <th className="p-2.5 font-semibold">Analytical derivation</th>
                 <th className="p-2.5 font-semibold text-center">Status</th>
               </tr>
             </thead>
@@ -414,7 +414,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
               Population distribution and critical safety benchmark
             </h3>
             <p className="text-[11px] text-slate-500 font-sans">
-              Red marks iterations with <MathView math="HQ > 1.0" /> (burden above that iteration’s
+              Red marks iterations with <MathView math="HQ > 1.0" /> (burden above that iteration's
               own limit). The dashed line is the cohort-mean limit, shown for context only.
             </p>
           </div>
@@ -428,7 +428,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Body Burden (µg)
+              Body burden (µg)
             </button>
             <button
               onClick={() => setMetricView('serum')}
@@ -438,7 +438,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Serum Concentration (µg/L)
+              Serum concentration (µg/L)
             </button>
           </div>
         </div>
@@ -469,8 +469,8 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   label={{
                     value:
                       metricView === 'bodyBurden'
-                        ? 'Internal Body Burden (µg)'
-                        : 'Blood Serum Concentration (µg/L)',
+                        ? 'Internal body burden (µg)'
+                        : 'Blood serum concentration (µg/L)',
                     position: 'bottom',
                     offset: 8,
                     fill: '#0f172a',
@@ -493,7 +493,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                 <RechartsTooltip
                   formatter={(val: unknown, name: unknown) => [
                     `${parseFloat(String(val ?? 0)).toFixed(2)}%`,
-                    name === 'safeFrequency' ? 'Safe Fraction' : 'Exceedance Fraction',
+                    name === 'safeFrequency' ? 'Safe fraction' : 'Exceedance fraction',
                   ]}
                   labelFormatter={(lbl: unknown) =>
                     `${metricView === 'bodyBurden' ? 'Burden' : 'Serum'}: ${parseFloat(String(lbl ?? 0)).toFixed(4)} ${metricView === 'bodyBurden' ? 'µg' : 'µg/L'}`
@@ -557,19 +557,19 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
             <table className="w-full text-left border-collapse text-[11px]">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-600 bg-slate-50 font-mono">
-                  <th className="p-2.5 font-semibold">Parameter / Output</th>
+                  <th className="p-2.5 font-semibold">Parameter / output</th>
                   <th className="p-2.5 font-semibold text-emerald-800 bg-emerald-50/50">
-                    Safe Cohort (HQ &le; 1.0) [{exceedanceStats.safePercent.toFixed(1)}%]
+                    Safe cohort (HQ &le; 1.0) [{exceedanceStats.safePercent.toFixed(1)}%]
                   </th>
                   <th className="p-2.5 font-semibold text-red-800 bg-red-50/50">
-                    Exceeding Cohort (HQ &gt; 1.0) [{exceedanceStats.exceedancePercent.toFixed(1)}%]
+                    Exceeding cohort (HQ &gt; 1.0) [{exceedanceStats.exceedancePercent.toFixed(1)}%]
                   </th>
-                  <th className="p-2.5 font-semibold text-slate-600">Cohort-Mean Safety Limit</th>
+                  <th className="p-2.5 font-semibold text-slate-600">Cohort-mean safety limit</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800">
                 <tr className="hover:bg-slate-50/50">
-                  <td className="p-2.5 font-medium text-slate-600">Daily Intake (µg/day)</td>
+                  <td className="p-2.5 font-medium text-slate-600">Daily intake (µg/day)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
                       ? `${exceedanceStats.safeDailyIntake.median.toFixed(4)} [${exceedanceStats.safeDailyIntake.min.toFixed(4)} to ${exceedanceStats.safeDailyIntake.max.toFixed(4)}]`
@@ -585,7 +585,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50">
-                  <td className="p-2.5 font-medium text-slate-600">Peak Body Burden (µg)</td>
+                  <td className="p-2.5 font-medium text-slate-600">Peak body burden (µg)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
                       ? `${exceedanceStats.safePeakBodyBurden.median.toFixed(3)} [${exceedanceStats.safePeakBodyBurden.min.toFixed(3)} to ${exceedanceStats.safePeakBodyBurden.max.toFixed(3)}]`
@@ -602,7 +602,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                 </tr>
                 <tr className="hover:bg-slate-50/50">
                   <td className="p-2.5 font-medium text-slate-600">
-                    Steady-State Serum <MathView math="C_{ss}" /> (µg/L)
+                    Steady-state serum <MathView math="C_{ss}" /> (µg/L)
                   </td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
@@ -619,7 +619,7 @@ export const ExceedanceAnalyzer: React.FC<ExceedanceAnalyzerProps> = ({
                   </td>
                 </tr>
                 <tr className="hover:bg-slate-50/50">
-                  <td className="p-2.5 font-medium text-slate-600">Body Weight (kg)</td>
+                  <td className="p-2.5 font-medium text-slate-600">Body weight (kg)</td>
                   <td className="p-2.5 font-mono text-emerald-800">
                     {exceedanceStats.safeCount > 0
                       ? `${exceedanceStats.safeBodyWeight.median.toFixed(1)} [${exceedanceStats.safeBodyWeight.min.toFixed(1)} to ${exceedanceStats.safeBodyWeight.max.toFixed(1)}]`

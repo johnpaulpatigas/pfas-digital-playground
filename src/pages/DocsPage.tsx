@@ -204,7 +204,7 @@ export const DocsPage: React.FC = () => {
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                 <span>
-                  Maintains random variation across the sample while ensuring coverage of upper-tail
+                  Maintains random variation across the sample and still covers upper-tail
                   percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />
                   ).
                 </span>
@@ -227,9 +227,9 @@ export const DocsPage: React.FC = () => {
           </h3>
           <p className="text-slate-600 text-xs font-sans leading-relaxed">
             Probabilistic exposure modeling yields continuous output distributions for steady-state
-            serum concentration (<MathView math="C_{ss}" />) and internal body burden. Because human
-            exposure data is typically right-skewed (lognormally distributed), non-parametric
-            population quantiles and variance metrics are essential to avoid biased conclusions from
+            serum concentration (<MathView math="C_{ss}" />) and internal body burden. Human
+            exposure data is typically right-skewed (lognormally distributed), so the tool reports
+            non-parametric population quantiles and variance metrics instead of relying on
             arithmetic means alone.
           </p>
 
@@ -237,7 +237,7 @@ export const DocsPage: React.FC = () => {
             {/* Quantiles Card */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="font-bold text-teal-900 text-sm font-heading block">
-                Population Quantiles (<MathView math="P_k" />)
+                Population quantiles (<MathView math="P_k" />)
               </span>
               <p className="text-slate-600 text-[11px] font-sans leading-relaxed">
                 Calculated by sorting simulated iteration outputs (
@@ -246,26 +246,25 @@ export const DocsPage: React.FC = () => {
               </p>
               <ul className="space-y-1.5 text-[11px] text-slate-700 font-sans">
                 <li>
-                  <strong>P5 (5th Percentile):</strong> Lower baseline exposure; 95% of the modeled
-                  cohort accumulates concentrations exceeding this level.
+                  P5 (5th percentile): Lower baseline exposure; 95% of the modeled cohort
+                  accumulates concentrations exceeding this level.
                 </li>
                 <li>
-                  <strong>P25 & P75 (Quartiles / IQR):</strong> The interquartile range [
+                  P25 and P75 (quartiles, IQR): The interquartile range [
                   <MathView math="P_{25}, P_{75}" />] spans the middle 50% of the population without
                   being pulled by extreme values.
                 </li>
                 <li>
-                  <strong>P50 (Median):</strong> Non-parametric central tendency, representing
-                  typical exposure without distortion from high-dose right-skewed tails.
+                  P50 (median): Non-parametric central tendency, representing typical exposure
+                  without distortion from high-dose right-skewed tails.
                 </li>
                 <li>
-                  <strong>P95 (95th Percentile):</strong> Regulatory high-exposure benchmark (US EPA
-                  / EFSA), representing sensitive or highly exposed subgroups (e.g., high fluid
-                  consumers).
+                  P95 (95th percentile): Regulatory high-exposure benchmark (US EPA / EFSA),
+                  representing sensitive or highly exposed subgroups (e.g., high fluid consumers).
                 </li>
                 <li>
-                  <strong>P99 (Extreme Tail):</strong> Captures worst-case susceptibility where
-                  lower body weight, elevated intake, and slower excretion coincide.
+                  P99 (extreme tail): Captures worst-case susceptibility where lower body weight,
+                  elevated intake, and slower excretion coincide.
                 </li>
               </ul>
             </div>
@@ -273,11 +272,11 @@ export const DocsPage: React.FC = () => {
             {/* Variance Metrics Card */}
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="font-bold text-purple-900 text-sm font-heading block">
-                Variance & Dispersion Metrics (<MathView math="\sigma, \sigma^2, CV" />)
+                Variance and dispersion metrics (<MathView math="\sigma, \sigma^2, CV" />)
               </span>
               <p className="text-slate-600 text-[11px] font-sans leading-relaxed">
-                Quantifies the magnitude of statistical dispersion and parametric uncertainty
-                propagated from physiological inputs into internal dose metrics:
+                These measure the statistical dispersion and parametric uncertainty that
+                physiological inputs propagate into internal dose metrics:
               </p>
               <div className="text-slate-900 bg-white p-2.5 rounded-lg border border-slate-300 text-center font-mono font-semibold text-xs space-y-1">
                 <MathView
@@ -291,33 +290,23 @@ export const DocsPage: React.FC = () => {
               </div>
               <ul className="space-y-1 text-[11px] text-slate-700 font-sans">
                 <li>
-                  <strong>
-                    Standard Deviation (<MathView math="s" />
-                    ):
-                  </strong>{' '}
-                  Average dispersion around the mean, measured in original concentration units
+                  Standard deviation (<MathView math="s" />
+                  ): Average dispersion around the mean, measured in original concentration units
                   (µg/L).
                 </li>
                 <li>
-                  <strong>
-                    Sample Variance (<MathView math="s^2" />
-                    ):
-                  </strong>{' '}
-                  Squared dispersion (µg²/L²), reflecting cumulative uncertainty across model
+                  Sample variance (<MathView math="s^2" />
+                  ): Squared dispersion (µg²/L²), reflecting cumulative uncertainty across model
                   variables.
                 </li>
                 <li>
-                  <strong>
-                    Coefficient of Variation (<MathView math="CV" />
-                    ):
-                  </strong>{' '}
-                  Ratio of standard deviation to the mean, allowing comparison of relative spread
+                  Coefficient of variation (<MathView math="CV" />
+                  ): Ratio of standard deviation to the mean, allowing comparison of relative spread
                   across compounds.
                 </li>
                 <li>
-                  <strong>95% Mean Confidence Interval:</strong> Estimated bounds for the population
-                  mean. Stratified Latin Hypercube Sampling narrows these bounds compared to simple
-                  random sampling.
+                  95% mean confidence interval: Estimated bounds for the population mean. Stratified
+                  Latin hypercube sampling narrows these bounds compared to simple random sampling.
                 </li>
               </ul>
             </div>
@@ -405,7 +394,7 @@ export const DocsPage: React.FC = () => {
         <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
           <Flame className="w-5 h-5 text-amber-600" />
           <h2 className="text-xl font-bold text-slate-900 font-heading">
-            5. Sensitivity and parameter uncertainty (PRCC & Spearman Rank)
+            5. Sensitivity and parameter uncertainty (PRCC & Spearman rank)
           </h2>
         </div>
 
@@ -497,7 +486,7 @@ export const DocsPage: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-purple-100 text-purple-800 text-xs font-mono font-bold">
-              Research Problem
+              Research problem
             </span>
             <h3 className="text-base font-bold text-slate-900 font-heading">
               Statement of the problem (SOP)
@@ -554,7 +543,7 @@ export const DocsPage: React.FC = () => {
               <p className="text-slate-600 leading-relaxed text-[11px]">
                 How do individual physiological and behavioral input parameters influence predicted
                 steady-state serum concentrations (<MathView math="C_{ss}" />) in global sensitivity
-                analysis, and which parameters serve as the primary drivers of internal dose?
+                analysis, and which parameters drive internal dose?
               </p>
             </div>
 
@@ -584,10 +573,10 @@ export const DocsPage: React.FC = () => {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800 text-xs font-mono font-bold">
-              Inferential Framework
+              Inferential framework
             </span>
             <h3 className="text-base font-bold text-slate-900 font-heading">
-              Null (H₀) and Alternative (H₁) hypotheses (all tests at α = 0.05, run separately for
+              Null (H₀) and alternative (H₁) hypotheses (all tests at α = 0.05, run separately for
               each PFAS)
             </h3>
           </div>
@@ -597,7 +586,7 @@ export const DocsPage: React.FC = () => {
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-slate-900 text-sm font-heading">
-                  Hypothesis 1: Serum Concentration Difference (Two-Sided Mann-Whitney U Test)
+                  Hypothesis 1: Serum concentration difference (two-sided Mann-Whitney U test)
                 </h4>
                 <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
                   α = 0.05
@@ -624,7 +613,7 @@ export const DocsPage: React.FC = () => {
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-slate-900 text-sm font-heading">
-                  Hypothesis 2: Cumulative Body Burden Difference (Two-Sided Mann-Whitney U Test)
+                  Hypothesis 2: Cumulative body burden difference (two-sided Mann-Whitney U test)
                 </h4>
                 <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
                   α = 0.05
@@ -650,7 +639,7 @@ export const DocsPage: React.FC = () => {
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-slate-900 text-sm font-heading">
-                  Hypothesis 3: Parameter Sensitivity on Serum Concentration (PRCC)
+                  Hypothesis 3: Parameter sensitivity on serum concentration (PRCC)
                 </h4>
                 <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
                   |PRCC| &ge; 0.10, p &lt; 0.05
@@ -678,7 +667,7 @@ export const DocsPage: React.FC = () => {
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-slate-900 text-sm font-heading">
-                  Hypothesis 4: Health Risk Level (One-Sample One-Sided Wilcoxon Signed-Rank Test)
+                  Hypothesis 4: Health risk level (one-sample one-sided Wilcoxon signed-rank test)
                 </h4>
                 <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200">
                   Threshold = 1.0, α = 0.05
@@ -710,7 +699,7 @@ export const DocsPage: React.FC = () => {
               Research Framework
             </span>
             <h3 className="text-base font-bold text-slate-900 font-heading">
-              Statement of the Problem & hypotheses
+              Statement of the problem & hypotheses
             </h3>
           </div>
 
@@ -718,16 +707,16 @@ export const DocsPage: React.FC = () => {
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-500 text-[11px]">
-                  <th className="py-2 px-3 font-semibold w-1/3">Research Domain</th>
-                  <th className="py-2 px-3 font-semibold w-2/3">Framework (SOP & Hypotheses)</th>
+                  <th className="py-2 px-3 font-semibold w-1/3">Research domain</th>
+                  <th className="py-2 px-3 font-semibold w-2/3">Framework (SOP & hypotheses)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-sans text-[11px] leading-relaxed">
                 <tr className="hover:bg-slate-50/70">
                   <td className="py-3 px-3 font-bold text-slate-900">
-                    Question 1 & Hypothesis 1<br />
+                    Question 1 & hypothesis 1<br />
                     <span className="font-mono text-[10px] text-slate-500 font-normal">
-                      Serum Concentration (Css)
+                      Serum concentration (Css)
                     </span>
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
@@ -740,9 +729,9 @@ export const DocsPage: React.FC = () => {
 
                 <tr className="hover:bg-slate-50/70">
                   <td className="py-3 px-3 font-bold text-slate-900">
-                    Question 2 & Hypothesis 2<br />
+                    Question 2 & hypothesis 2<br />
                     <span className="font-mono text-[10px] text-slate-500 font-normal">
-                      Accumulated Body Burden
+                      Accumulated body burden
                     </span>
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
@@ -755,9 +744,9 @@ export const DocsPage: React.FC = () => {
 
                 <tr className="hover:bg-slate-50/70">
                   <td className="py-3 px-3 font-bold text-slate-900">
-                    Question 3 & Hypothesis 3<br />
+                    Question 3 & hypothesis 3<br />
                     <span className="font-mono text-[10px] text-slate-500 font-normal">
-                      Sensitivity Analysis
+                      Sensitivity analysis
                     </span>
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">
@@ -770,9 +759,9 @@ export const DocsPage: React.FC = () => {
 
                 <tr className="hover:bg-slate-50/70">
                   <td className="py-3 px-3 font-bold text-slate-900">
-                    Question 4 & Hypothesis 4<br />
+                    Question 4 & hypothesis 4<br />
                     <span className="font-mono text-[10px] text-slate-500 font-normal">
-                      Health Risk & Hazard Indices
+                      Health risk & hazard indices
                     </span>
                   </td>
                   <td className="py-3 px-3 text-emerald-900 bg-emerald-50/30">

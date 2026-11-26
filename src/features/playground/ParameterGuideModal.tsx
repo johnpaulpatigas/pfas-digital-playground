@@ -55,7 +55,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
-            title="Close Guide"
+            title="Close guide"
           >
             <X className="w-5 h-5" />
           </button>
@@ -131,7 +131,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                     Target PFAS compounds and regulatory benchmarks
                   </h3>
                   <span className="text-[10px] font-mono text-slate-500">
-                    US EPA NPDWR (2024) Benchmarks
+                    US EPA NPDWR (2024) benchmarks
                   </span>
                 </div>
                 <div className="overflow-x-auto">
@@ -187,22 +187,14 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                     Choose from five statistical distribution types for each physiological variable:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside font-mono">
+                    <li>Fixed: Deterministic single-value point estimate.</li>
+                    <li>Uniform [min, max]: Equal probability across a bounded range.</li>
+                    <li>Normal (µ, σ): Symmetric bell-curve distribution.</li>
                     <li>
-                      <strong>Fixed:</strong> Deterministic single-value point estimate.
+                      Lognormal (µ, σ): Right-skewed distribution (standard for daily intake).
                     </li>
                     <li>
-                      <strong>Uniform [min, max]:</strong> Equal probability across a bounded range.
-                    </li>
-                    <li>
-                      <strong>Normal (µ, σ):</strong> Symmetric bell-curve distribution.
-                    </li>
-                    <li>
-                      <strong>Lognormal (µ, σ):</strong> Right-skewed distribution (standard for
-                      daily intake).
-                    </li>
-                    <li>
-                      <strong>Triangular (min, mode, max):</strong> Three-point distribution based
-                      on expert bounds.
+                      Triangular (min, mode, max): Three-point distribution based on expert bounds.
                     </li>
                   </ul>
                 </div>
@@ -221,20 +213,17 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                     Select a sampling engine:
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
+                    <li>Monte Carlo: Pseudo-random sampling across parameter ranges.</li>
                     <li>
-                      <strong>Monte Carlo:</strong> Pseudo-random sampling across parameter ranges.
+                      Latin hypercube (LHS): Stratified sampling with uniform distribution coverage.
                     </li>
                     <li>
-                      <strong>Latin Hypercube (LHS):</strong> Stratified sampling with uniform
-                      distribution coverage.
-                    </li>
-                    <li>
-                      <strong>MC + LHS Hybrid:</strong> Blended execution for variance reduction and
-                      sample stability.
+                      MC + LHS hybrid: Blended execution for variance reduction and sample
+                      stability.
                     </li>
                   </ul>
                   <p className="text-[10px] text-slate-500">
-                    Recommended sample size: <strong>N = 2,000 to 10,000 iterations</strong>.
+                    Recommended sample size: N = 2,000 to 10,000 iterations.
                   </p>
                 </div>
 
@@ -254,22 +243,22 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                   </p>
                   <ul className="text-[10px] text-slate-600 space-y-1 list-disc list-inside">
                     <li>
-                      <strong>Critical Thresholds:</strong> Parameter limits where Hazard Quotient{' '}
-                      <MathView math="HQ = 1.0" /> and exploratory sum of HQs exploratory HQ sum =
-                      1.0 (not a regulatory mixture threshold).
+                      Critical thresholds: Parameter limits where Hazard Quotient{' '}
+                      <MathView math="HQ = 1.0" /> and exploratory HQ sum = 1.0 (not a regulatory
+                      mixture threshold).
                     </li>
                     <li>
-                      <strong>Histogram and CDF:</strong> Population serum concentration density and
-                      tail percentiles (<MathView math="P_{95}" />, <MathView math="P_{99}" />
+                      Histogram and CDF: Population serum concentration density and tail percentiles
+                      (<MathView math="P_{95}" />, <MathView math="P_{99}" />
                       ).
                     </li>
                     <li>
-                      <strong>Time-Course Kinetics:</strong> Dynamic multi-year bioaccumulation
-                      curves up to 40 years.
+                      Time-course kinetics: Dynamic multi-year bioaccumulation curves up to 40
+                      years.
                     </li>
                     <li>
-                      <strong>Tornado Sensitivity:</strong> Spearman rank correlation (
-                      <MathView math="\rho" />) identifying primary exposure drivers.
+                      Tornado sensitivity: Spearman rank correlation (<MathView math="\rho" />)
+                      showing which inputs drive exposure.
                     </li>
                   </ul>
                 </div>
@@ -282,8 +271,8 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-slate-600 text-[11px]">
-                  Select any pre-configured population scenario to inspect its parameter
-                  distributions and quickly load it into the playground:
+                  Select a pre-configured population scenario to inspect its parameter distributions
+                  or load it into the playground:
                 </p>
               </div>
 
@@ -325,7 +314,7 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
                         }}
                         className="text-[10px] font-mono shrink-0"
                       >
-                        Load Scenario
+                        Load scenario
                       </Button>
                     </div>
                   </div>
@@ -338,24 +327,24 @@ export const ParameterGuideModal: React.FC<ParameterGuideModalProps> = ({ isOpen
         {/* Modal Footer */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-600">
           <div className="flex items-center gap-1.5">
-            <span>Need deeper toxicological background?</span>
+            <span>For more toxicological background:</span>
             <Link
               to="/guide"
               onClick={onClose}
               className="text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-2 flex items-center gap-0.5"
             >
-              <span>Explore the full Scientific Guide</span>
+              <span>Read the full scientific guide</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           <div className="flex items-center gap-2">
             <Link to="/docs" onClick={onClose}>
               <Button variant="secondary" size="sm">
-                Mathematical Docs
+                Mathematical docs
               </Button>
             </Link>
             <Button variant="primary" size="sm" onClick={onClose}>
-              Close Guide
+              Close guide
             </Button>
           </div>
         </div>

@@ -33,11 +33,11 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 'C_w',
     unit: 'ng/L',
     min: '0 ng/L',
-    average: 'Scenario starts at low-level treated-water baseline (0.5–1.0 ng/L)',
+    average: 'Scenario starts at low-level treated-water baseline (0.5 to 1.0 ng/L)',
     max: 'Study/site-specific',
     recommendedDist: 'Set from measured concentration data',
     source:
-      '2024 EPA NPDWR MCLs (4–10 ng/L); preset values are low-level baselines, not measured water data',
+      '2024 EPA NPDWR MCLs (4 to 10 ng/L); preset values are low-level baselines, not measured water data',
     description:
       'Concentration of a PFAS in drinking water. Water-derived intake is concentration × daily water consumption, converted from ng to µg.',
     criticalCutoff: 'C_{w,crit} = 1000 × (BW × RfD - I_{nw}) / W',
@@ -48,7 +48,7 @@ export const PARAMETER_REFERENCES: ParameterReferenceRow[] = [
     symbol: 'BW',
     unit: 'kg',
     min: '40.0 kg',
-    average: '55.4 kg (Filipino Adult Female)',
+    average: '55.4 kg (Filipino adult female)',
     max: '85.0 to 100.0 kg',
     recommendedDist: 'Normal (µ: 55.4, σ: 8.5) or Triangular (45, 55, 75)',
     source: 'DOST-FNRI Philippine Dietary Reference Intakes (PDRI), CDC NHANES',

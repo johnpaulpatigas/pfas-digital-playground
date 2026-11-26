@@ -175,7 +175,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
               setCompoundScope('all');
             }}
             className="flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-            title="Reset to Baseline Defaults"
+            title="Reset to baseline defaults"
           >
             <RefreshCw className="w-3 h-3" />
             <span>Reset</span>
@@ -184,8 +184,8 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
 
         <div className="grid grid-cols-3 gap-1.5">
           {[
-            { id: 'average-filipino-woman', label: 'Avg. W', title: 'Average Filipino Woman' },
-            { id: 'pregnant-woman', label: 'P.W.', title: 'Pregnant Woman' },
+            { id: 'average-filipino-woman', label: 'Avg. W', title: 'Average Filipino woman' },
+            { id: 'pregnant-woman', label: 'P.W.', title: 'Pregnant woman' },
             { id: 'custom', label: 'Custom', title: 'Custom Parameters & Compound Selection' },
           ].map((item) => {
             const isActive = activeScenarioId === item.id;
@@ -219,7 +219,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
           </span>
           {!isCustomMode && (
             <span className="flex items-center gap-1 text-[10px] font-mono text-slate-500">
-              <Lock className="w-3 h-3" /> All PFAS Locked
+              <Lock className="w-3 h-3" /> All PFAS locked
             </span>
           )}
         </div>
@@ -378,7 +378,7 @@ export const ParameterSidebar: React.FC<ParameterSidebarProps> = ({
               onClick={onOpenGuide}
               className="text-[11px] font-sans font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer"
             >
-              <span>Range Guide</span>
+              <span>Range guide</span>
               <BookOpen className="w-3 h-3" />
             </button>
           )}

@@ -157,8 +157,7 @@ export const ScientificGuidePage: React.FC = () => {
                     1. Health risk assessment: Hazard Quotient (HQ) and exploratory HQ sum
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
-                    Evaluating predicted exposure against regulatory benchmarks and oral reference
-                    doses.
+                    Compares predicted exposure with regulatory benchmarks and oral reference doses.
                   </p>
                 </div>
               </div>
@@ -299,24 +298,24 @@ export const ScientificGuidePage: React.FC = () => {
                     </strong>
                     <ul className="space-y-1.5 text-[11px] text-slate-600 font-sans">
                       <li>
-                        <strong>P5 (5th percentile):</strong> Lower baseline exposure. Only 5% of
-                        simulated women fall below this level.
+                        P5 (5th percentile): Lower baseline exposure. Only 5% of simulated women
+                        fall below this level.
                       </li>
                       <li>
-                        <strong>P25 to P75 (Interquartile range, IQR):</strong> Spans the middle 50%
-                        of the cohort without distortion from extreme values.
+                        P25 to P75 (interquartile range, IQR): Spans the middle 50% of the cohort
+                        without distortion from extreme values.
                       </li>
                       <li>
-                        <strong>P50 (Median):</strong> The central value for skewed data, showing
-                        what a typical individual receives.
+                        P50 (median): The central value for skewed data, showing what a typical
+                        individual receives.
                       </li>
                       <li>
-                        <strong>P95 (95th percentile):</strong> Regulatory benchmark for higher
-                        exposure, such as individuals with high drinking water intake.
+                        P95 (95th percentile): Regulatory benchmark for higher exposure, such as
+                        individuals with high drinking water intake.
                       </li>
                       <li>
-                        <strong>P99 (Extreme tail):</strong> Upper exposure tier where high intake
-                        and lower body weight coincide.
+                        P99 (extreme tail): Upper exposure tier where high intake and lower body
+                        weight coincide.
                       </li>
                     </ul>
                   </div>
@@ -327,31 +326,22 @@ export const ScientificGuidePage: React.FC = () => {
                     </strong>
                     <ul className="space-y-1.5 text-[11px] text-slate-600 font-sans">
                       <li>
-                        <strong>
-                          Standard Deviation (<MathView math="\sigma" />
-                          ):
-                        </strong>{' '}
-                        Average distance of individual concentrations from the mean, in µg/L.
+                        Standard deviation (<MathView math="\sigma" />
+                        ): Average distance of individual concentrations from the mean, in µg/L.
                       </li>
                       <li>
-                        <strong>
-                          Variance (<MathView math="\sigma^2" />
-                          ):
-                        </strong>{' '}
-                        Squared dispersion (µg²/L²), showing total variability from physiological
+                        Variance (<MathView math="\sigma^2" />
+                        ): Squared dispersion (µg²/L²), showing total variability from physiological
                         and intake differences.
                       </li>
                       <li>
-                        <strong>
-                          Coefficient of Variation (<MathView math="CV = \sigma / \mu" />
-                          ):
-                        </strong>{' '}
-                        Standard deviation divided by the mean, used to compare relative spread
+                        Coefficient of variation (<MathView math="CV = \sigma / \mu" />
+                        ): Standard deviation divided by the mean, used to compare relative spread
                         across different PFAS compounds.
                       </li>
                       <li>
-                        <strong>95% Confidence interval:</strong> Estimated range for the population
-                        mean, narrower under Latin Hypercube Sampling than standard Monte Carlo.
+                        95% confidence interval: Estimated range for the population mean, narrower
+                        under Latin hypercube sampling than standard Monte Carlo.
                       </li>
                     </ul>
                   </div>
@@ -534,8 +524,7 @@ export const ScientificGuidePage: React.FC = () => {
                     2. Sensitivity analysis and Spearman rank correlation (<MathView math="\rho" />)
                   </h2>
                   <p className="text-xs text-slate-500 font-sans">
-                    Identifying primary exposure drivers and physiological determinants of serum
-                    accumulation.
+                    Shows which inputs drive serum accumulation.
                   </p>
                 </div>
               </div>
@@ -588,27 +577,18 @@ export const ScientificGuidePage: React.FC = () => {
                   </p>
                   <ul className="space-y-1.5 text-amber-900 text-[11px] list-disc list-inside">
                     <li>
-                      <strong>
-                        Daily intake (<MathView math="I" />
-                        ):
-                      </strong>{' '}
-                      Usually the strongest driver (
+                      Daily intake (<MathView math="I" />
+                      ): Usually the strongest driver (
                       <MathView math="\rho \approx +0.75 \text{ to } +0.90" />
                       ).
                     </li>
                     <li>
-                      <strong>
-                        Elimination half-life (<MathView math="T_{1/2}" />
-                        ):
-                      </strong>{' '}
-                      Slower renal clearance leads to longer internal residence.
+                      Elimination half-life (<MathView math="T_{1/2}" />
+                      ): Slower renal clearance leads to longer internal residence.
                     </li>
                     <li>
-                      <strong>
-                        Bioavailability (<MathView math="f_{abs}" />
-                        ):
-                      </strong>{' '}
-                      Greater gastrointestinal uptake elevates systemic circulation.
+                      Bioavailability (<MathView math="f_{abs}" />
+                      ): Greater gastrointestinal uptake elevates systemic circulation.
                     </li>
                   </ul>
                 </div>
@@ -623,18 +603,15 @@ export const ScientificGuidePage: React.FC = () => {
                   </p>
                   <ul className="space-y-1.5 text-blue-900 text-[11px] list-disc list-inside">
                     <li>
-                      <strong>
-                        Body weight (<MathView math="BW" />
-                        ):
-                      </strong>{' '}
-                      Expands total volume of distribution (<MathView math="V_d \cdot BW" />
+                      Body weight (<MathView math="BW" />
+                      ): Expands total volume of distribution (
+                      <MathView math="V_d \cdot BW" />
                       ), diluting serum levels (
                       <MathView math="\rho \approx -0.40 \text{ to } -0.60" />
                       ).
                     </li>
                     <li>
-                      <strong>Renal clearance rate:</strong> Faster elimination reduces the
-                      steady-state plateau.
+                      Renal clearance rate: Faster elimination reduces the steady-state plateau.
                     </li>
                   </ul>
                 </div>
@@ -643,7 +620,7 @@ export const ScientificGuidePage: React.FC = () => {
               {/* Public Health & Mitigation Relevance */}
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 font-sans text-xs">
                 <h3 className="font-bold text-slate-900 font-heading text-sm">
-                  Translating sensitivity results into public health priorities
+                  Sensitivity results and public health priorities
                 </h3>
                 <p className="text-slate-600 leading-relaxed">
                   Sensitivity rankings clarify which intervention points have the greatest impact on
@@ -915,7 +892,7 @@ export const ScientificGuidePage: React.FC = () => {
       <div className="rounded-3xl bg-slate-900 border border-slate-800 text-white p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
         <div className="space-y-1.5 text-center sm:text-left">
           <h3 className="text-lg sm:text-xl font-bold text-white font-heading tracking-tight">
-            Ready to test these models in the simulation?
+            Run these models in the playground
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 font-sans leading-relaxed max-w-xl">
             Configure parameter distributions, run Monte Carlo or Latin hypercube sampling, and
